@@ -5,7 +5,7 @@
   "authors": { 
     "Travis Henspeter": "developer@birdsoundmusic.com"
   },
-  "homepage": "https://www.github.com/evilBird/BbCore",
+  "homepage": "https://github.com/evilBird/BbCore",
   "license": {
     "type": "Commerical",
     "file": "LICENSE"
@@ -15,13 +15,14 @@
   },
   "requires_arc": true,
   "source": {
-    "git": "https://www.github.com/evilBird/BbCore.git",
+    "git": "https://github.com/evilBird/BbCore.git",
     "tag": "0.0.1"
   },
   "frameworks": [
     "Foundation"
   ],
   "source_files":[
-	  "BbCore/*.{h,m}"
+	  "*Bb*.{h,m}",
+	  "NSMutableArray+Stack.{h,m}"
   ]
 }
