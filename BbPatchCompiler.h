@@ -22,7 +22,6 @@ static NSString *kConnectionPattern             =       @"%d %d %d %d;\n";
 @interface BbPatchCompiler : NSObject
 
 - (BbPatch *)compiledPatchFromText:(NSString *)text;
-
 - (NSArray *)scanTokensInText:(NSString *)text;
 
 @end

@@ -11,7 +11,7 @@
 
 typedef id (^BbCalculateBlock) (id value);
 
-@interface BbObject : NSObject  <BbObjectParent,BbObjectChild>
+@interface BbObject : NSObject  <BbObjectParent,BbObjectChild,BbObjectViewDataSource>
 
 @property (nonatomic,strong)                NSString                                *titleText;
 @property (nonatomic,strong)                NSString                                *arguments;
@@ -51,14 +51,21 @@ typedef id (^BbCalculateBlock) (id value);
 
 + (BbCalculateBlock)passThruCalculateBlock;
 - (NSString *)textDescription;
-
 + (NSString *)myToken;
-+ (NSString *)myViewClass;
 
+- (NSString *)myViewClass;
 - (id<BbObjectView>)createView;
 - (BOOL)openView;
 - (BOOL)closeView;
 
+#pragma mark - BbObjectViewDataSource
+
+- (NSUInteger)numberOfInlets;
+- (NSUInteger)numberOfOutlets;
+- (NSString *)titleText;
+- (NSValue *)initialPosition;
+- (void)BbObjectView:(id<BbObjectView>)sender argumentsDidChange:(NSString *)arguments;
+- (void)BbObjectView:(id<BbObjectView>)sender viewForPort:(id)port didMoveToIndex:(NSUInteger)index;
 
 @end
 
@@ -68,8 +75,11 @@ typedef id (^BbCalculateBlock) (id value);
 @end
 
 @interface BbObject (Meta)
-
++ (NSString *)testDescription;
++ (NSString *)viewArgsFromText:(NSString *)text;
++ (NSString *)objectArgsFromText:(NSString *)text;
++ (BbObject *)objectWithTextDescription:(NSString *)text;
 + (BbObject *)createObject:(NSString *)className arguments:(NSString *)arguments;
-+ (id<BbObjectView>)createViewWithArguments:(NSString *)arguments;
++ (id<BbObjectView>)createView:(NSString *)className dataSource:(id<BbObjectViewDataSource>)dataSource;
 
 @end

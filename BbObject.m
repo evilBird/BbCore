@@ -8,6 +8,7 @@
 
 #import "BbObject.h"
 #import "BbHelpers.h"
+#import "BbRuntime.h"
 
 static void     *BbObjectContextXX      =       &BbObjectContextXX;
 
@@ -238,7 +239,7 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 - (BbObject<BbObjectChild>*)removeChildObject:(BbObject<BbObjectChild>*)child
 {
     if ( [self.myChildren containsObject:child]==NO) {
-        return NO;
+        return nil;
     }
     
     [self removeChildObject:child];
@@ -262,7 +263,7 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 - (BbConnection *)removeConnection:(BbConnection *)connection
 {
     if ( [self.myConnections containsObject:connection] == NO ) {
-        return NO;
+        return nil;
     }
     
     [self.myConnections removeObject:connection];
@@ -397,6 +398,65 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     return @"#X";
 }
 
+- (NSString *)myViewClass
+{
+    if ( nil != self.view ) {
+        return NSStringFromClass([self.view class]);
+    }
+    
+    if ( nil != self.viewArguments ) {
+        NSArray *components = [self.viewArguments componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        return components.firstObject;
+    }
+    
+    return @"BbBoxView";
+}
+
+- (id<BbObjectView>)createView
+{
+    self.view = [BbObject createView:[self myViewClass] dataSource:self];
+    
+    for (BbInlet *anInlet in self.myInlets ) {
+        anInlet.view = [self.view viewForInletAtIndex:[anInlet indexInParent]];
+    }
+    for (BbOutlet *anOutlet in self.myOutlets) {
+        anOutlet.view = [self.view viewForOutletAtIndex:[anOutlet indexInParent]];
+    }
+    
+    return self.view;
+}
+
+#pragma mark - BbObjectViewDataSource
+
+- (NSUInteger)numberOfInlets
+{
+    if ( nil == self.myInlets ) {
+        return 0;
+    }
+    
+    return self.myInlets.count;
+}
+
+- (NSUInteger)numberOfOutlets
+{
+    if ( nil == self.myOutlets ) {
+        return 0;
+    }
+    
+    return self.myOutlets.count;
+}
+
+- (NSValue *)initialPosition
+{
+    if ( nil != self.viewArguments) {
+        NSArray *components = [self.viewArguments componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        CGFloat x = [components[0] doubleValue];
+        CGFloat y = [components[1] doubleValue];
+        return [NSValue valueWithCGPoint:CGPointMake(x, y)];
+    }else{
+        return [NSValue  valueWithCGPoint:CGPointZero];
+    }
+}
 
 - (BOOL)openView
 {
@@ -413,20 +473,6 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     }
     
     return YES;
-}
-
-- (id<BbObjectView>)createView
-{
-    self.view = [BbObject createViewWithArguments:self.viewArguments];
-    
-    for (BbInlet *anInlet in self.myInlets ) {
-        anInlet.view = [self.view viewForInletAtIndex:[anInlet indexInParent]];
-    }
-    for (BbOutlet *anOutlet in self.myOutlets) {
-        anOutlet.view = [self.view viewForOutletAtIndex:[anOutlet indexInParent]];
-    }
-    
-    return self.view;
 }
 
 - (BOOL)closeView
@@ -450,7 +496,7 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     if ( nil != self.view ) {
         view = NSStringFromClass([self.view class]);
     }else{
-        view = [BbObject myViewClass];
+        view = [self myViewClass];
     }
     
     [myComponents addObject:view];
@@ -474,6 +520,7 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
         argsString = self.arguments;
         [myComponents addObject:argsString];
     }
+    
     NSString *endOfLine = @";\n";
     NSString *myDescription = [[myComponents componentsJoinedByString:@" "]stringByAppendingString:endOfLine];
     NSMutableString *mutableString = [NSMutableString stringWithString:myDescription];

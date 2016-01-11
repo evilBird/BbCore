@@ -10,13 +10,14 @@
 #define BbObjectParent_h
 
 #import <Foundation/Foundation.h>
+#import "BbBridge.h"
 
 @class BbObject;
 @class BbPort;
 @class BbConnection;
 @protocol BbObjectParent;
 
-#define BbIndexInParentNotFound 1e8
+#define BbIndexInParentNotFound 1e7
 
 @protocol BbObjectChild <NSObject>
 
@@ -33,9 +34,7 @@
 
 @optional
 
-//- (NSString *)uniqueID:(id<BbObjectChild>)sender;
 - (NSUInteger)indexOfChild:(id<BbObjectChild>)sender;
-
 - (BOOL)hasChildPortWithID:(NSString *)uniqueID;
 - (BOOL)hasChildObjectWithID:(NSString *)uniqueID;
 - (BOOL)hasConnectionWithID:(NSString *)uniqueID;
@@ -45,20 +44,6 @@
 - (BbConnection *)childConnectionWithID:(NSString *)uniqueID;
 
 - (BOOL)connectionDidInvalidate:(BbConnection *)connection;
-
-@end
-
-
-@protocol BbObjectView <NSObject>
-
-+ (id<BbObjectView>)createWithArguments:(NSString *)arguments;
-- (void)removeFromSuperView;
-- (void)addSubview:(id<BbObjectView>)view;
-- (void)addConnectionWithPoints:(id)connection;
-- (id<BbObjectView>)viewForInletAtIndex:(NSUInteger)index;
-- (id<BbObjectView>)viewForOutletAtIndex:(NSUInteger)index;
-- (void)removeConnection:(id)connection;
-- (id)objectViewPosition:(id)sender;
 
 @end
 
