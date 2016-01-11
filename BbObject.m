@@ -14,11 +14,6 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 
 @interface BbObject ()
 
-@property (nonatomic,strong)                NSMutableArray                          *myInlets;
-@property (nonatomic,strong)                NSMutableArray                          *myOutlets;
-@property (nonatomic,strong)                NSMutableArray                          *myChildren;
-@property (nonatomic,strong)                NSMutableArray                          *myConnections;
-
 @property (nonatomic,strong)                NSMutableSet                            *childObjectIDs;
 @property (nonatomic,strong)                NSMutableSet                            *childPortIDs;
 

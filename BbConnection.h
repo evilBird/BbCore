@@ -20,7 +20,6 @@ typedef NS_ENUM(NSUInteger, BbPortElement) {
     BbPortElement_Input
 };
 
-
 @protocol BbConnectionDelegate <NSObject,BbObjectChild>
 
 - (id)viewPosition:(id)sender;

@@ -36,6 +36,8 @@
 - (NSUInteger)numberOfOutlets;
 - (NSString *)titleText;
 - (NSValue *)initialPosition;
+
+- (void)BbObjectView:(id<BbObjectView>)sender doAction:(id)anAction;
 - (void)BbObjectView:(id<BbObjectView>)sender argumentsDidChange:(NSString *)arguments;
 - (void)BbObjectView:(id<BbObjectView>)sender viewForPort:(id)port didMoveToIndex:(NSUInteger)index;
 
