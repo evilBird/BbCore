@@ -7,43 +7,39 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "BbConnectionDelegate.h"
+#import "BbObjectChild.h"
 #import "BbObjectParent.h"
-
-@class BbConnection;
-@class BbObject;
-@class BbPort;
-@class BbInlet;
-@class BbOutlet;
-
-typedef NS_ENUM(NSUInteger, BbPortElement) {
-    BbPortElement_Output,
-    BbPortElement_Input
-};
-
-@protocol BbConnectionDelegate <NSObject,BbObjectChild>
-
-- (id)viewPosition:(id)sender;
-- (BOOL)hasConnection:(BbConnection *)connection;
-- (BOOL)makeConnection:(BbConnection *)connection withElement:(BbPortElement)element ofPort:(BbPort *)port;
-- (BOOL)removeConnection:(BbConnection *)connection withElement:(BbPortElement)element ofPort:(BbPort *)port;
-
-@end
+#import "BbConnectionPath.h"
+#import "BbConnectionPathDataSource.h"
 
 @interface BbConnection : NSObject
 
-@property (nonatomic,weak)                              BbObject<BbObjectParent>                *parent;
-@property (nonatomic,weak)                              BbOutlet<BbConnectionDelegate>          *sender;
-@property (nonatomic,weak)                              BbInlet<BbConnectionDelegate>           *receiver;
+@property (nonatomic,weak)                              id <BbObjectParent>                     parent;
+@property (nonatomic,weak)                              id <BbObjectChild>                      sender;
+@property (nonatomic,weak)                              id <BbObjectChild>                      receiver;
+@property (nonatomic,strong)                            id <BbConnectionPath>                   path;
 
-@property (nonatomic,readonly,getter=isValid)           BOOL                                    valid;
-@property (nonatomic,readonly,getter=isConnected)       BOOL                                    connected;
-@property (nonatomic,readonly)                          NSString                                *textDescription;
 @property (nonatomic,readonly)                          NSString                                *uniqueID;
+@property (nonatomic,getter=isConnected)                BOOL                                    connected;
 
+- (instancetype)initWithSender:(id<BbObjectChild>)sender receiver:(id<BbObjectChild>)receiver parent:(id<BbObjectParent>)parent;
 
-- (instancetype)initWithSender:(BbOutlet<BbConnectionDelegate>*)sender receiver:(BbInlet<BbConnectionDelegate>*)receiver;
-- (BOOL)connectInParent:(BbObject<BbObjectParent>*)parent;
+- (BOOL)connect;
 - (BOOL)disconnect;
-- (id)connectionPoints;
+
+@end
+
+@interface BbConnection (BbObjectChild) <BbObjectChild>
+
+- (NSUInteger)indexInParent;
+- (NSString *)textDescription;
+
+@end
+
+@interface BbConnection (BbConnectionPathDataSource) <BbConnectionPathDataSource>
+
+- (NSValue *)originPointForConnectionPath:(id<BbConnectionPath>)connectionPath;
+- (NSValue *)terminalPointForConnectionPath:(id<BbConnectionPath>)connectionPath;
 
 @end

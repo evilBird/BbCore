@@ -10,5 +10,13 @@
 
 @implementation BbPort (Meta)
 
++ (BbPortInputBlock)passThroughInputBlock
+{
+    BbPortInputBlock block = ^(id value){
+        return value;
+    };
+    
+    return block;
+}
 
 @end

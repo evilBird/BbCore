@@ -9,41 +9,17 @@
 #ifndef BbObjectParent_h
 #define BbObjectParent_h
 
-#import <Foundation/Foundation.h>
-#import "BbBridge.h"
+#import "BbObjectRelationshipDefs.h"
 
-@class BbObject;
-@class BbPort;
-@class BbConnection;
-@protocol BbObjectParent;
+@protocol BbObjectParent <NSObject,BbObjectChild>
 
-#define BbIndexInParentNotFound 1e7
+@property (nonatomic,strong)        NSString            *uniqueID;
 
-@protocol BbObjectChild <NSObject>
-
-@property (nonatomic,weak)                  id <BbObjectParent>                      parent;
-
-- (NSUInteger)indexInParent;
-
-@end
-
-@protocol BbObjectParent <NSObject>
-
-@property (nonatomic,weak)                  BbObject <BbObjectParent>                *parent;
-@property (nonatomic,strong)                NSString                                 *uniqueID;
-
-@optional
-
-- (NSUInteger)indexOfChild:(id<BbObjectChild>)sender;
-- (BOOL)hasChildPortWithID:(NSString *)uniqueID;
-- (BOOL)hasChildObjectWithID:(NSString *)uniqueID;
-- (BOOL)hasConnectionWithID:(NSString *)uniqueID;
-
-- (BbObject *)childObjectWithID:(NSString *)uniqueID;
-- (BbPort *)childPortWithID:(NSString *)uniqueID;
-- (BbConnection *)childConnectionWithID:(NSString *)uniqueID;
-
-- (BOOL)connectionDidInvalidate:(BbConnection *)connection;
+- (BOOL)isParentObject:(id<BbObjectChild>)child;
+- (BOOL)addChildObject:(id<BbObjectChild>)child;
+- (BOOL)insertChildObject:(id<BbObjectChild>)child atIndex:(NSUInteger)index;
+- (BOOL)removeChildObject:(id<BbObjectChild>)child;
+- (NSUInteger)indexOfChildObject:(id<BbObjectChild>)child;
 
 @end
 

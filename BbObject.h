@@ -7,25 +7,37 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "BbPort.h"
+#import "BbInlet.h"
+#import "BbOutlet.h"
+#import "BbConnection.h"
+#import "BbRuntime.h"
+#import "BbHelpers.h"
+#import "BbBridge.h"
+#import "BbObjectParent.h"
+#import "BbObjectChild.h"
+#import "BbObjectView.h"
+#import "BbObjectViewDataSource.h"
 
 typedef id (^BbCalculateBlock) (id value);
 
 @interface BbObject : NSObject
 
-@property (nonatomic,strong)                NSString                                *titleText;
-@property (nonatomic,strong)                NSString                                *arguments;
+@property (nonatomic,weak)                  BbObject<BbObjectParent>                *parent;
+@property (nonatomic,strong)                NSString                                *uniqueID;
+
+@property (nonatomic,strong)                NSString                                *objectClass;
+@property (nonatomic,strong)                NSString                                *objectArguments;
+
+@property (nonatomic,strong)                NSString                                *viewClass;
+@property (nonatomic,strong)                NSString                                *viewArguments;
 
 @property (nonatomic,strong)                NSMutableArray                          *myInlets;
 @property (nonatomic,strong)                NSMutableArray                          *myOutlets;
 @property (nonatomic,strong)                NSMutableArray                          *myChildren;
 @property (nonatomic,strong)                NSMutableArray                          *myConnections;
 
-@property (nonatomic,weak)                  BbObject<BbObjectParent>                *parent;
 @property (nonatomic,strong)                id<BbObjectView>                         view;
 
-@property (nonatomic,strong)                NSString                                *viewArguments;
-@property (nonatomic,strong)                NSString                                *uniqueID;
 @property (nonatomic,readonly)              NSString                                *textDescription;
 
 @property (nonatomic,strong)                NSMutableDictionary                     *calculateBlocks;
@@ -35,71 +47,52 @@ typedef id (^BbCalculateBlock) (id value);
 - (void)setupWithArguments:(id)arguments;
 - (void)setupPorts;
 
-- (BOOL)addChildObject:(BbObject<BbObjectChild>*)child;
-- (BbObject<BbObjectChild>*)removeChildObject:(BbObject<BbObjectChild>*)child;
-
-+ (BbCalculateBlock)passThruCalculateBlock;
-- (NSString *)textDescription;
 + (NSString *)myToken;
 
 @end
 
 @interface BbObject (BbObjectParent) <BbObjectParent>
 
-- (NSString *)uniqueID;
 - (BOOL)isParentObject:(id<BbObjectChild>)child;
-- (void)addChildObject:(id<BbObjectChild>)child;
-- (void)insertChildObject:(id<BbObjectChild>)child atIndex:(NSUInteger)index;
-- (void)removeChildObject:(id<BbObjectChild>)child;
-
+- (BOOL)addChildObject:(id<BbObjectChild>)child;
+- (BOOL)insertChildObject:(id<BbObjectChild>)child atIndex:(NSUInteger)index;
+- (BOOL)removeChildObject:(id<BbObjectChild>)child;
 - (NSUInteger)indexOfChildObject:(id<BbObjectChild>)child;
-- (id<BbObjectChild>)childObjectAtIndex:(NSUInteger)index;
 
 @end
 
 @interface BbObject (BbObjectChild) <BbObjectChild>
 
-- (NSString *)uniqueID;
-- (NSUInteger)indexInParentObject;
-- (id<BbObjectParent>)parentObject;
+- (NSUInteger)indexInParent;
 
 @end
 
 @interface BbObject (BbObjectViewDataSource) <BbObjectViewDataSource>
 
-- (NSUInteger)numberOfInlets;
-- (NSUInteger)numberOfOutlets;
-- (NSString *)titleText;
-- (NSValue *)initialPosition;
-- (void)BbObjectView:(id<BbObjectView>)sender doAction:(id)anAction;
-- (void)BbObjectView:(id<BbObjectView>)sender argumentsDidChange:(NSString *)arguments;
-- (void)BbObjectView:(id<BbObjectView>)sender viewForPort:(id)port didMoveToIndex:(NSUInteger)index;
+- (NSUInteger)numberOfInletsForObjectView:(id<BbObjectView>)objectView;
+- (NSUInteger)numberOfOutletsForObjectView:(id<BbObjectView>)objectView;
 
-- (NSString *)myViewClass;
-- (id<BbObjectView>)createView;
-- (BOOL)openView;
-- (BOOL)closeView;
+- (NSString *)titleTextForObjectView:(id<BbObjectView>)objectView;
+- (NSValue *)positionForObjectView:(id<BbObjectView>)objectView;
+
+- (void)objectView:(id<BbObjectView>)sender positionDidChange:(NSValue *)position;
+- (void)objectView:(id<BbObjectView>)sender objectArgumentsDidChange:(NSString *)arguments;
+
 
 @end
 
 @interface BbObject (Ports)
 
-- (BOOL)addInlet:(BbInlet *)inlet;
-- (BOOL)addHotInlet:(BbInlet *)inlet targetOutlet:(BbOutlet *)outlet calculateBlock:(BbCalculateBlock)block;
-- (BOOL)addOutlet:(BbOutlet *)outlet;
-
-- (BbInlet *)removeInletAtIndex:(NSUInteger)index;
-- (BbOutlet *)removeOutletAtIndex:(NSUInteger)index;
-
-- (BOOL)insertInlet:(BbInlet *)inlet atIndex:(NSUInteger)inlet;
-- (BOOL)insertOutlet:(BbOutlet *)outlet atIndex:(NSUInteger)outlet;
+- (void)setupDefaultPorts;
+- (void)didAddChildPort:(BbPort *)childPort;
+- (void)didRemoveChildPort:(BbPort *)childPort;
 
 @end
 
 @interface BbObject (Connections)
 
-- (BOOL)addConnection:(BbConnection *)connection;
-- (BbConnection *)removeConnection:(BbConnection *)connection;
+- (void)didAddChildConnection:(BbConnection *)connection;
+- (void)didRemoveChildConnection:(BbConnection *)connection;
 
 @end
 

@@ -10,6 +10,14 @@
 
 @implementation BbObject (Connections)
 
+- (void)didAddChildConnection:(BbConnection *)connection
+{
+    [connection connect];
+}
 
+- (void)didRemoveChildConnection:(BbConnection *)connection
+{
+    [connection disconnect];
+}
 
 @end

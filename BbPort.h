@@ -7,46 +7,54 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "BbObjectChild.h"
 #import "BbObjectParent.h"
-#import "BbConnection.h"
+#import "BbConnectionDelegate.h"
+#import "BbObjectView.h"
+#import "BbObjectViewDataSource.h"
 
 typedef NS_ENUM(NSUInteger, BbPortScope) {
     BbPortScope_Output,
     BbPortScope_Input
 };
 
-typedef id  (^BbPortBlock)     (id value);
+typedef NS_ENUM(NSUInteger, BbPortElement) {
+    BbPortElement_Output,
+    BbPortElement_Input
+};
+
+typedef id  (^BbPortInputBlock)     (id value);
+typedef void (^BbPortOutputBlock)   (id value);
 
 static NSString *kOutputElement =   @"outputElement";
 static NSString *kInputElement  =   @"inputElement";
 
-@interface BbPort : NSObject    <BbConnectionDelegate,BbObjectChild>
+@interface BbPort : NSObject
 
-@property   (nonatomic,weak)                BbObject<BbObjectParent>            *parent;
-@property   (nonatomic,strong)              BbPortBlock                         inputBlock;
-@property   (nonatomic,strong)              BbPortBlock                         outputBlock;
+@property   (nonatomic,weak)                id<BbObjectParent>                  parent;
+@property   (nonatomic,strong)              BbPortInputBlock                    inputBlock;
+@property   (nonatomic,strong)              BbPortOutputBlock                   outputBlock;
 @property   (nonatomic,weak)                id                                  inputElement;
 @property   (nonatomic,weak)                id                                  outputElement;
 @property   (nonatomic)                     BbPortScope                         scope;
 @property   (nonatomic,strong)              id<BbObjectView>                    view;
 @property   (nonatomic,strong)              NSString                            *uniqueID;
-@property   (nonatomic,readonly)            NSArray                             *connections;
-@property   (nonatomic,strong)              NSMutableSet                        *myConnections;
+@property   (nonatomic,strong)              NSHashTable                         *observedPorts;
 
-- (id)getValue;
 - (void)commonInit;
-+ (BbPortBlock)passThruPortBlock;
+- (BOOL)connectToElement:(BbPortElement)element ofPort:(BbPort *)portToObserve;
+- (BOOL)disconnectFromElement:(BbPortElement)element ofPort:(BbPort *)portToObserve;
 
 @end
 
-@interface BbInlet : BbPort
+@interface BbPort (BbObjectChild) <BbObjectChild>
 
-@property   (nonatomic,getter=isHotInlet)   BOOL                              hotInlet;
-@property   (nonatomic)                     NSString                          *targetOutletID;
-
-@end
-
-@interface BbOutlet : BbPort
+- (NSUInteger)indexInParent;
 
 @end
 
+@interface BbPort (Meta)
+
++ (BbPortInputBlock)passThroughInputBlock;
+
+@end

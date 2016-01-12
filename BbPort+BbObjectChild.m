@@ -1,14 +1,16 @@
 //
-//  BbObject+BbObjectChild.m
+//  BbPort+BbObjectChild.m
 //  Pods
 //
 //  Created by Travis Henspeter on 1/11/16.
 //
 //
 
-#import "BbObject.h"
+#import "BbPort.h"
 
-@implementation BbObject (BbObjectChild)
+@implementation BbPort (BbObjectChild)
+
+#pragma mark - BbChildObject
 
 - (NSUInteger)indexInParent
 {

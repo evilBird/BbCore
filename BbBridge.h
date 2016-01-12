@@ -10,37 +10,11 @@
 #define BbBridge_h
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
+@protocol BbObjectView;
 @protocol BbObjectViewDataSource;
-
-@protocol BbObjectView <NSObject>
-
-- (void)removeFromSuperView;
-- (void)addSubview:(id<BbObjectView>)view;
-- (id)objectViewPosition:(id)sender;
-
-@optional
-
-- (id<BbObjectView>)initWithDataSource:(id<BbObjectViewDataSource>)dataSource;
-- (id<BbObjectView>)viewForInletAtIndex:(NSUInteger)index;
-- (id<BbObjectView>)viewForOutletAtIndex:(NSUInteger)index;
-
-- (void)addConnectionWithPoints:(id)connection;
-- (void)removeConnection:(id)connection;
-
-@end
-
-@protocol BbObjectViewDataSource <NSObject>
-
-- (NSUInteger)numberOfInlets;
-- (NSUInteger)numberOfOutlets;
-- (NSString *)titleText;
-- (NSValue *)initialPosition;
-
-- (void)BbObjectView:(id<BbObjectView>)sender doAction:(id)anAction;
-- (void)BbObjectView:(id<BbObjectView>)sender argumentsDidChange:(NSString *)arguments;
-- (void)BbObjectView:(id<BbObjectView>)sender viewForPort:(id)port didMoveToIndex:(NSUInteger)index;
-
-@end
+@protocol BbConnectionPath;
+@protocol BbConnectionPathDataSource;
 
 #endif /* BbBridge_h */

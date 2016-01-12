@@ -9,15 +9,18 @@
 #ifndef BbObjectChild_h
 #define BbObjectChild_h
 
-#import <Foundation/Foundation.h>
-
-@protocol BbObjectParent;
+#import "BbObjectRelationshipDefs.h"
 
 @protocol BbObjectChild <NSObject>
 
-- (NSString *)uniqueID;
-- (NSUInteger)indexInParentObject;
-- (id<BbObjectParent>)parentObject;
+@property (nonatomic,strong)        NSString                *uniqueID;
+@property (nonatomic,weak)          id<BbObjectParent>      parent;
+
+- (NSUInteger)indexInParent;
+
+@optional
+
+- (NSString *)textDescription;
 
 @end
 
