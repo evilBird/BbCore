@@ -15,4 +15,10 @@
     return @"#N";
 }
 
+- (NSString *)myViewClass
+{
+    return @"BbPatchView";
+}
+
+
 @end

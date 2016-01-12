@@ -50,7 +50,7 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 
 }
 
-+ (NSString *)myToken
+- (NSString *)myToken
 {
     return @"#X";
 }
@@ -63,36 +63,16 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 - (NSString *)textDescription
 {
     NSMutableArray *myComponents = [NSMutableArray array];
-    [myComponents addObject:[BbObject myToken]];
+    [myComponents addObject:[self myToken]];
+    [myComponents addObject:[self myViewClass]];
     
-    NSString *view = nil;
-    
-    if ( nil != self.view ) {
-        view = NSStringFromClass([self.view class]);
-    }else{
-        view = [self myViewClass];
+    if ( nil != self.viewArguments ) {
+        [myComponents addObject:self.viewArguments];
     }
-    
-    [myComponents addObject:view];
-    
-    NSString *position = nil;
-    
-    if ( nil != self.view ) {
-        position = [BbHelpers position2String:[self.view objectViewPosition:self]];
-    }else{
-        position = [BbHelpers position2String:nil];
-    }
-    
-    [myComponents addObject:position];
-    
-    NSString *className = NSStringFromClass([self class]);
-    [myComponents addObject:className];
-    
-    NSString *argsString = nil;
+    [myComponents addObject:NSStringFromClass([self class])];
     
     if ( nil != self.objectArguments ) {
-        argsString = self.objectArguments;
-        [myComponents addObject:argsString];
+        [myComponents addObject:self.objectArguments];
     }
     
     NSString *endOfLine = @";\n";
@@ -148,8 +128,6 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     }
     
     _view = nil;
-    _calculateBlocks = nil;
-    _calculateBlockTargets = nil;
 }
 
 @end

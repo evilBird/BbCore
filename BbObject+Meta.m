@@ -8,23 +8,18 @@
 
 #import "BbObject.h"
 #import "BbRuntime.h"
+#import "BbTextDescription.h"
 
 @implementation BbObject (Meta)
 
-+ (BbObject *)createObject:(NSString *)className arguments:(NSString *)arguments
++ (BbObject *)objectWithDescription:(BbObjectDescription *)description
 {
-    BbObject *object = [NSInvocation doClassMethod:className selector:@"alloc" arguments:nil];
-    NSArray *args = ( nil != arguments ) ? ( @[arguments] ) : nil;
-    [NSInvocation doInstanceMethod:object selector:@"initWithArguments:" arguments:args];
-    return object;
+    return nil;
 }
 
-+ (id<BbObjectView>)createView:(NSString *)className dataSource:(id<BbObjectViewDataSource>)dataSource
++ (BbConnection *)connectionWithDescription:(BbConnectionDescription *)description
 {
-    id<BbObjectView> view = nil;
-    view = [NSInvocation doClassMethod:className selector:@"alloc" arguments:nil];
-    [NSInvocation doInstanceMethod:view selector:@"initWithDataSource:" arguments:@[dataSource]];
-    return view;
+    return nil;
 }
 
 @end

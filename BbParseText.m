@@ -114,7 +114,7 @@ static NSString     *kSelectorToken     =       @"S";
 
 + (NSString *)parentViewArgumentsFromString:(NSString *)string
 {
-    NSString *pattern = @"(?<=#[NX]\\s)\\w+\\s+[0-9\.\-]+\\s+[0-9\.\-]+\\s+[0-9\.\-]+\\s+[0-9\.\-]+\\s+";
+    NSString *pattern = @"(?<=#[NX]\\s)\\w+\\s+[0-9\.\-]+\\s+[0-9\.\-]+\\s+[0-9\.\-]+\\s+[0-9\.\-]+\\s+[0-9\.\-]+\\s+";
     return [BbParseText matchPattern:pattern inString:string];
 }
 
@@ -130,8 +130,6 @@ static NSString     *kSelectorToken     =       @"S";
     NSArray *components = [string componentsSeparatedByString:separator];
     NSUInteger previousDepth = depth;
     NSUInteger separatorLength = separator.length;
-    NSString *depthToken = @"\t";
-    NSUInteger depthTokenLength = depthToken.length;
     for ( NSString *aComponent in components ) {
         NSUInteger newDepth = [BbParseText countOccurencesOfSubstring:@"\t" beforeSubstring:@"#" inString:aComponent];
         length += (aComponent.length);
@@ -211,59 +209,6 @@ static NSString     *kSelectorToken     =       @"S";
     }
     return patchDescription;
 }
-/*
-- (BbPatchDescription *)parse
-{
-    NSMutableArray *myComponentsCopy = self.myComponents.mutableCopy;
-    NSString *myText = [myComponentsCopy firstObject];
-    [myComponentsCopy removeObjectAtIndex:0];
-    NSUInteger separatorLength = self.mySeparator.length;
-    self.myTextLocation += ( myText.length + separatorLength );
-    self.myDepth = [BbParseText countOccurencesOfSubstring:@"\t" beforeSubstring:@"#" inString:myText];
-    NSString *myViewArgs = [BbParseText parentViewArgumentsFromString:myText];
-    NSString *myObjectArgs = [BbParseText objectArgumentsFromString:myText];
-    BbPatchDescription *patchDescription = [BbPatchDescription patchDescriptionWithArgs:myObjectArgs viewArgs:myViewArgs];
-    patchDescription.depth = self.myDepth;
-    while ( self.myTextLocation < self.myText.length ) {
-        
-    }
-    for (NSString *aComponent in myComponentsCopy ) {
-        NSUInteger numCharsToAdvance = 0;
-        if ( self.myTextLocation >= self.myText.length || aComponent.length == 0 ) {
-            break;
-        }
-        
-        if ( [BbParseText isChild:aComponent] ) {
-            if ( [BbParseText isConnection:aComponent] ) {
-                [patchDescription addChildConnectionDescriptionWithArgs:[BbParseText connectionArgumentsFromString:aComponent]];
-            }else{
-                NSString *objectArgs = [BbParseText objectArgumentsFromString:aComponent];
-                NSString *viewArgs = [BbParseText childViewArgumentsFromString:aComponent];
-                [patchDescription addChildObjectDescriptionWithArgs:objectArgs viewArgs:viewArgs];
-            }
-            numCharsToAdvance = aComponent.length;
-            
-        }else if ( [BbParseText isParent:aComponent] ){
-            NSUInteger depth = [BbParseText countOccurencesOfSubstring:@"\t" beforeSubstring:@"#" inString:aComponent];
-            NSString *substring1 = [self.myText substringFromIndex:self.myTextLocation];
-            NSUInteger length = [BbParseText lengthOfDepth:depth inString:substring1 separator:self.mySeparator];
-            NSString *substring2 = [substring1 substringToIndex:length];
-            [patchDescription.childObjectDescriptions addObject:[BbParseText parseText:substring2]];
-            numCharsToAdvance = length;
-        }else if ( [BbParseText isSelector:aComponent] ){
-            [patchDescription addSelectorDescription:aComponent];
-            numCharsToAdvance = aComponent.length;
-        }else{
-            
-            NSLog(@"INVALID SELECTOR AT LOCATION: %@ COMPONENT: %@",@(self.myTextLocation),aComponent);
-        }
-        
-        self.myTextLocation += (numCharsToAdvance + separatorLength);
-    }
-    
-    
-    return patchDescription;
-}
-*/
+
 
 @end

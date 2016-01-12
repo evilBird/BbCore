@@ -18,11 +18,12 @@
 #import "BbObjectView.h"
 #import "BbObjectViewDataSource.h"
 
-typedef id (^BbCalculateBlock) (id value);
+@class BbObjectDescription;
+@class BbConnectionDescription;
 
 @interface BbObject : NSObject
 
-@property (nonatomic,weak)                  BbObject<BbObjectParent>                *parent;
+@property (nonatomic,weak)                  id <BbObjectParent>                     parent;
 @property (nonatomic,strong)                NSString                                *uniqueID;
 
 @property (nonatomic,strong)                NSString                                *objectClass;
@@ -40,14 +41,10 @@ typedef id (^BbCalculateBlock) (id value);
 
 @property (nonatomic,readonly)              NSString                                *textDescription;
 
-@property (nonatomic,strong)                NSMutableDictionary                     *calculateBlocks;
-@property (nonatomic,strong)                NSMutableDictionary                     *calculateBlockTargets;
-
 - (instancetype)initWithArguments:(NSString *)arguments;
 - (void)setupWithArguments:(id)arguments;
 - (void)setupPorts;
-
-+ (NSString *)myToken;
+- (NSString *)myToken;
 
 @end
 
@@ -78,7 +75,6 @@ typedef id (^BbCalculateBlock) (id value);
 - (void)objectView:(id<BbObjectView>)sender positionDidChange:(NSValue *)position;
 - (void)objectView:(id<BbObjectView>)sender objectArgumentsDidChange:(NSString *)arguments;
 
-
 @end
 
 @interface BbObject (Ports)
@@ -98,7 +94,7 @@ typedef id (^BbCalculateBlock) (id value);
 
 @interface BbObject (Meta)
 
-+ (BbObject *)createObject:(NSString *)className arguments:(NSString *)arguments;
-+ (id<BbObjectView>)createView:(NSString *)className dataSource:(id<BbObjectViewDataSource>)dataSource;
++ (BbObject *)objectWithDescription:(BbObjectDescription *)description;
++ (BbConnection *)connectionWithDescription:(BbConnectionDescription *)description;
 
 @end
