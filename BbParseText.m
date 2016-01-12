@@ -194,7 +194,8 @@ static NSString     *kSelectorToken     =       @"S";
             NSUInteger depth = [BbParseText countOccurencesOfSubstring:@"\t" beforeSubstring:@"#" inString:aComponent];
             NSUInteger length = [BbParseText lengthOfDepth:depth inString:myText separator:self.mySeparator];
             NSString *substring2 = [myText substringToIndex:length];
-            [patchDescription.childObjectDescriptions addObject:[BbParseText parseText:substring2]];
+            BbPatchDescription *childPatchDescription = [BbParseText parseText:substring2];
+            [patchDescription addChildPatchDescription:childPatchDescription];
             numCharsToAdvance = length;
         }else if ( [BbParseText isSelector:aComponent] ){
             NSString *selectorArgs = [BbParseText selectorFromString:aComponent];

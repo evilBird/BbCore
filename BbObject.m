@@ -57,6 +57,10 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 
 - (NSString *)myViewClass
 {
+    if ( nil != self.viewClass ) {
+        return self.viewClass;
+    }
+    
     return @"BbBoxView";
 }
 
@@ -89,7 +93,7 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     if ( nil != self.myConnections ) {
         for (BbConnection *aConnection in self.myConnections ) {
             
-            [mutableString appendString:[aConnection textDescription]];
+            [mutableString appendFormat:@"\t%@",[aConnection textDescription]];
         }
     }
     

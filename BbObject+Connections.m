@@ -12,12 +12,17 @@
 
 - (void)didAddChildConnection:(BbConnection *)connection
 {
-    [connection connect];
+    BbPort *sender = connection.sender;
+    BbPort *receiver = connection.receiver;
+    connection.connected = [sender connectToPort:receiver];
 }
 
 - (void)didRemoveChildConnection:(BbConnection *)connection
 {
-    [connection disconnect];
+    BbPort *sender = connection.sender;
+    BbPort *receiver = connection.receiver;
+    connection.connected = [sender disconnectFromPort:receiver];
+    
 }
 
 @end

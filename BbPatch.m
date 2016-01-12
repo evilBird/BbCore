@@ -17,8 +17,35 @@
 
 - (NSString *)myViewClass
 {
+    if ( nil != self.viewClass ) {
+        return self.viewClass;
+    }
+    
     return @"BbPatchView";
 }
 
+- (NSString *)textDescription
+{
+    NSString *text = [super textDescription];
+    return [text stringByAppendingString:[self selectorText]];
+}
+
+- (NSString *)selectorText
+{
+    if ( nil == self.mySelectors ) {
+        return @"";
+    }
+    NSMutableString *selectors = [NSMutableString string];
+    for (NSString *aSelectorDescription in self.mySelectors ) {
+        [selectors appendFormat:@"#S %@;\n",aSelectorDescription];
+    }
+    
+    return selectors;
+}
+
+- (void)doSelectors
+{
+    NSLog(@"DOING MY SELECTORS: %@",self.mySelectors);
+}
 
 @end

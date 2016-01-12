@@ -128,6 +128,15 @@
     return result;
 }
 
+- (void)addChildPatchDescription:(BbPatchDescription *)patchDescription
+{
+    if ( nil == self.childObjectDescriptions ) {
+        self.childObjectDescriptions = [NSMutableArray array];
+    }
+    
+    [self.childObjectDescriptions addObject:patchDescription];
+}
+
 - (void)addChildObjectDescriptionWithArgs:(NSString *)objectArgs viewArgs:(NSString *)viewArgs
 {
     if ( nil == self.childObjectDescriptions ) {

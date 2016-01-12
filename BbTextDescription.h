@@ -43,6 +43,7 @@
 + (BbPatchDescription *)patchDescriptionWithArgs:(NSString *)objectArgs viewArgs:(NSString *)viewArgs;
 
 - (void)addChildObjectDescriptionWithArgs:(NSString *)objectArgs viewArgs:(NSString *)viewArgs;
+- (void)addChildPatchDescription:(BbPatchDescription *)patchDescription;
 - (void)addChildConnectionDescriptionWithArgs:(NSString *)connectionArgs;
 - (void)addSelectorDescription:(NSString *)selectorArgs;
 

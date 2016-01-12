@@ -47,6 +47,29 @@ static void *BbPortObservationContextXX     =       &BbPortObservationContextXX;
     [self addObserver:self forKeyPath:kOutputElement options:NSKeyValueObservingOptionNew context:BbPortObservationContextXX];
 }
 
+- (BOOL)connectToPort:(BbPort *)port
+{
+    if ( [port.observedPorts containsObject:self] ) {
+        return NO;
+    }
+    
+    [self addObserver:port forKeyPath:kOutputElement options:NSKeyValueObservingOptionNew context:BbPortObservationContextXX];
+    [port.observedPorts addObject:self];
+    return YES;
+}
+
+- (BOOL)disconnectFromPort:(BbPort *)port
+{
+    if ( ![port.observedPorts containsObject:self] ) {
+        return NO;
+    }
+    
+    [self removeObserver:port forKeyPath:kOutputElement context:BbPortObservationContextXX];
+    [port.observedPorts removeObject:self];
+    return YES;
+}
+
+
 - (BOOL)connectToElement:(BbPortElement)element ofPort:(BbPort *)portToObserve
 {
     if ( [self.observedPorts containsObject:portToObserve] ) {
@@ -106,6 +129,14 @@ static void *BbPortObservationContextXX     =       &BbPortObservationContextXX;
     
     [self removeObserver:self forKeyPath:kInputElement context:BbPortObservationContextXX];
     [self removeObserver:self forKeyPath:kOutputElement context:BbPortObservationContextXX];
+    if ( _observedPorts.allObjects.count ) {
+        NSMutableArray *observedPorts = _observedPorts.allObjects.mutableCopy;
+        
+        for (BbPort *anObservedPort in observedPorts ) {
+            [anObservedPort disconnectFromPort:self];
+        }
+    }
+    
     _observedPorts = nil;
     _inputBlock = nil;
     _outputBlock = nil;

@@ -131,13 +131,13 @@
     }
     
     if ( [child isKindOfClass:[BbInlet class]] ) {
-        [self.myInlets indexOfObject:child];
+        return [self.myInlets indexOfObject:child];
     }else if ( [child isKindOfClass:[BbOutlet class]] ){
-        [self.myOutlets indexOfObject:child];
+        return [self.myOutlets indexOfObject:child];
     }else if ( [child isKindOfClass:[BbConnection class]] ){
-        [self.myConnections indexOfObject:child];
+        return [self.myConnections indexOfObject:child];
     }else if ( [child isKindOfClass:[BbObject class]] ){
-        [self.myChildren indexOfObject:child];
+        return [self.myChildren indexOfObject:child];
     }
     
     return BbIndexInParentNotFound;

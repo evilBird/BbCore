@@ -12,6 +12,10 @@
 
 @interface BbPatch : BbObject
 
+@property (nonatomic,strong)            NSMutableArray      *mySelectors;
+
+- (void)doSelectors;
+
 @end
 
 @interface BbPatch (Connections)

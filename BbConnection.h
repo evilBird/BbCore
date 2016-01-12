@@ -25,9 +25,6 @@
 
 - (instancetype)initWithSender:(id<BbObjectChild>)sender receiver:(id<BbObjectChild>)receiver parent:(id<BbObjectParent>)parent;
 
-- (BOOL)connect;
-- (BOOL)disconnect;
-
 @end
 
 @interface BbConnection (BbObjectChild) <BbObjectChild>

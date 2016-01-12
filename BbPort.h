@@ -42,8 +42,10 @@ static NSString *kInputElement  =   @"inputElement";
 @property   (nonatomic,strong)              NSHashTable                         *observedPorts;
 
 - (void)commonInit;
-- (BOOL)connectToElement:(BbPortElement)element ofPort:(BbPort *)portToObserve;
-- (BOOL)disconnectFromElement:(BbPortElement)element ofPort:(BbPort *)portToObserve;
+- (BOOL)connectToPort:(BbPort *)port;
+- (BOOL)disconnectFromPort:(BbPort *)port;
+//- (BOOL)connectToElement:(BbPortElement)element ofPort:(BbPort *)portToObserve;
+//- (BOOL)disconnectFromElement:(BbPortElement)element ofPort:(BbPort *)portToObserve;
 
 @end
 

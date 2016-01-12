@@ -95,6 +95,6 @@
 @interface BbObject (Meta)
 
 + (BbObject *)objectWithDescription:(BbObjectDescription *)description;
-+ (BbConnection *)connectionWithDescription:(BbConnectionDescription *)description;
+- (BbConnection *)connectionWithDescription:(BbConnectionDescription *)description;
 
 @end
