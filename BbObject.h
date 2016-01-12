@@ -40,6 +40,8 @@
 @property (nonatomic,strong)                id<BbObjectView>                         view;
 
 @property (nonatomic,readonly)              NSString                                *textDescription;
+@property (nonatomic)                       NSUInteger                              myDepth;
+
 
 - (instancetype)initWithArguments:(NSString *)arguments;
 - (void)setupWithArguments:(id)arguments;
@@ -55,6 +57,9 @@
 - (BOOL)insertChildObject:(id<BbObjectChild>)child atIndex:(NSUInteger)index;
 - (BOOL)removeChildObject:(id<BbObjectChild>)child;
 - (NSUInteger)indexOfChildObject:(id<BbObjectChild>)child;
+
+- (NSUInteger)depthOfChildObject:(id<BbObjectChild>)child;
+- (NSString *)depthStringForChildObject:(id<BbObjectChild>)child;
 
 @end
 

@@ -143,5 +143,23 @@
     return BbIndexInParentNotFound;
 }
 
+- (NSUInteger)depthOfChildObject:(id<BbObjectChild>)child
+{
+    if ( nil == self.parent ) {
+        return 1;
+    }
+    
+    return ([self.parent depthOfChildObject:self]+1);
+}
+
+- (NSString *)depthStringForChildObject:(id<BbObjectChild>)child
+{
+    NSString *depthString = @"\t";
+    if ( nil == self.parent ) {
+        return depthString;
+    }
+    
+    return [depthString stringByAppendingString:[self.parent depthStringForChildObject:self]];
+}
 
 @end

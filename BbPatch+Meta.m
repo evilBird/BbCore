@@ -24,7 +24,7 @@
         for (id aDescription in description.childObjectDescriptions ) {
             if ( [aDescription isKindOfClass:[BbPatchDescription class]] ) {
                 [patch addChildObject:[BbPatch patchWithDescription:aDescription]];
-            }else if ( [aDescription isKindOfClass:[BbPatchDescription class]]){
+            }else if ( [aDescription isKindOfClass:[BbObjectDescription class]]){
                 [patch addChildObject:[BbObject objectWithDescription:aDescription]];
             }else{
                 NSLog(@"Unhandled description: %@",aDescription);

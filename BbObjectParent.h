@@ -21,6 +21,9 @@
 - (BOOL)removeChildObject:(id<BbObjectChild>)child;
 - (NSUInteger)indexOfChildObject:(id<BbObjectChild>)child;
 
+@optional
+- (NSUInteger)depthOfChildObject:(id<BbObjectChild>)child;
+- (NSString *)depthStringForChildObject:(id<BbObjectChild>)child;
 @end
 
 #endif /* BbObjectParent_h */

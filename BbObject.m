@@ -64,6 +64,8 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     return @"BbBoxView";
 }
 
+
+
 - (NSString *)textDescription
 {
     NSMutableArray *myComponents = [NSMutableArray array];
@@ -82,18 +84,20 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     NSString *endOfLine = @";\n";
     NSString *myDescription = [[myComponents componentsJoinedByString:@" "]stringByAppendingString:endOfLine];
     NSMutableString *mutableString = [NSMutableString stringWithString:myDescription];
-    
     if ( self.myChildren ) {
         for (BbObject *aChild in self.myChildren ) {
-            
-            [mutableString appendFormat:@"\t%@",[aChild textDescription]];
+            NSString *depthString = [aChild.parent depthStringForChildObject:aChild];
+            //[mutableString appendFormat:@"\t%@",[aChild textDescription]];
+            [mutableString appendFormat:@"%@%@",depthString,[aChild textDescription]];
+
         }
     }
     
     if ( nil != self.myConnections ) {
         for (BbConnection *aConnection in self.myConnections ) {
-            
-            [mutableString appendFormat:@"\t%@",[aConnection textDescription]];
+            NSString *depthString = [aConnection.parent depthStringForChildObject:aConnection];
+            //[mutableString appendFormat:@"\t%@",[aConnection textDescription]];
+            [mutableString appendFormat:@"%@%@",depthString,[aConnection textDescription]];
         }
     }
     

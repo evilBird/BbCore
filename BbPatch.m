@@ -36,8 +36,14 @@
         return @"";
     }
     NSMutableString *selectors = [NSMutableString string];
+    NSString *depthString = nil;
+    if ( nil != self.parent ) {
+        depthString = [self.parent depthStringForChildObject:self];
+    }else{
+        depthString = @"";
+    }
     for (NSString *aSelectorDescription in self.mySelectors ) {
-        [selectors appendFormat:@"#S %@;\n",aSelectorDescription];
+        [selectors appendFormat:@"%@#S %@;\n",depthString,aSelectorDescription];
     }
     
     return selectors;
