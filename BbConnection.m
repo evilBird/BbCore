@@ -9,9 +9,9 @@
 #import "BbConnection.h"
 #import "BbPort.h"
 #import "BbObject.h"
+#import "BbHelpers.h"
 
-
-static NSString  *kObservedKeyPath = @"view.objectViewPosition";
+static NSString  *kObservedKeyPath = @"viewArguments";
 
 static void*     BbConnectionPathObservationContextXX       =       &BbConnectionPathObservationContextXX;
 
@@ -43,12 +43,10 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
         [self.path removeFromParentView];
         self.path = nil;
     }
-    UIView *view = (UIView *)[self.sender parent].view;
-    [view addObserver:self forKeyPath:@"objectViewPosition" options:NSKeyValueObservingOptionNew context:BbConnectionPathObservationContextXX];
     
-    //[[self startObservingObject:[[self.sender parent]view]];
-    //[[self.sender parent]addObjectObserver:self];
-    //[[self.receiver parent]addObjectObserver:self];
+    [[self.sender parent]addObjectObserver:self];
+    [[self.receiver parent]addObjectObserver:self];
+    
     self.path = [BbConnectionPath addConnectionPathWithDelegate:delegate dataSource:self];
 }
 
@@ -70,6 +68,16 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
 
 #pragma mark - BbConnectionPathDataSource
 
+- (UIView *)getSendingView:(id<BbConnectionPath>)sender
+{
+    return (UIView *)[self.sender view];
+}
+
+- (UIView *)getReceivingView:(id<BbConnectionPath>)sender
+{
+    return (UIView *)[self.receiver view];
+}
+
 - (NSString *)connectionIDForConnectionPath:(id<BbConnectionPath>)connectionPath
 {
     return self.uniqueID;
@@ -90,7 +98,17 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if (context == BbConnectionPathObservationContextXX) {
-        [self.path setNeedsRedraw:YES];
+        if ( [object isParentObject:self.sender] ) {
+            NSString *string = change[@"new"];
+            CGPoint point = CGPointFromString(string);
+            self.senderPosition = [NSValue valueWithCGPoint:point];
+            [self.path setNeedsRedraw:YES];
+        }else if ( [object isParentObject:self.receiver] ){
+            NSString *string = change[@"new"];
+            CGPoint point = CGPointFromString(string);
+            self.receiverPosition = [NSValue valueWithCGPoint:point];
+            [self.path setNeedsRedraw:YES];
+        }
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }

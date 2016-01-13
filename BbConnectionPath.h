@@ -16,6 +16,10 @@
 
 @protocol BbConnectionPathDataSource <NSObject>
 
+- (UIView *)getSendingView:(id<BbConnectionPath>)sender;
+
+- (UIView *)getReceivingView:(id<BbConnectionPath>)sender;
+
 - (NSString *)connectionIDForConnectionPath:(id<BbConnectionPath>)connectionPath;
 
 - (NSValue *)originPointForConnectionPath:(id<BbConnectionPath>)connectionPath;
@@ -47,6 +51,10 @@
 
 - (void)removeFromParentView;
 
+- (UIView *)sendingView;
+
+- (UIView *)receivingView;
+
 @end
 
 @interface BbConnectionPath : NSObject <BbConnectionPath>
@@ -72,6 +80,14 @@
 @property (nonatomic,getter=isSelected)     BOOL                                selected;
 
 @property (nonatomic,readonly)              UIColor                             *preferredColor;
+
+@property (nonatomic)                       NSValue                             *originPoint;
+
+@property (nonatomic,strong)                NSValue                             *terminalPoint;
+
+@property (nonatomic)                       CGPoint                             origin;
+
+@property (nonatomic)                       CGPoint                             terminus;
 
 
 + (BbConnectionPath *)addConnectionPathWithDelegate:(id<BbConnectionPathDelegate>)delegate dataSource:(id<BbConnectionPathDataSource>)dataSource;

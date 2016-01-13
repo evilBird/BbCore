@@ -22,8 +22,8 @@
 + (BbConnectionPath *)addConnectionPathWithDelegate:(id<BbConnectionPathDelegate>)delegate dataSource:(id<BbConnectionPathDataSource>)dataSource
 {
     BbConnectionPath *path = [[BbConnectionPath alloc]initWithDelegate:delegate dataSource:dataSource];
-    [path.delegate addConnectionPath:path];
-    [path setNeedsRedraw:YES];
+    //[path.delegate addConnectionPath:path];
+    path.delegate = delegate;
     return path;
 }
 
@@ -53,8 +53,9 @@
 {
     _needsRedraw = needsRedraw;
     if ( needsRedraw ) {
-        [self prepareToRedraw];
+        //[self prepareToRedraw];
         [self.delegate redrawConnectionPath:self];
+        [self setNeedsRedraw:NO];
     }
 }
 
@@ -72,19 +73,38 @@
     [_bezierPath removeAllPoints];
 }
 
+- (UIView *)sendingView
+{
+    return [self.dataSource getSendingView:self];
+}
+
+- (UIView *)receivingView
+{
+    return [self.dataSource getReceivingView:self];
+    
+}
+
+
 - (void)setOriginPoint:(NSValue *)originPoint
 {
+    /*
     [self prepareToRedrawWithOrigin:originPoint
                            terminus:[self.dataSource terminalPointForConnectionPath:self]
      ];
     [self.delegate redrawConnectionPath:self];
+    */
+    
+    [self setNeedsRedraw:YES];
+    
 }
 
 - (void)setTerminalPoint:(NSValue *)terminalPoint
 {
+    /*
     [self prepareToRedrawWithOrigin:[self.dataSource originPointForConnectionPath:self]
                            terminus:terminalPoint];
     [self.delegate redrawConnectionPath:self];
+    */
 }
 
 - (void)setSelected:(BOOL)selected

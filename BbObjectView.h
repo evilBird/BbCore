@@ -149,9 +149,7 @@ typedef NS_ENUM(NSInteger, BbObjectViewEditingEvent) {
 
 + (id<BbObjectView>)createViewWithDataSource:(id<BbObjectViewDataSource>)dataSource;
 
-- (void)layoutSubviews;
-
-- (void)layoutIfNeeded;
+- (void)updateLayout;
 
 - (NSArray *)positionConstraints;
 

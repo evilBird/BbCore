@@ -15,6 +15,8 @@
     BbPort *sender = connection.sender;
     BbPort *receiver = connection.receiver;
     connection.connected = [sender connectToPort:receiver];
+    [connection createPathWithDelegate:self.view];
+    [self.view addConnectionPath:[connection path]];
     
 }
 
@@ -23,7 +25,7 @@
     BbPort *sender = connection.sender;
     BbPort *receiver = connection.receiver;
     connection.connected = ![sender disconnectFromPort:receiver];
-    
+    [self.view removeConnectionPath:connection];
 }
 
 

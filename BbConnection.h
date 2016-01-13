@@ -16,11 +16,12 @@
 @property (nonatomic,weak)                              id <BbObjectChild>                      receiver;
 @property (nonatomic,strong)                            id <BbConnectionPath>                   path;
 @property (nonatomic,getter=isConnected)                BOOL                                    connected;
-
 @property (nonatomic,strong)                            NSString                                *uniqueID;
+
 - (instancetype)initWithSender:(id<BbObjectChild>)sender receiver:(id<BbObjectChild>)receiver parent:(id<BbObjectParent>)parent;
 
 - (void)createPathWithDelegate:(id<BbConnectionPathDelegate>)delegate;
+
 
 #pragma mark - BbObject
 

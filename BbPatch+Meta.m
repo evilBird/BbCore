@@ -58,11 +58,13 @@
         }
     }
     
-    for ( id aConnection in self.myConnections ) {
-        [(BbConnection *)aConnection createPathWithDelegate:self.view];
+    for ( BbConnection *aConnection in self.myConnections ) {
+        [aConnection createPathWithDelegate:self.view];
+        [self.view addConnectionPath:aConnection.path];
     }
     
     if ( nil != self.view ) {
+        [self.view updateLayout];
         return YES;
     }
     

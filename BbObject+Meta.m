@@ -45,13 +45,15 @@
     if ( nil != self.view ) {
         
         for (NSUInteger i = 0 ; i < self.myInlets.count ; i ++ ) {
-            id view = [self.view viewForInletAtIndex:i];
+            id<BbObjectView> view = [self.view viewForInletAtIndex:i];
             [self.myInlets[i]setView:view];
+            [view setDataSource:self.myInlets[i]];
         }
         
         for (NSUInteger i = 0; i < self.myOutlets.count; i++) {
-            id view = [self.view viewForOutletAtIndex:i];
+            id<BbObjectView> view = [self.view viewForOutletAtIndex:i];
             [self.myOutlets[i]setView:view];
+            [view setDataSource:self.myOutlets[i]];
         }
         
         return YES;

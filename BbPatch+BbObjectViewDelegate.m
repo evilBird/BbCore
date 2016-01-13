@@ -39,7 +39,8 @@
 
 - (void)objectView:(id<BbObjectView>)sender didRequestPlaceholderViewAtPosition:(NSValue *)position
 {
-    
+    id<BbObjectView> view = [NSInvocation doClassMethod:@"BbBoxView" selector:@"createViewWithDataSource:" arguments:nil];
+    [sender addChildObjectView:view];
 }
 
 - (void)objectView:(id<BbObjectView>)sender didAddChildObjectView:(id<BbObjectView>)child
@@ -69,7 +70,11 @@
 
 - (void)objectView:(id<BbObjectView>)sender didConnectPortView:(id<BbObjectView>)sendingPortView toPortView:(id<BbObjectView>)receivingPortView
 {
-    
+    //BbConnection *connection = [BbConnection alloc]initWithSender:receiver: parent:
+    BbPort *sendingPort = (BbPort *)[sendingPortView dataSource];
+    BbPort *receivingPort = (BbPort *)[receivingPortView dataSource];
+    BbConnection *connection = [[BbConnection alloc]initWithSender:sendingPort receiver:receivingPort parent:self];
+    [self addChildObject:connection];
 }
 
 - (void)objectView:(id<BbObjectView>)sender didDisconnectPortView:(id<BbObjectView>)sendingPortView fromPortView:(id<BbObjectView>)receivingPortView
