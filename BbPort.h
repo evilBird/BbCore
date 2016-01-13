@@ -7,11 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "BbObjectChild.h"
-#import "BbObjectParent.h"
-#import "BbConnectionDelegate.h"
-#import "BbObjectView.h"
-#import "BbObjectViewDataSource.h"
+#import "BbBridge.h"
 
 typedef NS_ENUM(NSUInteger, BbPortScope) {
     BbPortScope_Output,
@@ -44,8 +40,6 @@ static NSString *kInputElement  =   @"inputElement";
 - (void)commonInit;
 - (BOOL)connectToPort:(BbPort *)port;
 - (BOOL)disconnectFromPort:(BbPort *)port;
-//- (BOOL)connectToElement:(BbPortElement)element ofPort:(BbPort *)portToObserve;
-//- (BOOL)disconnectFromElement:(BbPortElement)element ofPort:(BbPort *)portToObserve;
 
 @end
 

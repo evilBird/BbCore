@@ -13,10 +13,6 @@
 #import "BbRuntime.h"
 #import "BbHelpers.h"
 #import "BbBridge.h"
-#import "BbObjectParent.h"
-#import "BbObjectChild.h"
-#import "BbObjectView.h"
-#import "BbObjectViewDataSource.h"
 
 @class BbObjectDescription;
 @class BbConnectionDescription;
@@ -39,6 +35,7 @@
 
 @property (nonatomic,strong)                id<BbObjectView>                         view;
 
+@property (nonatomic,strong)                NSHashTable                             *observers;
 @property (nonatomic,readonly)              NSString                                *textDescription;
 @property (nonatomic)                       NSUInteger                              myDepth;
 
@@ -47,6 +44,12 @@
 - (void)setupWithArguments:(id)arguments;
 - (void)setupPorts;
 - (NSString *)myToken;
+
+#pragma mark - BbObject protocol
+
+- (BOOL)addObjectObserver:(id<BbObject>)object;
+- (BOOL)removeObjectObserver:(id<BbObject>)object;
+- (BOOL)removeAllObjectObservers;
 
 @end
 
@@ -57,8 +60,6 @@
 - (BOOL)insertChildObject:(id<BbObjectChild>)child atIndex:(NSUInteger)index;
 - (BOOL)removeChildObject:(id<BbObjectChild>)child;
 - (NSUInteger)indexOfChildObject:(id<BbObjectChild>)child;
-
-- (NSUInteger)depthOfChildObject:(id<BbObjectChild>)child;
 - (NSString *)depthStringForChildObject:(id<BbObjectChild>)child;
 
 @end
@@ -77,8 +78,11 @@
 - (NSString *)titleTextForObjectView:(id<BbObjectView>)objectView;
 - (NSValue *)positionForObjectView:(id<BbObjectView>)objectView;
 
-- (void)objectView:(id<BbObjectView>)sender positionDidChange:(NSValue *)position;
-- (void)objectView:(id<BbObjectView>)sender objectArgumentsDidChange:(NSString *)arguments;
+@end
+
+@interface BbObject (BbObjectViewDelegate) <BbObjectViewDelegate>
+
+- (void)objectView:(id<BbObjectView>)sender didChangePosition:(NSValue *)position;
 
 @end
 
@@ -101,5 +105,6 @@
 
 + (BbObject *)objectWithDescription:(BbObjectDescription *)description;
 - (BbConnection *)connectionWithDescription:(BbConnectionDescription *)description;
+- (BOOL)loadView;
 
 @end

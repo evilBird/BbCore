@@ -7,23 +7,31 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "BbConnectionDelegate.h"
-#import "BbObjectChild.h"
-#import "BbObjectParent.h"
-#import "BbConnectionPath.h"
-#import "BbConnectionPathDataSource.h"
+#import "BbBridge.h"
 
-@interface BbConnection : NSObject
+@interface BbConnection : NSObject <BbConnectionPathDataSource,BbObject>
 
 @property (nonatomic,weak)                              id <BbObjectParent>                     parent;
 @property (nonatomic,weak)                              id <BbObjectChild>                      sender;
 @property (nonatomic,weak)                              id <BbObjectChild>                      receiver;
 @property (nonatomic,strong)                            id <BbConnectionPath>                   path;
-
-@property (nonatomic,readonly)                          NSString                                *uniqueID;
 @property (nonatomic,getter=isConnected)                BOOL                                    connected;
 
+@property (nonatomic,strong)                            NSString                                *uniqueID;
 - (instancetype)initWithSender:(id<BbObjectChild>)sender receiver:(id<BbObjectChild>)receiver parent:(id<BbObjectParent>)parent;
+
+- (void)createPathWithDelegate:(id<BbConnectionPathDelegate>)delegate;
+
+#pragma mark - BbObject
+
+- (BOOL)startObservingObject:(id<BbObject>)object;
+- (BOOL)stopObservingObject:(id<BbObject>)object;
+
+#pragma mark - BbConnectionPathDataSource
+
+- (NSString *)connectionIDForConnectionPath:(id<BbConnectionPath>)connectionPath;
+- (NSValue *)originPointForConnectionPath:(id<BbConnectionPath>)connectionPath;
+- (NSValue *)terminalPointForConnectionPath:(id<BbConnectionPath>)connectionPath;
 
 @end
 
@@ -31,12 +39,5 @@
 
 - (NSUInteger)indexInParent;
 - (NSString *)textDescription;
-
-@end
-
-@interface BbConnection (BbConnectionPathDataSource) <BbConnectionPathDataSource>
-
-- (NSValue *)originPointForConnectionPath:(id<BbConnectionPath>)connectionPath;
-- (NSValue *)terminalPointForConnectionPath:(id<BbConnectionPath>)connectionPath;
 
 @end

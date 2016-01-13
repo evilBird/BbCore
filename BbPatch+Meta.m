@@ -43,4 +43,30 @@
     return patch;
 }
 
+- (BOOL)loadViews
+{
+    self.view = [NSInvocation doClassMethod:self.viewClass selector:@"createViewWithDataSource:" arguments:self];
+    [self.view setDelegate:self];
+    
+    for ( id aChild in self.myChildren ) {
+        if ( [aChild isKindOfClass:[BbPatch class]]) {
+            [(BbPatch *)aChild loadViews];
+            [self.view addChildObjectView:[(BbPatch *)aChild view]];
+        }else if ( [aChild isKindOfClass:[BbObject class]]){
+            [(BbObject *)aChild loadView];
+            [self.view addChildObjectView:[(BbObject *)aChild view]];
+        }
+    }
+    
+    for ( id aConnection in self.myConnections ) {
+        [(BbConnection *)aConnection createPathWithDelegate:self.view];
+    }
+    
+    if ( nil != self.view ) {
+        return YES;
+    }
+    
+    return NO;
+}
+
 @end

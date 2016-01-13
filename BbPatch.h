@@ -18,9 +18,10 @@
 
 @end
 
-@interface BbPatch (Connections)
+@interface BbPatch (Connections) <BbConnectionPathDelegate>
 
 - (void)didAddChildConnection:(BbConnection *)connection;
+
 - (void)didRemoveChildConnection:(BbConnection *)connection;
 
 @end
@@ -28,28 +29,42 @@
 @interface BbPatch (Ports)
 
 - (void)setupDefaultPorts;
+
 - (void)didAddChildPort:(BbPort *)childPort;
+
 - (void)didRemoveChildPort:(BbPort *)childPort;
+
+@end
+
+@interface BbPatch (BbObjectViewDelegate)
+
+- (void)objectViewDidAppear:(id<BbObjectView>)sender;
+
+- (void)objectView:(id<BbObjectView>)sender didChangePosition:(NSValue *)position;
+
+- (void)objectView:(id<BbObjectView>)sender didChangeContentOffset:(NSValue *)offset;
+
+- (void)objectView:(id<BbObjectView>)sender didChangeZoomScale:(NSValue *)zoomScale;
+
+- (void)objectView:(id<BbObjectView>)sender didChangeSize:(NSValue *)viewSize;
+
+- (void)objectView:(id<BbObjectView>)sender didRequestPlaceholderViewAtPosition:(NSValue *)position;
 
 @end
 
 @interface BbPatch (BbObjectViewDataSource)
 
 - (NSValue *)contentOffsetForObjectView:(id<BbObjectView>)objectView;
-- (NSValue *)zoomScaleForObjectView:(id<BbObjectView>)objectView;
-- (NSValue *)sizeForObjectView:(id<BbObjectView>)objectView;
 
-- (void)objectView:(id<BbObjectView>)sender objectClassDidChange:(NSString *)objectClass arguments:(NSString *)arguments;
-- (void)objectView:(id<BbObjectView>)sender doAction:(id)anAction withArguments:(id)arguments;
-- (void)objectView:(id<BbObjectView>)sender contentOffsetDidChange:(NSValue *)offset;
-- (void)objectView:(id<BbObjectView>)sender zoomScaleDidChange:(NSValue *)zoomScale;
-- (void)objectView:(id<BbObjectView>)sender sizeDidChange:(NSValue *)viewSize;
-- (void)objectView:(id<BbObjectView>)sender viewForPort:(id)port didMoveToIndex:(NSUInteger)index;
+- (NSValue *)zoomScaleForObjectView:(id<BbObjectView>)objectView;
+
+- (NSValue *)sizeForObjectView:(id<BbObjectView>)objectView;
 
 @end
 
 @interface BbPatch (Meta)
 
 + (BbPatch *)patchWithDescription:(BbPatchDescription *)description;
+- (BOOL)loadViews;
 
 @end

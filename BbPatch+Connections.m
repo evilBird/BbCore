@@ -15,6 +15,7 @@
     BbPort *sender = connection.sender;
     BbPort *receiver = connection.receiver;
     connection.connected = [sender connectToPort:receiver];
+    
 }
 
 - (void)didRemoveChildConnection:(BbConnection *)connection
@@ -22,6 +23,11 @@
     BbPort *sender = connection.sender;
     BbPort *receiver = connection.receiver;
     connection.connected = ![sender disconnectFromPort:receiver];
+    
 }
+
+
+#pragma mark - BbConnectionPathDelegate
+
 
 @end

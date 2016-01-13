@@ -45,6 +45,27 @@
     return nil;
 }
 
++ (NSArray *)string2DoubleArray:(NSString *)string
+{
+    NSArray *array = [BbHelpers string2Array:string];
+    NSMutableArray *result = [NSMutableArray arrayWithCapacity:array.count];
+    for (NSString *aString in array ) {
+        [result addObject:@([aString doubleValue])];
+    }
+    
+    return result;
+}
+
++ (NSString *)doubleArrayToString:(NSArray *)doubleArray
+{
+    NSMutableArray *formattedNumbers = [NSMutableArray arrayWithCapacity:doubleArray.count];
+    for (NSNumber *aNumber in doubleArray) {
+        [formattedNumbers addObject:[NSString stringWithFormat:@"%.4f",aNumber.doubleValue]];
+    }
+    
+    return [formattedNumbers componentsJoinedByString:@" "];
+}
+
 + (id)stringComponent2Object:(NSString *)string
 {
     if ( nil == string ) {
@@ -82,6 +103,129 @@
     }
 
     return @"0 0";
+}
+
++ (NSValue *)positionFromViewArgs:(NSString *)viewArgs
+{
+    if ( nil == viewArgs ){
+        return [NSValue valueWithCGPoint:CGPointMake(0.0, 0.0)];
+    }
+    
+    NSArray *args = [BbHelpers string2DoubleArray:viewArgs];
+    if ( args.count != 2 ) {
+        return [NSValue valueWithCGPoint:CGPointMake(0.0, 0.0)];
+    }
+    
+    return [NSValue valueWithCGPoint:CGPointMake([args.firstObject doubleValue], [args.lastObject doubleValue])];
+}
+
++ (NSValue *)offsetFromViewArgs:(NSString *)viewArgs
+{
+    if ( nil == viewArgs ){
+        return [NSValue valueWithCGPoint:CGPointMake(0.0, 0.0)];
+    }
+    
+    NSArray *args = [BbHelpers string2DoubleArray:viewArgs];
+    if ( args.count < 4 ) {
+        return [NSValue valueWithCGPoint:CGPointMake(0.0, 0.0)];
+    }
+    
+    return [NSValue valueWithCGPoint:CGPointMake([args[2] doubleValue], [args[3] doubleValue])];
+}
+
++ (NSValue *)zoomScaleFromViewArgs:(NSString *)viewArgs
+{
+    if ( nil == viewArgs ){
+        return (NSValue *)[NSNumber numberWithDouble:1.0];
+    }
+    
+    NSArray *args = [BbHelpers string2DoubleArray:viewArgs];
+    if ( args.count < 5 ) {
+        return (NSValue *)[NSNumber numberWithDouble:1.0];
+    }
+    
+    return (NSNumber *)[NSNumber numberWithDouble:[args.lastObject doubleValue]];
+}
+
++ (NSValue *)sizeFromViewArgs:(NSString *)viewArgs
+{
+    if ( nil == viewArgs ){
+        return [NSValue valueWithCGSize:CGSizeMake(0.0, 0.0)];
+    }
+    
+    NSArray *args = [BbHelpers string2DoubleArray:viewArgs];
+    if ( args.count < 5 ) {
+        return [NSValue valueWithCGSize:CGSizeMake(0.0, 0.0)];
+    }
+    
+    return [NSValue valueWithCGSize:CGSizeMake([args[0] doubleValue], [args[1] doubleValue])];
+}
+
++ (NSString *)updateViewArgs:(NSString *)viewArgs withPosition:(NSValue *)position
+{
+    if ( nil == viewArgs || nil == position ) {
+        return viewArgs;
+    }
+    
+    NSMutableArray *numberArray = [BbHelpers string2DoubleArray:viewArgs].mutableCopy;
+    if ( numberArray.count < 2 ) {
+        return viewArgs;
+    }
+    
+    CGPoint point = position.CGPointValue;
+    numberArray[0] = @(point.x);
+    numberArray[1] = @(point.y);
+    return [BbHelpers doubleArrayToString:numberArray];
+}
+
++ (NSString *)updateViewArgs:(NSString *)viewArgs withOffset:(NSValue *)offset
+{
+    if ( nil == viewArgs || nil == offset ) {
+        return viewArgs;
+    }
+    
+    NSMutableArray *numberArray = [BbHelpers string2DoubleArray:viewArgs].mutableCopy;
+    if ( numberArray.count < 4 ) {
+        return viewArgs;
+    }
+    
+    CGPoint point = offset.CGPointValue;
+    numberArray[2] = @(point.x);
+    numberArray[3] = @(point.y);
+    return [BbHelpers doubleArrayToString:numberArray];
+}
+
++ (NSString *)updateViewArgs:(NSString *)viewArgs withZoomScale:(NSValue *)zoomScale
+{
+    if ( nil == viewArgs || nil == zoomScale ) {
+        return viewArgs;
+    }
+    
+    NSMutableArray *numberArray = [BbHelpers string2DoubleArray:viewArgs].mutableCopy;
+    if ( numberArray.count < 5 ) {
+        return viewArgs;
+    }
+    
+    CGFloat zoom = [(NSNumber *)zoomScale doubleValue];
+    numberArray[4] = @(zoom);
+    return [BbHelpers doubleArrayToString:numberArray];
+}
+
++ (NSString *)updateViewArgs:(NSString *)viewArgs withSize:(NSValue *)size
+{
+    if ( nil == viewArgs || nil == size ) {
+        return viewArgs;
+    }
+    
+    NSMutableArray *numberArray = [BbHelpers string2DoubleArray:viewArgs].mutableCopy;
+    if ( numberArray.count < 5 ) {
+        return viewArgs;
+    }
+    
+    CGSize newSize = size.CGSizeValue;
+    numberArray[0] = @(newSize.width);
+    numberArray[1] = @(newSize.height);
+    return [BbHelpers doubleArrayToString:numberArray];
 }
 
 @end

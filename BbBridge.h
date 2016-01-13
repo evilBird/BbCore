@@ -9,12 +9,8 @@
 #ifndef BbBridge_h
 #define BbBridge_h
 
-#import <Foundation/Foundation.h>
-#import <UIKit/UIKit.h>
-
-@protocol BbObjectView;
-@protocol BbObjectViewDataSource;
-@protocol BbConnectionPath;
-@protocol BbConnectionPathDataSource;
+#import "BbObjectParent.h"
+#import "BbObjectView.h"
+#import "BbHelpers.h"
 
 #endif /* BbBridge_h */

@@ -9,21 +9,27 @@
 #ifndef BbObjectParent_h
 #define BbObjectParent_h
 
-#import "BbObjectRelationshipDefs.h"
+#import <Foundation/Foundation.h>
+#import "BbObjectChild.h"
+
+#define BbIndexInParentNotFound 1e7
 
 @protocol BbObjectParent <NSObject,BbObjectChild>
 
-@property (nonatomic,strong)        NSString            *uniqueID;
-
 - (BOOL)isParentObject:(id<BbObjectChild>)child;
+
 - (BOOL)addChildObject:(id<BbObjectChild>)child;
+
 - (BOOL)insertChildObject:(id<BbObjectChild>)child atIndex:(NSUInteger)index;
+
 - (BOOL)removeChildObject:(id<BbObjectChild>)child;
+
 - (NSUInteger)indexOfChildObject:(id<BbObjectChild>)child;
 
 @optional
-- (NSUInteger)depthOfChildObject:(id<BbObjectChild>)child;
+
 - (NSString *)depthStringForChildObject:(id<BbObjectChild>)child;
+
 @end
 
 #endif /* BbObjectParent_h */

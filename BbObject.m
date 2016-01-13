@@ -37,6 +37,7 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     self.myOutlets = [NSMutableArray array];
     self.myChildren = [NSMutableArray array];
     self.myConnections = [NSMutableArray array];
+    self.observers = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
     [self setupPorts];
 }
 
@@ -64,8 +65,6 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     return @"BbBoxView";
 }
 
-
-
 - (NSString *)textDescription
 {
     NSMutableArray *myComponents = [NSMutableArray array];
@@ -87,7 +86,6 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     if ( self.myChildren ) {
         for (BbObject *aChild in self.myChildren ) {
             NSString *depthString = [aChild.parent depthStringForChildObject:aChild];
-            //[mutableString appendFormat:@"\t%@",[aChild textDescription]];
             [mutableString appendFormat:@"%@%@",depthString,[aChild textDescription]];
 
         }
@@ -96,7 +94,6 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     if ( nil != self.myConnections ) {
         for (BbConnection *aConnection in self.myConnections ) {
             NSString *depthString = [aConnection.parent depthStringForChildObject:aConnection];
-            //[mutableString appendFormat:@"\t%@",[aConnection textDescription]];
             [mutableString appendFormat:@"%@%@",depthString,[aConnection textDescription]];
         }
     }
@@ -105,9 +102,46 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     
 }
 
+#pragma mark - BbObject Protocol
+
+- (BOOL)addObjectObserver:(id<BbObject>)object
+{
+    if ( [self.observers containsObject:object] ) {
+        return NO;
+    }
+    [self.observers addObject:object];
+    [object startObservingObject:self];
+    return YES;
+}
+
+- (BOOL)removeObjectObserver:(id<BbObject>)object
+{
+    if ( ![self.observers containsObject:object] ) {
+        return NO;
+    }
+    
+    [self.observers removeObject:object];
+    return [object stopObservingObject:(id<BbObject>)self];
+}
+
+- (BOOL)removeAllObjectObservers{
+    if ( !self.observers.count ) {
+        return YES;
+    }
+    
+    NSMutableArray *observers = self.observers.allObjects.mutableCopy;
+    for (id<BbObject>anObserver in observers ) {
+        [self removeObjectObserver:anObserver];
+    }
+    
+    return YES;
+}
 
 - (void)dealloc
 {
+    
+    [self removeAllObjectObservers];
+    
     for ( BbConnection *aConnection in _myConnections.mutableCopy ) {
         [self removeChildObject:aConnection];
     }

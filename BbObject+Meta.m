@@ -38,6 +38,27 @@
     return connection;
 }
 
+- (BOOL)loadView
+{
+    self.view = [NSInvocation doClassMethod:self.viewClass selector:@"createViewWithDataSource:" arguments:self];
+    self.view.delegate = self;
+    if ( nil != self.view ) {
+        
+        for (NSUInteger i = 0 ; i < self.myInlets.count ; i ++ ) {
+            id view = [self.view viewForInletAtIndex:i];
+            [self.myInlets[i]setView:view];
+        }
+        
+        for (NSUInteger i = 0; i < self.myOutlets.count; i++) {
+            id view = [self.view viewForOutletAtIndex:i];
+            [self.myOutlets[i]setView:view];
+        }
+        
+        return YES;
+    }
+    return NO;
+}
+
 @end
 
 

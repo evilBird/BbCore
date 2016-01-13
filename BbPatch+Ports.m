@@ -10,6 +10,19 @@
 
 @implementation BbPatch (Ports)
 
+- (void)setupDefaultPorts
+{
+    
+}
 
+- (void)didAddChildPort:(BbPort *)childPort
+{
+    
+}
+
+- (void)didRemoveChildPort:(BbPort *)childPort
+{
+    
+}
 
 @end
