@@ -1,6 +1,6 @@
 {
   "name": "BbCore",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "summary": "Core Objects for Bb.",
   "authors": { 
     "Travis Henspeter": "developer@birdsoundmusic.com"
@@ -16,7 +16,7 @@
   "requires_arc": true,
   "source": {
     "git": "https://github.com/evilBird/BbCore.git",
-    "tag": "0.0.3"
+    "tag": "0.0.4"
   },
   "frameworks": [
     "Foundation",
@@ -28,6 +28,9 @@
   ],
   "dependencies":{
 	  "BbRuntime":[
+	  	
+	  ],
+	  "UIView+Layout":[
 	  	
 	  ]
   }
