@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 #import "BbObjectChild.h"
 
-@protocol BbObjectView;
 
 @protocol BbConnection <NSObject>
 
@@ -22,6 +21,9 @@
 - (UIView *)outletView;
 
 @end
+
+@protocol BbObjectView;
+
 
 @interface BbConnection : NSObject <BbObject>
 
