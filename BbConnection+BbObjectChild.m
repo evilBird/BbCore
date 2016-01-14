@@ -7,6 +7,7 @@
 //
 
 #import "BbConnection.h"
+#import "BbBridge.h"
 
 @implementation BbConnection (BbObjectChild)
 

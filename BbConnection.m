@@ -17,8 +17,8 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
 
 @interface BbConnection ()
 
-@property (nonatomic,strong)            NSValue             *senderPosition;
-@property (nonatomic,strong)            NSValue             *receiverPosition;
+@property      (nonatomic,getter=isObservingSender)                  BOOL           observingSender;
+@property      (nonatomic,getter=isObservingReceiver)                BOOL           observingReceiver;
 
 @end
 
@@ -31,66 +31,61 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
         _sender = sender;
         _receiver = receiver;
         _parent = parent;
-        self.uniqueID = [NSString stringWithFormat:@"%@-%@-%@",[_parent uniqueID],[_sender uniqueID],[_receiver uniqueID]];
+        [self commonInit];
     }
     
     return self;
 }
 
-- (void)createPathWithDelegate:(id<BbConnectionPathDelegate>)delegate
+- (void)commonInit
 {
-    if ( nil != self.path ) {
-        [self.path removeFromParentView];
-        self.path = nil;
-    }
-    
+    self.uniqueID = [NSString stringWithFormat:@"%@.%@.%@",[_parent uniqueID],[_sender uniqueID],[_receiver uniqueID]];
     [[self.sender parent]addObjectObserver:self];
     [[self.receiver parent]addObjectObserver:self];
-    
-    self.path = [BbConnectionPath addConnectionPathWithDelegate:delegate dataSource:self];
 }
 
-#pragma mark - BbObject
+#pragma mark - Accessors
 
-- (BOOL)startObservingObject:(id<BbObject>)object
+- (void)setValid:(BOOL)valid
 {
-    NSObject *obj = (NSObject *)object;
-    [obj addObserver:self forKeyPath:kObservedKeyPath options:NSKeyValueObservingOptionNew context:BbConnectionPathObservationContextXX];
-    return YES;
+    BOOL wasValid = self.isValid;
+    _valid = valid;
+    if ( _valid != wasValid ) {
+        [self validityDidChange:valid];
+    }
 }
 
-- (BOOL)stopObservingObject:(id<BbObject>)object
+- (void)validityDidChange:(BOOL)validity
 {
-    NSObject *obj = (NSObject *)object;
-    [obj removeObserver:self forKeyPath:kObservedKeyPath context:BbConnectionPathObservationContextXX];
-    return YES;
+    if ( !validity ) {
+        [self.parent removeChildObject:self];
+    }
 }
 
-#pragma mark - BbConnectionPathDataSource
+#pragma mark - BbConnection Protocol
 
-- (UIView *)getSendingView:(id<BbConnectionPath>)sender
+- (UIView *)parentView
+{
+    return (UIView *)[self.parent view];
+}
+
+- (UIView *)outletView
 {
     return (UIView *)[self.sender view];
 }
 
-- (UIView *)getReceivingView:(id<BbConnectionPath>)sender
+- (UIView *)inletView
 {
     return (UIView *)[self.receiver view];
 }
 
-- (NSString *)connectionIDForConnectionPath:(id<BbConnectionPath>)connectionPath
+- (BOOL)validate
 {
-    return self.uniqueID;
-}
-
-- (NSValue *)originPointForConnectionPath:(id<BbConnectionPath>)connectionPath
-{
-   return [[self.sender view]objectViewPosition];
-}
-
-- (NSValue *)terminalPointForConnectionPath:(id<BbConnectionPath>)connectionPath
-{
-    return [[self.receiver view]objectViewPosition];
+    if ( nil != self.sender && nil != self.receiver && nil != self.parent ) {
+        return YES;
+    }
+    
+    return NO;
 }
 
 #pragma mark - KVO
@@ -98,29 +93,56 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if (context == BbConnectionPathObservationContextXX) {
-        if ( [object isParentObject:self.sender] ) {
-            NSString *string = change[@"new"];
-            CGPoint point = CGPointFromString(string);
-            self.senderPosition = [NSValue valueWithCGPoint:point];
-            [self.path setNeedsRedraw:YES];
-        }else if ( [object isParentObject:self.receiver] ){
-            NSString *string = change[@"new"];
-            CGPoint point = CGPointFromString(string);
-            self.receiverPosition = [NSValue valueWithCGPoint:point];
-            [self.path setNeedsRedraw:YES];
+        if ( [object isParentObject:self.sender] || [object isParentObject:self.receiver] ) {
+            self.needsRedraw = YES;
         }
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
 }
 
+#pragma mark - BbObject Protcol
+
+- (BOOL)startObservingObject:(id<BbObject>)object
+{
+    NSObject *obj = (NSObject *)object;
+    [obj addObserver:self forKeyPath:kObservedKeyPath options:NSKeyValueObservingOptionNew context:BbConnectionPathObservationContextXX];
+    id <BbObjectParent> parent = (id<BbObjectParent>)object;
+    
+    if ( [parent isParentObject:self.sender] ) {
+        self.observingSender = YES;
+        self.valid = [self validate];
+    }else if ( [parent isParentObject:self.receiver] ){
+        self.observingReceiver = YES;
+        self.valid = [self validate];
+    }
+    
+    return YES;
+}
+
+- (BOOL)stopObservingObject:(id<BbObject>)object
+{
+    NSObject *obj = (NSObject *)object;
+    [obj removeObserver:self forKeyPath:kObservedKeyPath context:BbConnectionPathObservationContextXX];
+    id <BbObjectParent> parent = (id<BbObjectParent>)object;
+    if ( [parent isParentObject:self.sender] ) {
+        self.observingSender = NO;
+        self.valid = [self validate];
+    }else if ( [parent isParentObject:self.receiver] ){
+        self.observingReceiver = NO;
+        self.valid = [self validate];
+    }
+    
+    return YES;
+}
+
 - (void)dealloc
 {
     [_sender removeObjectObserver:self];
+    _sender = nil;
     [_receiver removeObjectObserver:self];
+    _receiver = nil;
     _parent = nil;
-    [_path removeFromParentView];
-    _path = nil;
 }
 
 @end

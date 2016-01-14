@@ -18,7 +18,7 @@
 
 @end
 
-@interface BbPatch (Connections) <BbConnectionPathDelegate>
+@interface BbPatch (Connections) 
 
 - (void)didAddChildConnection:(BbConnection *)connection;
 
@@ -36,7 +36,13 @@
 
 @end
 
-@interface BbPatch (BbObjectViewDelegate)
+@interface BbPatch (BbObjectViewDelegate) <BbObjectViewEditingDelegate>
+
+- (BOOL)objectViewShouldBeginEditing:(id<BbObjectView>)objectView;
+
+- (void)objectView:(id<BbObjectView>)objectView didEditText:(NSString *)text;
+
+- (BOOL)objectView:(id<BbObjectView>)objectView shouldEndEditingWithText:(NSString *)text;
 
 - (void)objectViewDidAppear:(id<BbObjectView>)sender;
 

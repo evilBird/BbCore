@@ -27,7 +27,6 @@
     self.viewArguments = [BbHelpers updateViewArgs:self.viewArguments withSize:viewSize];
 }
 
-
 - (void)objectViewDidAppear:(id<BbObjectView>)sender
 {
     if ( nil != self.mySelectors ) {
@@ -37,15 +36,12 @@
 
 #pragma mark - Add/remove child object views
 
-- (void)objectView:(id<BbObjectView>)sender didRequestPlaceholderViewAtPosition:(NSValue *)position
-{
-    id<BbObjectView> view = [NSInvocation doClassMethod:@"BbBoxView" selector:@"createViewWithDataSource:" arguments:nil];
-    [sender addChildObjectView:view];
-}
-
 - (void)objectView:(id<BbObjectView>)sender didAddChildObjectView:(id<BbObjectView>)child
 {
-    
+    if ( nil == child.dataSource ) {
+        child.editingDelegate = self;
+        child.editing = YES;
+    }
 }
 
 - (void)objectView:(id<BbObjectView>)sender didRemoveChildObjectView:(id<BbObjectView>)child
@@ -70,7 +66,6 @@
 
 - (void)objectView:(id<BbObjectView>)sender didConnectPortView:(id<BbObjectView>)sendingPortView toPortView:(id<BbObjectView>)receivingPortView
 {
-    //BbConnection *connection = [BbConnection alloc]initWithSender:receiver: parent:
     BbPort *sendingPort = (BbPort *)[sendingPortView dataSource];
     BbPort *receivingPort = (BbPort *)[receivingPortView dataSource];
     BbConnection *connection = [[BbConnection alloc]initWithSender:sendingPort receiver:receivingPort parent:self];
@@ -83,15 +78,28 @@
 }
 
 #pragma mark - Handle edits in textfield
-
-- (void)objectView:(id<BbObjectView>)sender didEditWithEvent:(BbObjectViewEditingEvent)event
+- (BOOL)objectViewShouldBeginEditing:(id<BbObjectView>)objectView
 {
+    if ( nil == objectView.dataSource ) {
+        objectView.editingDelegate = self;
+        return YES;
+    }
     
+    return NO;
 }
 
-- (void)objectView:(id<BbObjectView>)sender textField:(id)textField didEditWithEvent:(BbObjectViewEditingEvent)event
+- (void)objectView:(id<BbObjectView>)objectView didEditText:(NSString *)text
 {
+    NSLog(@"object view has text: %@",text);
+}
+
+- (BOOL)objectView:(id<BbObjectView>)objectView shouldEndEditingWithText:(NSString *)text
+{
+    NSArray *args = [text componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    NSString *className = args.firstObject;
+    NSLog(@"Object view ended editing with text: %@",text);
     
+    return YES;
 }
 
 #pragma mark - Editing state change handler

@@ -59,8 +59,7 @@
     }
     
     for ( BbConnection *aConnection in self.myConnections ) {
-        [aConnection createPathWithDelegate:self.view];
-        [self.view addConnectionPath:aConnection.path];
+        [self.view addConnection:(id<BbConnection>)aConnection];
     }
     
     if ( nil != self.view ) {

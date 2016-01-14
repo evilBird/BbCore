@@ -12,24 +12,23 @@
 
 - (void)didAddChildConnection:(BbConnection *)connection
 {
-    BbPort *sender = connection.sender;
-    BbPort *receiver = connection.receiver;
-    connection.connected = [sender connectToPort:receiver];
-    [connection createPathWithDelegate:self.view];
-    [self.view addConnectionPath:[connection path]];
-    
+    if ( [connection validate] ) {
+        BbPort *sender = connection.sender;
+        BbPort *receiver = connection.receiver;
+        [sender connectToPort:receiver];
+        [self.view addConnection:(id<BbConnection>)connection];
+    }else{
+        [self removeChildObject:connection];
+    }
 }
 
 - (void)didRemoveChildConnection:(BbConnection *)connection
 {
     BbPort *sender = connection.sender;
     BbPort *receiver = connection.receiver;
-    connection.connected = ![sender disconnectFromPort:receiver];
-    [self.view removeConnectionPath:connection];
+    [sender disconnectFromPort:receiver];
+    [self.view removeConnection:(id<BbConnection>)connection];
+    connection = nil;
 }
-
-
-#pragma mark - BbConnectionPathDelegate
-
 
 @end

@@ -7,32 +7,48 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "BbBridge.h"
+#import "BbObjectChild.h"
 
-@interface BbConnection : NSObject <BbConnectionPathDataSource,BbObject>
+@protocol BbObjectView;
+
+@protocol BbConnection <NSObject>
+
+@property    (nonatomic)                    BOOL                needsRedraw;
+@property    (nonatomic,getter=isValid)     BOOL                valid;
+
+- (BOOL)validate;
+- (UIView *)parentView;
+- (UIView *)inletView;
+- (UIView *)outletView;
+
+@end
+
+@interface BbConnection : NSObject <BbObject>
 
 @property (nonatomic,weak)                              id <BbObjectParent>                     parent;
 @property (nonatomic,weak)                              id <BbObjectChild>                      sender;
 @property (nonatomic,weak)                              id <BbObjectChild>                      receiver;
-@property (nonatomic,strong)                            id <BbConnectionPath>                   path;
-@property (nonatomic,getter=isConnected)                BOOL                                    connected;
+
 @property (nonatomic,strong)                            NSString                                *uniqueID;
 
-- (instancetype)initWithSender:(id<BbObjectChild>)sender receiver:(id<BbObjectChild>)receiver parent:(id<BbObjectParent>)parent;
+@property (nonatomic)                                   BOOL                                    needsRedraw;
+@property (nonatomic,getter=isValid)                    BOOL                                    valid;
 
-- (void)createPathWithDelegate:(id<BbConnectionPathDelegate>)delegate;
+- (instancetype)initWithSender:(id<BbObjectChild>)sender
+                      receiver:(id<BbObjectChild>)receiver
+                        parent:(id<BbObjectParent>)parent;
 
+#pragma mark - BbConnection
+
+- (BOOL)validate;
+- (UIView *)parentView;
+- (UIView *)inletView;
+- (UIView *)outletView;
 
 #pragma mark - BbObject
 
 - (BOOL)startObservingObject:(id<BbObject>)object;
 - (BOOL)stopObservingObject:(id<BbObject>)object;
-
-#pragma mark - BbConnectionPathDataSource
-
-- (NSString *)connectionIDForConnectionPath:(id<BbConnectionPath>)connectionPath;
-- (NSValue *)originPointForConnectionPath:(id<BbConnectionPath>)connectionPath;
-- (NSValue *)terminalPointForConnectionPath:(id<BbConnectionPath>)connectionPath;
 
 @end
 

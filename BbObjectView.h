@@ -10,7 +10,7 @@
 #define BbObjectView_h
 
 #import <Foundation/Foundation.h>
-#import "BbConnectionPath.h"
+#import "BbConnection.h"
 
 typedef NS_ENUM(NSInteger, BbObjectViewEditState) {
     BbObjectViewEditState_Default    =   0,
@@ -74,8 +74,6 @@ typedef NS_ENUM(NSInteger, BbObjectViewEditingEvent) {
 
 #pragma mark - Add/remove child object views
 
-- (void)objectView:(id<BbObjectView>)sender didRequestPlaceholderViewAtPosition:(NSValue *)position;
-
 - (void)objectView:(id<BbObjectView>)sender didAddChildObjectView:(id<BbObjectView>)child;
 
 - (void)objectView:(id<BbObjectView>)sender didRemoveChildObjectView:(id<BbObjectView>)child;
@@ -92,35 +90,9 @@ typedef NS_ENUM(NSInteger, BbObjectViewEditingEvent) {
 
 - (void)objectView:(id<BbObjectView>)sender didDisconnectPortView:(id<BbObjectView>)sendingPortView fromPortView:(id<BbObjectView>)receivingPortView;
 
-#pragma mark - Handle edits in textfield
-
-- (void)objectView:(id<BbObjectView>)sender didEditWithEvent:(BbObjectViewEditingEvent)event;
-
-- (void)objectView:(id<BbObjectView>)sender textField:(id)textField didEditWithEvent:(BbObjectViewEditingEvent)event;
-
-#pragma mark - Editing state change handler
-
-- (void)objectView:(id<BbObjectView>)sender didChangeEditState:(NSInteger)editState;
-
-#pragma mark - Editing actions
-
-- (void)objectView:(id<BbObjectView>)sender didCopySelected:(NSArray*)selectedObjectViews;
-
-- (void)objectView:(id<BbObjectView>)sender didCutSelected:(NSArray*)selectedObjectViews;
-
-- (void)objectViewDidPasteCopied:(id<BbObjectView>)sender;
-
-- (void)objectView:(id<BbObjectView>)sender didAbstractSelected:(NSArray *)selectedObjectViews withArguments:(NSString *)arguments;
-
 #pragma mark - Target/Action type methods
 
 - (void)sendActionsForObjectView:(id<BbObjectView>)sender;
-
-#pragma mark - Undo/Redo
-
-- (BOOL)objectViewDidUndo:(id<BbObjectView>)sender;
-
-- (BOOL)objectViewDidRedo:(id<BbObjectView>)sender;
 
 #pragma mark - Open close selected object views
 
@@ -134,22 +106,58 @@ typedef NS_ENUM(NSInteger, BbObjectViewEditingEvent) {
 
 @end
 
+@protocol BbObjectViewEditingDelegate <NSObject,BbObjectViewDelegate>
 
-@protocol BbObjectView <NSObject,BbConnectionPathDelegate>
+- (BOOL)objectViewShouldBeginEditing:(id<BbObjectView>)objectView;
 
-@property (nonatomic,weak)          id<BbObjectViewDataSource>      dataSource;
+- (void)objectView:(id<BbObjectView>)objectView didEditText:(NSString *)text;
+
+- (BOOL)objectView:(id<BbObjectView>)objectView shouldEndEditingWithText:(NSString *)text;
+
+#pragma mark - Editing state change handler
+
+- (void)objectView:(id<BbObjectView>)sender didChangeEditState:(NSInteger)editState;
+
+#pragma mark - Undo/Redo
+
+- (BOOL)objectViewDidUndo:(id<BbObjectView>)sender;
+
+- (BOOL)objectViewDidRedo:(id<BbObjectView>)sender;
+
+#pragma mark - Editing actions
+
+- (void)objectView:(id<BbObjectView>)sender didCopySelected:(NSArray*)selectedObjectViews;
+
+- (void)objectView:(id<BbObjectView>)sender didCutSelected:(NSArray*)selectedObjectViews;
+
+- (void)objectViewDidPasteCopied:(id<BbObjectView>)sender;
+
+- (void)objectView:(id<BbObjectView>)sender didAbstractSelected:(NSArray *)selectedObjectViews withArguments:(NSString *)arguments;
+
+@end
+
+
+@protocol BbObjectView <NSObject>
+
+@property (nonatomic,weak)                  id<BbObjectViewDataSource>      dataSource;
+@property (nonatomic,weak)                  id<BbObjectViewDelegate>        delegate;
+@property (nonatomic,weak)                  id<BbObjectViewEditingDelegate> editingDelegate;
+@property (nonatomic)                       CGPoint                         center;
+@property (nonatomic,weak)                  UIView                          *superview;
+@property (nonatomic,getter=isSelected)     BOOL                            selected;
+@property (nonatomic,getter=isEditing)      BOOL                            editing;
 
 - (void)removeFromSuperView;
 
 @optional
-
-@property (nonatomic,weak)          id<BbObjectViewDelegate>        delegate;
 
 @property (nonatomic,readonly)        NSValue                       *objectViewPosition;
 
 + (id<BbObjectView>)createViewWithDataSource:(id<BbObjectViewDataSource>)dataSource;
 
 - (void)updateLayout;
+
+- (void)moveToPoint:(CGPoint)point;
 
 - (NSArray *)positionConstraints;
 
@@ -167,15 +175,17 @@ typedef NS_ENUM(NSInteger, BbObjectViewEditingEvent) {
 
 - (void)setContentOffsetWithValue:(NSValue *)value;
 
-- (void)addConnectionPath:(id<BbConnectionPath>)path;
+- (void)addConnection:(id<BbConnection>)connection;
 
-- (void)removeConnectionPath:(id<BbConnectionPath>)path;
+- (void)removeConnection:(id<BbConnection>)connection;
 
 - (void)setDataSource:(id<BbObjectViewDataSource>)dataSource reloadViews:(BOOL)reload;
 
 - (void)doAction:(void(^)(void))action;
 
 - (void)suggestTextCompletion:(id)textCompletion;
+
++ (id<BbObjectView>)createPlaceholder;
 
 - (id<BbObjectView>)initWithDataSource:(id<BbObjectViewDataSource>)dataSource;
 

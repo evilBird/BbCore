@@ -79,7 +79,7 @@
         child.parent = self;
         [self didAddChildPort:child];
         return YES;
-    }else if ( [child isKindOfClass:[BbConnection class]] && index <= self.myConnections.count ){
+    }else if ( [child isKindOfClass:[BbConnection class]] && index <= self.myConnections.count ){        
         [self.myConnections insertObject:child atIndex:index];
         child.parent = self;
         [self didAddChildConnection:(BbConnection *)child];

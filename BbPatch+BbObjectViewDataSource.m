@@ -30,7 +30,19 @@
     return [BbHelpers sizeFromViewArgs:self.viewArguments];
 }
 
+- (BOOL)objectView:(id<BbObjectView>)sender canOpenChildView:(id<BbObjectView>)child
+{
+    return NO;
+}
 
+- (BOOL)objectView:(id<BbObjectView>)sender canOpenHelpObjectForChildView:(id<BbObjectView>)child
+{
+    return NO;
+}
 
+- (BOOL)objectView:(id<BbObjectView>)sender canTestObjectForChildView:(id<BbObjectView>)child
+{
+    return NO;
+}
 
 @end
