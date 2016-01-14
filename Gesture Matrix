@@ -1,0 +1,31 @@
+
+STATE CONDITIONS
+
+c1) gesture state
+c2) edit state
+c3) number of touches
+c4) selected box
+c5) selected outlet
+c6) selected inlet
+c7) duration
+c8) movement
+c9) repeat count
+
+
+
+ACTIONS                    c1         c2         c3         c4         c5         c6         c7         c8          c9
+
+a1) add box               (== 3)    (== 0)      (== 1)    (== 0)     (== 0)     (== 0)     (== 0)    (== 0)      (== 1)
+a2) select box            (== 3)      1         (== 1)       1       (== 0)     (== 0)     (== 0)       1           1
+a3) deselect box          (== 3)      1         (== 1)       1       (== 0)     (== 0)     (== 0)       1           1
+a4) select outlet         (== 1)    (== 0)      (== 1)    (== 0)     (== 0)     (== 0)        1         1           1
+a5) deselect outlet       (== 3)    (== 0)      (== 1)    (== 0)     (== 1)       1           1         1           1
+a6) select inlet          (== 2)    (== 0)      (== 1)    (== 0)     (== 1)     (== 0)        1         1           1
+a7) deselect inlet        (>= 2)    (== 0)      (== 1)    (== 0)     (== 1)     (== 1)        1         1           1
+a5) draw connection       (== 2)    (== 0)      (== 1)    (== 0)     (== 1)       1           1         1           1
+a6) make connection       (== 3)    (== 0)      (== 1)    (== 0)     (== 1)     (== 1)        1         1           1
+a7) move box              (== 2)      1         (== 1)    (== 1)     (== 0)     (== 0)        1         1           1
+a8) edit box              (>= 2)    (== 0)      (== 1)    (== 1)     (== 0)     (== 0)     (== 1)    (== 0)         1
+a9) show box options      (== 3)    (== 0)      (== 1)    (== 1)     (== 0)     (== 0)     (== 0)    (== 0)      (== 1)
+a10) send actions         (== 1)    (== 0)      (== 1)       1       (== 0)     (== 0)     (== 0)    (== 0)         1
+

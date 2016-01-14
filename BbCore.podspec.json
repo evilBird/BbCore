@@ -1,6 +1,6 @@
 {
   "name": "BbCore",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "summary": "Core Objects for Bb.",
   "authors": { 
     "Travis Henspeter": "developer@birdsoundmusic.com"
@@ -16,7 +16,7 @@
   "requires_arc": true,
   "source": {
     "git": "https://github.com/evilBird/BbCore.git",
-    "tag": "0.0.2"
+    "tag": "0.0.3"
   },
   "frameworks": [
     "Foundation",
@@ -25,5 +25,10 @@
   "source_files":[
 	  "*Bb*.{h,m}",
 	  "NSMutableArray+Stack.{h,m}"
-  ]
+  ],
+  "dependencies":{
+	  "BbRuntime":[
+	  	
+	  ]
+  }
 }
