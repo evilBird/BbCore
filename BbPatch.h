@@ -7,32 +7,36 @@
 //
 
 #import "BbObject.h"
+#import "BbConnection.h"
 
 @class BbPatchDescription;
 
 @interface BbPatch : BbObject
 
-@property (nonatomic,strong)            NSMutableArray      *mySelectors;
+@property (nonatomic,strong)                NSMutableArray                          *mySelectors;
+@property (nonatomic,strong)                NSMutableArray                          *childObjects;
+@property (nonatomic,strong)                NSMutableArray                          *connections;
 
-- (void)doSelectors;
 
 @end
 
-@interface BbPatch (Connections) 
+@interface BbPatch (BbObjectParent) <BbObjectParent>
+
+- (NSString *)depthStringForChildObject:(id<BbObjectChild>)child;
 
 - (void)didAddChildConnection:(BbConnection *)connection;
 
 - (void)didRemoveChildConnection:(BbConnection *)connection;
 
-@end
+- (void)doSelectors;
 
-@interface BbPatch (Ports)
+- (NSString *)selectorText;
 
-- (void)setupDefaultPorts;
+- (NSString *)textDescription;
 
-- (void)didAddChildPort:(BbPort *)childPort;
+- (NSString *)descriptionToken;
 
-- (void)didRemoveChildPort:(BbPort *)childPort;
+- (BOOL)loadViews;
 
 @end
 
@@ -71,6 +75,9 @@
 @interface BbPatch (Meta)
 
 + (BbPatch *)patchWithDescription:(BbPatchDescription *)description;
-- (BOOL)loadViews;
+
++ (BbObject *)objectWithDescription:(BbObjectDescription *)description;
+
+- (BbConnection *)connectionWithDescription:(BbConnectionDescription *)description;
 
 @end

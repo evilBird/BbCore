@@ -17,7 +17,7 @@
 
 - (void)objectView:(id<BbObjectView>)sender didAddPortView:(id<BbObjectView>)portView inScope:(NSUInteger)scope atIndex:(NSUInteger)index
 {
-    NSMutableArray *ports = ( scope == 0 ) ? ( self.myOutlets ) : ( self.myInlets );
+    NSMutableArray *ports = ( scope == 0 ) ? ( self.outlets ) : ( self.inlets );
     if ( index < ports.count ) {
         BbPort *aPort = ports[index];
         aPort.view = portView;

@@ -9,7 +9,6 @@
 #ifndef BbObjectParent_h
 #define BbObjectParent_h
 
-#import <Foundation/Foundation.h>
 #import "BbObjectChild.h"
 
 #define BbIndexInParentNotFound 1e7
@@ -29,6 +28,12 @@
 @optional
 
 - (NSString *)depthStringForChildObject:(id<BbObjectChild>)child;
+
+- (void)loadViews;
+
+- (NSString *)descriptionToken;
+
+- (NSString *)textDescription;
 
 @end
 

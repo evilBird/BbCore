@@ -14,12 +14,12 @@
 
 - (NSUInteger)numberOfInletsForObjectView:(id<BbObjectView>)objectView
 {
-    return self.myInlets.count;
+    return self.inlets.count;
 }
 
 - (NSUInteger)numberOfOutletsForObjectView:(id<BbObjectView>)objectView
 {
-    return self.myOutlets.count;
+    return self.outlets.count;
 }
 
 - (NSValue *)positionForObjectView:(id<BbObjectView>)objectView

@@ -46,7 +46,11 @@
 
 - (void)objectView:(id<BbObjectView>)sender didRemoveChildObjectView:(id<BbObjectView>)child
 {
-    
+    if ( nil != child.dataSource && [self isParentObject:(id<BbObjectChild>)child.dataSource] ) {
+        BbObject *object = (BbObject *)(child.dataSource);
+        [self removeChildObject:object];
+        object = nil;
+    }
 }
 
 - (void)objectView:(id<BbObjectView>)sender didAddPortView:(id<BbObjectView>)portView inScope:(NSUInteger)scope atIndex:(NSUInteger)index
@@ -68,13 +72,31 @@
 {
     BbPort *sendingPort = (BbPort *)[sendingPortView dataSource];
     BbPort *receivingPort = (BbPort *)[receivingPortView dataSource];
-    BbConnection *connection = [[BbConnection alloc]initWithSender:sendingPort receiver:receivingPort parent:self];
+    BbConnection *connection = [[BbConnection alloc]initWithSender:sendingPort receiver:receivingPort];
     [self addChildObject:connection];
 }
 
 - (void)objectView:(id<BbObjectView>)sender didDisconnectPortView:(id<BbObjectView>)sendingPortView fromPortView:(id<BbObjectView>)receivingPortView
 {
+    BbPort *sendingPort = (BbPort *)[sendingPortView dataSource];
+    BbPort *receivingPort = (BbPort *)[receivingPortView dataSource];
+    NSPredicate *senderPredicate = [NSPredicate predicateWithFormat:@"senderID like %@",sendingPort.uniqueID];
+    NSPredicate *receiverPredicate = [NSPredicate predicateWithFormat:@"receiverID like %@",receivingPort.uniqueID];
+    NSArray *senderConnections = [self.connections filteredArrayUsingPredicate:senderPredicate];
+    NSArray *receiverConnections = [self.connections filteredArrayUsingPredicate:receiverPredicate];
+    if ( nil == senderConnections || nil == receiverConnections ) {
+        return;
+    }
     
+    NSMutableSet *senderSet = [NSMutableSet setWithArray:senderConnections];
+    NSSet *receiverSet = [NSSet setWithArray:receiverConnections];
+    [senderSet intersectSet:receiverSet];
+    
+    if ( senderSet.allObjects.count ) {
+        for ( BbConnection *connection in senderSet.allObjects ) {
+            [self removeChildObject:connection];
+        }
+    }
 }
 
 #pragma mark - Handle edits in textfield

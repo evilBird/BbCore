@@ -10,48 +10,34 @@
 
 @implementation BbPatch
 
-- (NSString *)myToken
+- (void)commonInit
 {
-    return @"#N";
+    [super commonInit];
+    self.childObjects = [NSMutableArray array];
+    self.connections = [NSMutableArray array];
 }
 
-- (NSString *)myViewClass
+- (void)setupPorts {}
+
+- (void)setupWithArguments:(id)arguments
 {
-    if ( nil != self.viewClass ) {
-        return self.viewClass;
+    self.viewClass = @"BbPatchView";
+}
+
+- (void)dealloc
+{
+    for ( BbConnection *aConnection in _connections.mutableCopy ) {
+        [self removeChildObject:aConnection];
     }
     
-    return @"BbPatchView";
-}
-
-- (NSString *)textDescription
-{
-    NSString *text = [super textDescription];
-    return [text stringByAppendingString:[self selectorText]];
-}
-
-- (NSString *)selectorText
-{
-    if ( nil == self.mySelectors ) {
-        return @"";
-    }
-    NSMutableString *selectors = [NSMutableString string];
-    NSString *depthString = nil;
-    if ( nil != self.parent ) {
-        depthString = [self.parent depthStringForChildObject:self];
-    }else{
-        depthString = @"";
-    }
-    for (NSString *aSelectorDescription in self.mySelectors ) {
-        [selectors appendFormat:@"%@#S %@;\n",depthString,aSelectorDescription];
+    _connections = nil;
+    
+    for ( BbObject *aChildObject in _childObjects.mutableCopy ) {
+        [self removeChildObject:aChildObject];
     }
     
-    return selectors;
-}
-
-- (void)doSelectors
-{
-    NSLog(@"DOING MY SELECTORS: %@",self.mySelectors);
+    _childObjects = nil;
 }
 
 @end
+

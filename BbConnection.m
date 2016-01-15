@@ -24,13 +24,12 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
 
 @implementation BbConnection
 
-- (instancetype)initWithSender:(id<BbObjectChild>)sender receiver:(id<BbObjectChild>)receiver parent:(id<BbObjectParent>)parent
+- (instancetype)initWithSender:(id<BbObjectChild>)sender receiver:(id<BbObjectChild>)receiver
 {
     self = [super init];
     if ( self ) {
         _sender = sender;
         _receiver = receiver;
-        _parent = parent;
         [self commonInit];
     }
     
@@ -39,7 +38,9 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
 
 - (void)commonInit
 {
-    self.uniqueID = [NSString stringWithFormat:@"%@.%@.%@",[_parent uniqueID],[_sender uniqueID],[_receiver uniqueID]];
+    self.uniqueID = [BbHelpers createUniqueIDString];
+    self.senderID = [self.sender uniqueID];
+    self.receiverID = [self.receiver uniqueID];
     [[self.sender parent]addObjectObserver:self];
     [[self.receiver parent]addObjectObserver:self];
 }
@@ -101,6 +102,19 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
     }
 }
 
+- (void)dealloc
+{
+    [_sender removeObjectObserver:self];
+    _sender = nil;
+    [_receiver removeObjectObserver:self];
+    _receiver = nil;
+    _parent = nil;
+}
+
+@end
+
+@implementation BbConnection (BbObject)
+
 #pragma mark - BbObject Protcol
 
 - (BOOL)startObservingObject:(id<BbObject>)object
@@ -136,13 +150,29 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
     return YES;
 }
 
-- (void)dealloc
+@end
+
+@implementation BbConnection (BbObjectChild)
+
+- (NSUInteger)indexInParent
 {
-    [_sender removeObjectObserver:self];
-    _sender = nil;
-    [_receiver removeObjectObserver:self];
-    _receiver = nil;
-    _parent = nil;
+    if ( nil == self.parent ) {
+        return BbIndexInParentNotFound;
+    }
+    
+    return [self.parent indexOfChildObject:self];
+}
+
+- (NSString *)textDescription
+{
+    NSUInteger senderIndex = [self.sender indexInParent];
+    NSUInteger receiverIndex = [self.receiver indexInParent];
+    NSUInteger senderParentIndex = [self.parent indexOfChildObject:[self.sender parent]];
+    NSUInteger receiverParentIndex = [self.parent indexOfChildObject:[self.receiver parent]];
+    NSString *className = NSStringFromClass([self class]);
+    NSString *token = @"#X";
+    NSString *description = [NSString stringWithFormat:@"%@ %@ %@ %@ %@ %@;\n",token,className,@(senderParentIndex),@(senderIndex),@(receiverParentIndex),@(receiverIndex)];
+    return description;
 }
 
 @end

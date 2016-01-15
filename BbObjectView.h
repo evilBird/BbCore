@@ -10,7 +10,7 @@
 #define BbObjectView_h
 
 #import <Foundation/Foundation.h>
-#import "BbConnection.h"
+#import <UIKit/UIKit.h>
 
 typedef NS_ENUM(NSInteger, BbObjectViewEditState) {
     BbObjectViewEditState_Default    =   0,
@@ -136,14 +136,23 @@ typedef NS_ENUM(NSInteger, BbObjectViewEditingEvent) {
 
 @end
 
+@protocol BbConnection <NSObject>
+
+@property    (nonatomic)                    BOOL                needsRedraw;
+@property    (nonatomic,getter=isValid)     BOOL                valid;
+
+- (BOOL)validate;
+- (UIView *)parentView;
+- (UIView *)inletView;
+- (UIView *)outletView;
+
+@end
 
 @protocol BbObjectView <NSObject>
 
 @property (nonatomic,weak)                  id<BbObjectViewDataSource>      dataSource;
 @property (nonatomic,weak)                  id<BbObjectViewDelegate>        delegate;
 @property (nonatomic,weak)                  id<BbObjectViewEditingDelegate> editingDelegate;
-@property (nonatomic)                       CGPoint                         center;
-@property (nonatomic,weak)                  UIView                          *superview;
 @property (nonatomic,getter=isSelected)     BOOL                            selected;
 @property (nonatomic,getter=isEditing)      BOOL                            editing;
 
@@ -156,6 +165,10 @@ typedef NS_ENUM(NSInteger, BbObjectViewEditingEvent) {
 + (id<BbObjectView>)createViewWithDataSource:(id<BbObjectViewDataSource>)dataSource;
 
 - (void)updateLayout;
+
+- (CGPoint)center;
+
+- (UIView *)superview;
 
 - (void)moveToPoint:(CGPoint)point;
 

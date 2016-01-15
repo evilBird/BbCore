@@ -9,6 +9,8 @@
 #ifndef BbObjectChild_h
 #define BbObjectChild_h
 
+#import <Foundation/Foundation.h>
+
 @protocol BbObjectView;
 @protocol BbObjectParent;
 
@@ -16,12 +18,8 @@
 
 @property (nonatomic,strong)        NSString                *uniqueID;
 @property (nonatomic,strong)        NSHashTable             *observers;
-@property (nonatomic,weak)          id<BbObjectParent>      parent;
-@property (nonatomic,strong)        id<BbObjectView>        view;
 
 @optional
-
-- (void)loadView;
 
 - (BOOL)startObservingObject:(id<BbObject>)object;
 - (BOOL)stopObservingObject:(id<BbObject>)object;
@@ -33,6 +31,9 @@
 
 @protocol BbObjectChild <NSObject,BbObject>
 
+@property (nonatomic,weak)          id<BbObjectParent>      parent;
+@property (nonatomic,strong)        id<BbObjectView>        view;
+
 - (NSUInteger)indexInParent;
 
 @optional
@@ -40,6 +41,7 @@
 - (void)willBeRemovedFromParent:(id<BbObjectParent>)parent;
 - (BOOL)startObserving:(id<BbObjectChild>)object;
 - (NSString *)textDescription;
+- (void)loadView;
 
 @end
 

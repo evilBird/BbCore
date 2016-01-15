@@ -43,31 +43,30 @@
     return patch;
 }
 
-- (BOOL)loadViews
++ (BbObject *)objectWithDescription:(BbObjectDescription *)description
 {
-    self.view = [NSInvocation doClassMethod:self.viewClass selector:@"createViewWithDataSource:" arguments:self];
-    [self.view setDelegate:self];
-    
-    for ( id aChild in self.myChildren ) {
-        if ( [aChild isKindOfClass:[BbPatch class]]) {
-            [(BbPatch *)aChild loadViews];
-            [self.view addChildObjectView:[(BbPatch *)aChild view]];
-        }else if ( [aChild isKindOfClass:[BbObject class]]){
-            [(BbObject *)aChild loadView];
-            [self.view addChildObjectView:[(BbObject *)aChild view]];
-        }
-    }
-    
-    for ( BbConnection *aConnection in self.myConnections ) {
-        [self.view addConnection:(id<BbConnection>)aConnection];
-    }
-    
-    if ( nil != self.view ) {
-        [self.view updateLayout];
-        return YES;
-    }
-    
-    return NO;
+    BbObject *object = (BbObject *)[NSInvocation doClassMethod:description.objectClass selector:@"alloc" arguments:nil];
+    [NSInvocation doInstanceMethod:object selector:@"initWithArguments:" arguments:description.objectArguments];
+    object.viewClass = description.viewClass;
+    object.viewArguments = description.viewArguments;
+    return object;
+}
+
+- (BbConnection *)connectionWithDescription:(BbConnectionDescription *)description
+{
+    NSUInteger childCount = self.childObjects.count;
+    NSAssert(description.senderParentIndex < childCount, @"ERROR: Sending object index %@",@(description.senderParentIndex));
+    BbObject *sendingObject = [self.childObjects objectAtIndex:description.senderParentIndex];
+    NSUInteger sendingObjectOutletCount = sendingObject.outlets.count;
+    NSAssert(description.senderPortIndex<sendingObjectOutletCount, @"ERROR: Sending port index: %@",@(description.senderPortIndex));
+    BbOutlet *sender = [sendingObject.outlets objectAtIndex:description.senderPortIndex];
+    NSAssert(description.receiverParentIndex < childCount, @"ERROR: Receiving Object index: %@",@(description.receiverParentIndex));
+    BbObject *receivingObject = [self.childObjects objectAtIndex:description.receiverParentIndex];
+    NSUInteger receivingObjectInletCount = receivingObject.inlets.count;
+    NSAssert(description.receiverPortIndex<receivingObjectInletCount, @"ERROR: Receiving port index: %@",@(description.receiverPortIndex));
+    BbInlet *receiver = [receivingObject.inlets objectAtIndex:description.receiverPortIndex];
+    BbConnection *connection = [[BbConnection alloc]initWithSender:sender receiver:receiver];
+    return connection;
 }
 
 @end

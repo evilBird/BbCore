@@ -7,38 +7,24 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "BbObjectView.h"
 #import "BbObjectChild.h"
 
-
-@protocol BbConnection <NSObject>
-
-@property    (nonatomic)                    BOOL                needsRedraw;
-@property    (nonatomic,getter=isValid)     BOOL                valid;
-
-- (BOOL)validate;
-- (UIView *)parentView;
-- (UIView *)inletView;
-- (UIView *)outletView;
-
-@end
-
-@protocol BbObjectView;
-
-
-@interface BbConnection : NSObject <BbObject>
+@interface BbConnection : NSObject
 
 @property (nonatomic,weak)                              id <BbObjectParent>                     parent;
 @property (nonatomic,weak)                              id <BbObjectChild>                      sender;
 @property (nonatomic,weak)                              id <BbObjectChild>                      receiver;
 
 @property (nonatomic,strong)                            NSString                                *uniqueID;
+@property (nonatomic,strong)                            NSString                                *senderID;
+@property (nonatomic,strong)                            NSString                                *receiverID;
 
 @property (nonatomic)                                   BOOL                                    needsRedraw;
 @property (nonatomic,getter=isValid)                    BOOL                                    valid;
 
 - (instancetype)initWithSender:(id<BbObjectChild>)sender
-                      receiver:(id<BbObjectChild>)receiver
-                        parent:(id<BbObjectParent>)parent;
+                      receiver:(id<BbObjectChild>)receiver;
 
 #pragma mark - BbConnection
 
@@ -47,7 +33,9 @@
 - (UIView *)inletView;
 - (UIView *)outletView;
 
-#pragma mark - BbObject
+@end
+
+@interface BbConnection (BbObject) <BbObject>
 
 - (BOOL)startObservingObject:(id<BbObject>)object;
 - (BOOL)stopObservingObject:(id<BbObject>)object;
