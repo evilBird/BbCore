@@ -58,7 +58,7 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 
 + (NSString *)viewClass
 {
-    return @"BbBoxView";
+    return @"BbView";
 }
 
 - (void)dealloc

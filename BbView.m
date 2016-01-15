@@ -6,14 +6,14 @@
 //  Copyright © 2016 birdSound. All rights reserved.
 //
 
-#import "BbBoxView.h"
+#import "BbView.h"
 #import "UIView+Layout.h"
 #import "UIView+BbPatch.h"
 #import "BbPortView.h"
 
 static CGFloat kDefaultPortViewSpacing = 10;
 
-@interface BbBoxView () <UITextFieldDelegate>
+@interface BbView () <UITextFieldDelegate>
 
 @property (nonatomic)               NSUInteger          numIn;
 @property (nonatomic)               NSUInteger          numOut;
@@ -38,7 +38,7 @@ static CGFloat kDefaultPortViewSpacing = 10;
 
 @end
 
-@implementation BbBoxView
+@implementation BbView
 
 - (instancetype)initWithTitleText:(NSString *)text inlets:(NSUInteger)numInlets outlets:(NSUInteger)numOutlets
 {
@@ -299,7 +299,7 @@ static CGFloat kDefaultPortViewSpacing = 10;
         return;
     }
     
-    __weak BbBoxView *weakself = self;
+    __weak BbView *weakself = self;
     [UIView animateWithDuration:0.2 animations:^{
         weakself.backgroundColor = weakself.myFillColor;
         weakself.layer.borderColor = weakself.myBorderColor.CGColor;
@@ -314,9 +314,9 @@ static CGFloat kDefaultPortViewSpacing = 10;
 
 - (void)calculateSpacingAndContentSize
 {
-    CGSize labelSize = [BbBoxView sizeForText:self.myTitleText attributes:[self myTextAttributes]];
-    CGSize inletStackSize = [BbBoxView sizeForPortViews:self.inletViews minimumSpacing:kDefaultPortViewSpacing];
-    CGSize outletStackSize = [BbBoxView sizeForPortViews:self.outletViews minimumSpacing:kDefaultPortViewSpacing];
+    CGSize labelSize = [BbView sizeForText:self.myTitleText attributes:[self myTextAttributes]];
+    CGSize inletStackSize = [BbView sizeForPortViews:self.inletViews minimumSpacing:kDefaultPortViewSpacing];
+    CGSize outletStackSize = [BbView sizeForPortViews:self.outletViews minimumSpacing:kDefaultPortViewSpacing];
     
     CGSize size;
     size.height = labelSize.height+inletStackSize.height+outletStackSize.height;
@@ -460,7 +460,7 @@ static CGFloat kDefaultPortViewSpacing = 10;
 
 + (id<BbObjectView>)createPlaceholder
 {
-    BbBoxView *placeholder = [[BbBoxView alloc]initWithTitleText:@"New Object" inlets:0 outlets:0];
+    BbView *placeholder = [[BbView alloc]initWithTitleText:@"New Object" inlets:0 outlets:0];
     return placeholder;
 }
 

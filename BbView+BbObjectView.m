@@ -6,15 +6,15 @@
 //
 //
 
-#import "BbBoxView.h"
+#import "BbView.h"
 
-@implementation BbBoxView (BbObjectView)
+@implementation BbView (BbObjectView)
 
 #pragma mark - BbObjectView
 
 + (id<BbObjectView>)createViewWithDataSource:(id<BbObjectViewDataSource>)dataSource
 {
-    return [[BbBoxView alloc]initWithDataSource:dataSource];
+    return [[BbView alloc]initWithDataSource:dataSource];
 }
 
 - (void)setTitleText:(NSString *)titleText

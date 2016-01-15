@@ -20,12 +20,12 @@
 		F2E29F9B1C4858DB009528E7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F2E29F991C4858DB009528E7 /* LaunchScreen.storyboard */; };
 		F2E29FA61C4858DB009528E7 /* BbCoreProjectTests.m in Sources */ = {isa = PBXBuildFile; fileRef = F2E29FA51C4858DB009528E7 /* BbCoreProjectTests.m */; };
 		F2E29FB11C4858DB009528E7 /* BbCoreProjectUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = F2E29FB01C4858DB009528E7 /* BbCoreProjectUITests.m */; };
-		F2E29FFE1C48590F009528E7 /* BbBoxView.m in Sources */ = {isa = PBXBuildFile; fileRef = F2E29FC11C48590F009528E7 /* BbBoxView.m */; };
-		F2E29FFF1C48590F009528E7 /* BbBoxView.m in Sources */ = {isa = PBXBuildFile; fileRef = F2E29FC11C48590F009528E7 /* BbBoxView.m */; };
-		F2E2A0001C48590F009528E7 /* BbBoxView.m in Sources */ = {isa = PBXBuildFile; fileRef = F2E29FC11C48590F009528E7 /* BbBoxView.m */; };
-		F2E2A0011C48590F009528E7 /* BbBoxView+BbObjectView.m in Sources */ = {isa = PBXBuildFile; fileRef = F2E29FC21C48590F009528E7 /* BbBoxView+BbObjectView.m */; };
-		F2E2A0021C48590F009528E7 /* BbBoxView+BbObjectView.m in Sources */ = {isa = PBXBuildFile; fileRef = F2E29FC21C48590F009528E7 /* BbBoxView+BbObjectView.m */; };
-		F2E2A0031C48590F009528E7 /* BbBoxView+BbObjectView.m in Sources */ = {isa = PBXBuildFile; fileRef = F2E29FC21C48590F009528E7 /* BbBoxView+BbObjectView.m */; };
+		F2E29FFE1C48590F009528E7 /* BbView.m in Sources */ = {isa = PBXBuildFile; fileRef = F2E29FC11C48590F009528E7 /* BbView.m */; };
+		F2E29FFF1C48590F009528E7 /* BbView.m in Sources */ = {isa = PBXBuildFile; fileRef = F2E29FC11C48590F009528E7 /* BbView.m */; };
+		F2E2A0001C48590F009528E7 /* BbView.m in Sources */ = {isa = PBXBuildFile; fileRef = F2E29FC11C48590F009528E7 /* BbView.m */; };
+		F2E2A0011C48590F009528E7 /* BbView+BbObjectView.m in Sources */ = {isa = PBXBuildFile; fileRef = F2E29FC21C48590F009528E7 /* BbView+BbObjectView.m */; };
+		F2E2A0021C48590F009528E7 /* BbView+BbObjectView.m in Sources */ = {isa = PBXBuildFile; fileRef = F2E29FC21C48590F009528E7 /* BbView+BbObjectView.m */; };
+		F2E2A0031C48590F009528E7 /* BbView+BbObjectView.m in Sources */ = {isa = PBXBuildFile; fileRef = F2E29FC21C48590F009528E7 /* BbView+BbObjectView.m */; };
 		F2E2A0041C48590F009528E7 /* BbConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = F2E29FC51C48590F009528E7 /* BbConnection.m */; };
 		F2E2A0051C48590F009528E7 /* BbConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = F2E29FC51C48590F009528E7 /* BbConnection.m */; };
 		F2E2A0061C48590F009528E7 /* BbConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = F2E29FC51C48590F009528E7 /* BbConnection.m */; };
@@ -162,9 +162,9 @@
 		F2E29FB01C4858DB009528E7 /* BbCoreProjectUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BbCoreProjectUITests.m; sourceTree = "<group>"; };
 		F2E29FB21C4858DB009528E7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F2E29FBF1C48590F009528E7 /* Bb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Bb.h; path = ../Bb.h; sourceTree = "<group>"; };
-		F2E29FC01C48590F009528E7 /* BbBoxView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BbBoxView.h; path = ../BbBoxView.h; sourceTree = "<group>"; };
-		F2E29FC11C48590F009528E7 /* BbBoxView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BbBoxView.m; path = ../BbBoxView.m; sourceTree = "<group>"; };
-		F2E29FC21C48590F009528E7 /* BbBoxView+BbObjectView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "BbBoxView+BbObjectView.m"; path = "../BbBoxView+BbObjectView.m"; sourceTree = "<group>"; };
+		F2E29FC01C48590F009528E7 /* BbView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BbView.h; path = ../BbView.h; sourceTree = "<group>"; };
+		F2E29FC11C48590F009528E7 /* BbView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BbView.m; path = ../BbView.m; sourceTree = "<group>"; };
+		F2E29FC21C48590F009528E7 /* BbView+BbObjectView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "BbView+BbObjectView.m"; path = "../BbView+BbObjectView.m"; sourceTree = "<group>"; };
 		F2E29FC31C48590F009528E7 /* BbBridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BbBridge.h; path = ../BbBridge.h; sourceTree = "<group>"; };
 		F2E29FC41C48590F009528E7 /* BbConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BbConnection.h; path = ../BbConnection.h; sourceTree = "<group>"; };
 		F2E29FC51C48590F009528E7 /* BbConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BbConnection.m; path = ../BbConnection.m; sourceTree = "<group>"; };
@@ -334,9 +334,9 @@
 			isa = PBXGroup;
 			children = (
 				F2E29FBF1C48590F009528E7 /* Bb.h */,
-				F2E29FC01C48590F009528E7 /* BbBoxView.h */,
-				F2E29FC11C48590F009528E7 /* BbBoxView.m */,
-				F2E29FC21C48590F009528E7 /* BbBoxView+BbObjectView.m */,
+				F2E29FC01C48590F009528E7 /* BbView.h */,
+				F2E29FC11C48590F009528E7 /* BbView.m */,
+				F2E29FC21C48590F009528E7 /* BbView+BbObjectView.m */,
 				F2E29FC31C48590F009528E7 /* BbBridge.h */,
 				F2E29FC41C48590F009528E7 /* BbConnection.h */,
 				F2E29FC51C48590F009528E7 /* BbConnection.m */,
@@ -592,7 +592,7 @@
 				F2E2A0641C48590F009528E7 /* BbTextDescription.m in Sources */,
 				F2E2A02E1C48590F009528E7 /* BbPatch.m in Sources */,
 				F2E2A0341C48590F009528E7 /* BbPatch+BbObjectViewDelegate.m in Sources */,
-				F2E2A0011C48590F009528E7 /* BbBoxView+BbObjectView.m in Sources */,
+				F2E2A0011C48590F009528E7 /* BbView+BbObjectView.m in Sources */,
 				F2E2A03A1C48590F009528E7 /* BbPatch+Meta.m in Sources */,
 				F2E2A02B1C48590F009528E7 /* BbParseText.m in Sources */,
 				F2E2A05B1C48590F009528E7 /* BbPort+Meta.m in Sources */,
@@ -605,7 +605,7 @@
 				F2E2A0191C48590F009528E7 /* BbObject+BbObjectViewDataSource.m in Sources */,
 				F2E2A0311C48590F009528E7 /* BbPatch+BbObjectViewDataSource.m in Sources */,
 				F2E2A0281C48590F009528E7 /* BbOutlet.m in Sources */,
-				F2E29FFE1C48590F009528E7 /* BbBoxView.m in Sources */,
+				F2E29FFE1C48590F009528E7 /* BbView.m in Sources */,
 				F2E2A0611C48590F009528E7 /* BbScrollView.m in Sources */,
 				F2E2A04F1C48590F009528E7 /* BbPatchViewContainer.m in Sources */,
 				F2E2A00A1C48590F009528E7 /* BbHelpers.m in Sources */,
@@ -630,7 +630,7 @@
 				F2E2A01A1C48590F009528E7 /* BbObject+BbObjectViewDataSource.m in Sources */,
 				F2E2A0741C48590F009528E7 /* UIView+BbPatch.m in Sources */,
 				F2E2A0111C48590F009528E7 /* BbObject.m in Sources */,
-				F2E29FFF1C48590F009528E7 /* BbBoxView.m in Sources */,
+				F2E29FFF1C48590F009528E7 /* BbView.m in Sources */,
 				F2E2A0441C48590F009528E7 /* BbPatchGestureRecognizer.m in Sources */,
 				F2E2A04D1C48590F009528E7 /* BbPatchView+Gestures.m in Sources */,
 				F2E2A0051C48590F009528E7 /* BbConnection.m in Sources */,
@@ -642,7 +642,7 @@
 				F2E2A0081C48590F009528E7 /* BbConnection+BbObjectChild.m in Sources */,
 				F2E2A0621C48590F009528E7 /* BbScrollView.m in Sources */,
 				F2E2A0561C48590F009528E7 /* BbPort+BbObjectChild.m in Sources */,
-				F2E2A0021C48590F009528E7 /* BbBoxView+BbObjectView.m in Sources */,
+				F2E2A0021C48590F009528E7 /* BbView+BbObjectView.m in Sources */,
 				F2E2A0531C48590F009528E7 /* BbPort.m in Sources */,
 				F2E2A01D1C48590F009528E7 /* BbObject+BbObjectViewDelegate.m in Sources */,
 				F2E29FA61C4858DB009528E7 /* BbCoreProjectTests.m in Sources */,
@@ -667,7 +667,7 @@
 				F2E2A01B1C48590F009528E7 /* BbObject+BbObjectViewDataSource.m in Sources */,
 				F2E2A0751C48590F009528E7 /* UIView+BbPatch.m in Sources */,
 				F2E2A0121C48590F009528E7 /* BbObject.m in Sources */,
-				F2E2A0001C48590F009528E7 /* BbBoxView.m in Sources */,
+				F2E2A0001C48590F009528E7 /* BbView.m in Sources */,
 				F2E2A0451C48590F009528E7 /* BbPatchGestureRecognizer.m in Sources */,
 				F2E2A04E1C48590F009528E7 /* BbPatchView+Gestures.m in Sources */,
 				F2E2A0061C48590F009528E7 /* BbConnection.m in Sources */,
@@ -679,7 +679,7 @@
 				F2E2A0091C48590F009528E7 /* BbConnection+BbObjectChild.m in Sources */,
 				F2E2A0631C48590F009528E7 /* BbScrollView.m in Sources */,
 				F2E2A0571C48590F009528E7 /* BbPort+BbObjectChild.m in Sources */,
-				F2E2A0031C48590F009528E7 /* BbBoxView+BbObjectView.m in Sources */,
+				F2E2A0031C48590F009528E7 /* BbView+BbObjectView.m in Sources */,
 				F2E2A0541C48590F009528E7 /* BbPort.m in Sources */,
 				F2E2A01E1C48590F009528E7 /* BbObject+BbObjectViewDelegate.m in Sources */,
 				F2E29FB11C4858DB009528E7 /* BbCoreProjectUITests.m in Sources */,

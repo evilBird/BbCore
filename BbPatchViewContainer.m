@@ -10,7 +10,7 @@
 #import "BbScrollView.h"
 #import "BbPatchView.h"
 #import "UIView+Layout.h"
-#import "BbBoxView.h"
+#import "BbView.h"
 
 @interface BbPatchViewContainer () <BbPatchViewEventDelegate,UIScrollViewDelegate>
 

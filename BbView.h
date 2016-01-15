@@ -12,7 +12,7 @@
 @class BbInletView;
 @class BbOutletView;
 
-@interface BbBoxView : UIView
+@interface BbView : UIView
 
 @property (nonatomic,strong)                    UIColor                         *defaultFillColor;
 @property (nonatomic,strong)                    UIColor                         *selectedFillColor;
@@ -55,7 +55,7 @@
 
 @end
 
-@interface BbBoxView (BbObjectView) <BbObjectView>
+@interface BbView (BbObjectView) <BbObjectView>
 
 #pragma mark - BbObjectView
 

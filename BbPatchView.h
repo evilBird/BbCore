@@ -31,7 +31,7 @@ typedef NS_ENUM(NSInteger, BbPatchViewType){
 
 @end
 
-@class BbBoxView;
+@class BbView;
 
 @interface BbPatchView : UIView
 

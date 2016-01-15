@@ -7,7 +7,7 @@
 //
 
 #import "BbPatchView.h"
-#import "BbBoxView.h"
+#import "BbView.h"
 #import "BbPortView.h"
 #import "UIView+BbPatch.h"
 #import "BbPatchGestureRecognizer.h"
@@ -402,7 +402,7 @@ static CGFloat              kMaxMovement          = 20.0;
 + (NSArray *)myViewTypes
 {
     return @[[BbPatchView class],
-             [BbBoxView class],
+             [BbView class],
              [BbInletView class],
              [BbOutletView class]
              ];
