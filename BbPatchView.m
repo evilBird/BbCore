@@ -31,11 +31,6 @@ static CGFloat              kMaxMovement          = 20.0;
 
 @property (nonatomic,strong)        UIBezierPath                        *activeConnection;
 
-@property (nonatomic)               NSUInteger                          hasSelectedObject;
-@property (nonatomic)               NSUInteger                          hasSelectedOutlet;
-@property (nonatomic)               NSUInteger                          hasSelectedInlet;
-
-
 @end
 
 @implementation BbPatchView
@@ -170,6 +165,8 @@ static CGFloat              kMaxMovement          = 20.0;
     self.currentViewType = [self viewType:gesture.currentView];
     BOOL isEditing = ( self.editState > BbObjectViewEditState_Default );
     id<BbObjectView> objectView = (id<BbObjectView>)gesture.currentView;
+    id<BbObjectView> firstObjectView = (id<BbObjectView>)gesture.firstView;
+    
     switch (self.currentViewType) {
             
         case BbPatchViewType_Inlet:
@@ -188,18 +185,18 @@ static CGFloat              kMaxMovement          = 20.0;
             switch (self.firstViewType) {
                 case BbPatchViewType_Object:
                 {
-                    if ( !isEditing && !self.hasSelectedObject ) {
+                    if ( !isEditing && nil == self.selectedObject ) {
                         [gesture stopTracking];
                         return;
                     }
                     if ( isEditing ) {
                         NSArray *selected = [self getSelectedObjects];
                         //Move selected
-                    }else if ( self.hasSelectedObject ){
-                        CGPoint point = objectView.center;
-                        point.x+=gesture.deltaPosition.x;
-                        point.y+=gesture.deltaPosition.y;
-                        [objectView moveToPoint:point];
+                    }else if ( nil != self.selectedObject ){
+                        CGPoint point = firstObjectView.center;
+                        point.x+=gesture.deltaLocation.x;
+                        point.y+=gesture.deltaLocation.y;
+                        [firstObjectView moveToPoint:point];
                         [self setNeedsDisplay];
                     }
                 }
@@ -242,8 +239,8 @@ static CGFloat              kMaxMovement          = 20.0;
             if ( !isEditing && gesture.repeatCount && gesture.movement < kMaxMovement ) {
                 // add box
                 id <BbObjectView> placeholder = [BbBoxView<BbObjectView> createPlaceholder];
-                [self addChildObjectView:objectView];
-                [placeholder moveToPoint:gesture.position];
+                [self addChildObjectView:placeholder];
+                [placeholder moveToPoint:gesture.location];
                 [self.delegate objectView:self didAddChildObjectView:placeholder];
             }
         }
@@ -323,10 +320,8 @@ static CGFloat              kMaxMovement          = 20.0;
     _selectedInlet = selectedInlet;
     if ( nil == _selectedInlet) {
         prevSelInlet.selected = NO;
-        self.hasSelectedInlet = NO;
     }else{
         _selectedInlet.selected = YES;
-        self.hasSelectedInlet = YES;
     }
 }
 

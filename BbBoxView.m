@@ -154,9 +154,10 @@ static CGFloat kDefaultPortViewSpacing = 10;
 - (void)moveToPoint:(CGPoint)point
 {
     _myPosition = [self point2Position:point];
-    _myOffset = [self position2Offset:point];
+    _myOffset = [self point2Offset:point];
     [self updatePositionConstraints];
-    [self.delegate objectView:self didChangePosition:[NSValue valueWithCGPoint:_myPosition]];
+    _objectViewPosition = [NSValue valueWithCGPoint:_myPosition];
+    [self.delegate objectView:self didChangePosition:_objectViewPosition];
 }
 
 - (void)setPosition:(CGPoint)position
@@ -164,7 +165,8 @@ static CGFloat kDefaultPortViewSpacing = 10;
     _myPosition = [self point2Position:position];
     _myOffset = [self point2Offset:position];
     [self updatePositionConstraints];
-    [self.delegate objectView:self didChangePosition:[NSValue valueWithCGPoint:_myPosition]];
+    _objectViewPosition = [NSValue valueWithCGPoint:_myPosition];
+    [self.delegate objectView:self didChangePosition:_objectViewPosition];
 }
 
 - (CGPoint)getPosition

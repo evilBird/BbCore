@@ -7,6 +7,7 @@
 //
 
 #import "BbPatch.h"
+#import "BbTextDescription.h"
 
 @implementation BbPatch (BbObjectViewDelegate)
 
@@ -117,10 +118,16 @@
 
 - (BOOL)objectView:(id<BbObjectView>)objectView shouldEndEditingWithText:(NSString *)text
 {
-    NSArray *args = [text componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    NSString *className = args.firstObject;
+    NSValue *position = [objectView objectViewPosition];
+    NSMutableArray *viewArgArray = [NSMutableArray array];
+    [viewArgArray addObject:NSStringFromClass([objectView class])];
+    [viewArgArray addObject:[BbHelpers updateViewArgs:@"0 0" withPosition:position]];
+    NSString *viewArgs = [viewArgArray componentsJoinedByString:@" "];
+    BbObjectDescription *objectDescription = [BbObjectDescription objectDescriptionWithArgs:text viewArgs:viewArgs];
+    BbObject *object = [BbPatch objectWithDescription:objectDescription];
+    [self addChildObject:object];
+    [objectView setDataSource:object reloadViews:YES];
     NSLog(@"Object view ended editing with text: %@",text);
-    
     return YES;
 }
 

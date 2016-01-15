@@ -54,7 +54,11 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 
 - (void)setupWithArguments:(id)arguments {
     
-    self.viewClass = @"BbBoxView";
+}
+
++ (NSString *)viewClass
+{
+    return @"BbBoxView";
 }
 
 - (void)dealloc
@@ -128,7 +132,7 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 
 - (BOOL)loadView
 {
-    self.view = [NSInvocation doClassMethod:self.viewClass selector:@"createViewWithDataSource:" arguments:self];
+    self.view = [NSInvocation doClassMethod:[[self class] viewClass] selector:@"createViewWithDataSource:" arguments:self];
     self.view.delegate = self;
     if ( nil != self.view ) {
         
@@ -138,7 +142,7 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
             [view setDataSource:self.inlets[i]];
         }
         
-        for (NSUInteger i = 0; i < self.inlets.count; i++) {
+        for (NSUInteger i = 0; i < self.outlets.count; i++) {
             id<BbObjectView> view = [self.view viewForOutletAtIndex:i];
             [self.outlets[i]setView:view];
             [view setDataSource:self.outlets[i]];

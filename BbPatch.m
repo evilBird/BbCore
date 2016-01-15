@@ -19,13 +19,34 @@
 
 - (void)setupPorts {}
 
-- (void)setupWithArguments:(id)arguments
+- (void)setupWithArguments:(id)arguments {}
+
++ (NSString *)viewClass
 {
-    self.viewClass = @"BbPatchView";
+    return @"BbPatchView";
 }
 
 - (void)dealloc
 {
+    [self removeAllObjectObservers];
+    
+    for (BbInlet *anInlet in self.inlets.mutableCopy ) {
+        [self removeChildObject:anInlet];
+    }
+    self.inlets = nil;
+    
+    for (BbOutlet *anOutlet in self.outlets.mutableCopy ) {
+        [self removeChildObject:anOutlet];
+    }
+    
+    self.outlets = nil;
+    
+    if ( nil != self.view ) {
+        [self.view removeFromSuperView];
+    }
+    
+    self.view = nil;
+    
     for ( BbConnection *aConnection in _connections.mutableCopy ) {
         [self removeChildObject:aConnection];
     }

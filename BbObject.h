@@ -42,6 +42,8 @@
 
 - (void)setupWithArguments:(id)arguments;
 
++ (NSString *)viewClass;
+
 @end
 
 @interface BbObject (BbObject)
