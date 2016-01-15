@@ -53,6 +53,11 @@
     }
 }
 
+- (BOOL)canEdit
+{
+    return YES;
+}
+
 - (void)doAction:(void(^)(void))action
 {
     

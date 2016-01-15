@@ -166,6 +166,8 @@ typedef NS_ENUM(NSInteger, BbObjectViewEditingEvent) {
 
 - (void)updateLayout;
 
+- (BOOL)canEdit;
+
 - (CGPoint)center;
 
 - (UIView *)superview;
