@@ -7,6 +7,7 @@
 //
 
 #import "BbView.h"
+#import "UIView+BbPatch.h"
 
 @implementation BbView (BbObjectView)
 
@@ -20,12 +21,6 @@
 - (void)setTitleText:(NSString *)titleText
 {
     [self setTitle:titleText];
-}
-
-- (void)setPositionWithValue:(NSValue *)value
-{
-    CGPoint position = [value CGPointValue];
-    [self setPosition:position];
 }
 
 - (id<BbObjectView>)viewForInletAtIndex:(NSUInteger)index

@@ -37,6 +37,7 @@ static void *BbPortObservationContextXX     =       &BbPortObservationContextXX;
 {
     self.uniqueID = [BbHelpers createUniqueIDString];
     self.inputBlock = [BbPort passThroughInputBlock];
+    
     self.outputBlock = nil;
     _inputElement = nil;
     _outputElement = nil;

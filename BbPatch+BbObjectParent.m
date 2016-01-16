@@ -57,6 +57,33 @@
     return NO;
 }
 
+- (BOOL)loadChildViews
+{
+    for ( id aChild in self.childObjects ) {
+        if ( [aChild isKindOfClass:[BbPatch class]]) {
+            [(BbPatch *)aChild loadViews];
+            [self.view addChildObjectView:[(BbPatch *)aChild view]];
+        }else if ( [aChild isKindOfClass:[BbObject class]]){
+            [(BbObject *)aChild loadView];
+            [self.view addChildObjectView:[(BbObject *)aChild view]];
+            BbObject *object = (BbObject *)aChild;
+            [object.view setPositionWithValue:[BbHelpers positionFromViewArgs:object.viewArguments]];
+            
+        }
+    }
+    
+    for ( BbConnection *aConnection in self.connections ) {
+        [self.view addConnection:(id<BbConnection>)aConnection];
+    }
+    
+    if ( nil != self.view && nil != [ (UIView * ) self.view superview ] ) {
+        [self.view updateLayout];
+        return YES;
+    }
+    
+    return NO;
+}
+
 - (void)didAddChildConnection:(BbConnection *)connection
 {
     if ( [connection validate] ) {

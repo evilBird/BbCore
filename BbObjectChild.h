@@ -26,6 +26,7 @@
 - (BOOL)addObjectObserver:(id<BbObject>)object;
 - (BOOL)removeObjectObserver:(id<BbObject>)object;
 - (BOOL)removeAllObjectObservers;
+- (void)loadBang;
 
 @end
 

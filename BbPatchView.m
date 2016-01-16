@@ -118,7 +118,7 @@ static CGFloat              kMaxMovement          = 20.0;
             //Select view and prepare to pan or move
             [self.eventDelegate patchView:self setScrollViewShouldBegin:NO];
             UIView *first = gesture.firstView;
-            self.selectedObject = ( self.firstViewType == BbPatchViewType_Object ) ? (BbBoxView *)first : (BbBoxView *)first.superview;
+            self.selectedObject = ( self.firstViewType == BbPatchViewType_Object ) ? (BbView *)first : (BbView *)first.superview;
         }
             break;
         case BbPatchViewType_Outlet:
@@ -238,7 +238,7 @@ static CGFloat              kMaxMovement          = 20.0;
         {
             if ( !isEditing && gesture.repeatCount && gesture.movement < kMaxMovement ) {
                 // add box
-                id <BbObjectView> placeholder = [BbBoxView<BbObjectView> createPlaceholder];
+                id <BbObjectView> placeholder = [BbView<BbObjectView> createPlaceholder];
                 [self addChildObjectView:placeholder];
                 [placeholder moveToPoint:gesture.location];
                 [self.delegate objectView:self didAddChildObjectView:placeholder];

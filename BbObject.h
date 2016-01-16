@@ -12,6 +12,7 @@
 #import "BbRuntime.h"
 #import "BbHelpers.h"
 #import "BbBridge.h"
+#import "BbBang.h"
 
 @class BbObjectDescription;
 @class BbConnectionDescription;
@@ -32,6 +33,8 @@
 @property (nonatomic,strong)                id<BbObjectView>                         view;
 
 @property (nonatomic,strong)                NSHashTable                             *observers;
+@property (nonatomic,strong)                NSString                                *name;
+
 @property (nonatomic)                       NSUInteger                              myDepth;
 
 - (instancetype)initWithArguments:(NSString *)arguments;
@@ -53,6 +56,8 @@
 - (BOOL)removeObjectObserver:(id<BbObject>)object;
 
 - (BOOL)removeAllObjectObservers;
+
+- (void)loadBang;
 
 @end
 

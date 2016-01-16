@@ -19,4 +19,37 @@
     return block;
 }
 
++ (BbPortInputBlock)allowTypeInputBlock:(Class)type
+{
+    BbPortInputBlock block = ^(id value){
+        if ( [value isKindOfClass:type] ) {
+            return value;
+        }else{
+            id nilValue = nil;
+            return nilValue;
+        }
+    };
+    return block;
+}
+
++ (BbPortInputBlock)allowTypesInputBlock:(NSArray *)types
+{
+    BbPortInputBlock block = ^(id value){
+        NSEnumerator *typeEnum = types.objectEnumerator;
+        Class aType = [typeEnum nextObject];
+        BOOL OK = [value isKindOfClass:aType];
+        while ( !OK && NULL != aType ) {
+            aType = [typeEnum nextObject];
+            OK = [value isKindOfClass:[typeEnum nextObject]];
+        }
+        if ( OK ) {
+            return value;
+        }else{
+            id nilValue = nil;
+            return nilValue;
+        }
+    };
+    return block;
+}
+
 @end

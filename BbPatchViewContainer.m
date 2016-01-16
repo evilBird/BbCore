@@ -10,6 +10,7 @@
 #import "BbScrollView.h"
 #import "BbPatchView.h"
 #import "UIView+Layout.h"
+#import "UIView+BbPatch.h"
 #import "BbView.h"
 
 @interface BbPatchViewContainer () <BbPatchViewEventDelegate,UIScrollViewDelegate>
@@ -21,7 +22,7 @@
 - (instancetype)initWithCoder:(NSCoder *)aDecoder{
     self = [super initWithCoder:aDecoder];
     if ( self ) {
-        [self commonInit];
+        [self setupScrollView];
     }
     
     return self;
@@ -31,7 +32,7 @@
 {
     self = [super initWithFrame:frame];
     if ( self ) {
-        [self commonInit];
+        [self setupScrollView];
     }
     
     return self;
@@ -41,84 +42,81 @@
 {
     self = [super init];
     if ( self ) {
-        [self commonInit];
+        [self setupScrollView];
     }
     
     return self;
 }
 
-- (instancetype)initWithPatchView:(BbPatchView *)patchView
-{
-    self = [super initWithFrame:[UIScreen mainScreen].bounds];
-    if ( self ) {
-        _patchView = patchView;
-        [self defaultInit];
-    }
-    return self;
-}
-
-- (void)defaultInit
-{
-    [self setupScrollView];
-    [self setupPatchView];
-    [self finishSetup];
-}
-
 - (void)setupScrollView
 {
-    self.scrollView = [[BbScrollView alloc]initWithFrame:self.bounds];
+    self.scrollView = [[BbScrollView alloc]initWithFrame:CGRectZero];
     self.scrollView.translatesAutoresizingMaskIntoConstraints = NO;
     self.scrollView.delegate = self;
     self.scrollView.minimumZoomScale = 0.5;
     self.scrollView.maximumZoomScale = 2.0;
+    self.scrollView.backgroundColor = [UIColor greenColor];
     [self addSubview:self.scrollView];
+    [self addConstraints:[self.scrollView pinEdgesToSuperWithInsets:UIEdgeInsetsZero]];
 }
 
-- (void)createPatchView
+- (void)setPatchView:(BbPatchView *)patchView completion:(void (^)(void))completion
 {
-    CGRect screen = [UIScreen mainScreen].bounds;
-    CGSize patchViewSize = screen.size;
-    CGFloat edge = ( patchViewSize.width >= patchViewSize.height ) ? ( patchViewSize.width ) : ( patchViewSize.height );
-    edge*=2;
-    CGRect patchViewRect = CGRectMake(0.0, 0.0, edge, edge);
-    self.patchView = [[BbPatchView alloc]initWithFrame:patchViewRect];
+    _patchView = patchView;
+    [self setupPatchView];
+    if ( nil != completion ) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            completion();
+        });
+    }
 }
 
 - (void)setupPatchView
 {
     self.patchView.eventDelegate = self;
-    self.patchView.backgroundColor = [UIColor whiteColor];
-}
-
-- (void)finishSetup
-{
-    [self.scrollView addSubview:self.patchView];
+    self.patchView.backgroundColor = [UIColor yellowColor];
+    CGSize sizeFactor = [self.patchView.dataSource sizeForObjectView:self.patchView].CGSizeValue;
     CGRect bounds = self.bounds;
-    CGSize size = bounds.size;
-    CGSize objectSize = [[self.patchView.dataSource sizeForObjectView:self.patchView]CGSizeValue];
-    CGSize contentSize;
+    bounds.size = [self multiplySize:bounds.size withSize:sizeFactor];
+    self.patchView.frame = bounds;
+    [self.scrollView addSubview:self.patchView];
+
+    //[self addConstraints:[self constrainSizeOfSubview:self.patchView withSizeFactor:sizeFactor]];
+    //[self layoutSubviews];
     
-    contentSize.width = objectSize.width*size.width;
-    contentSize.height = objectSize.height*size.height;
-    CGRect patchViewRect;
-    patchViewRect.origin = CGPointZero;
-    patchViewRect.size = contentSize;
-    self.patchView.frame = patchViewRect;
-    self.scrollView.contentSize = contentSize;
+    self.scrollView.contentSize = self.patchView.bounds.size;
     self.scrollView.zoomScale = [(NSNumber *)[self.patchView.dataSource zoomScaleForObjectView:self.patchView]doubleValue];
-    CGPoint offset = [[self.patchView.dataSource contentOffsetForObjectView:self.patchView]CGPointValue];
-    offset.x*=size.width;
-    offset.y*=size.height;
-    self.scrollView.contentOffset = offset;
-    [self addConstraints:[self.scrollView pinEdgesToSuperWithInsets:UIEdgeInsetsZero]];
+    CGPoint offsetFactor = [self.patchView.dataSource contentOffsetForObjectView:self.patchView].CGPointValue;
+    offsetFactor.x *= self.patchView.bounds.size.width;
+    offsetFactor.y *= self.patchView.bounds.size.height;
+    self.scrollView.contentOffset = offsetFactor;
 }
 
-- (void)commonInit
+- (NSArray *)constrainSizeOfSubview:(UIView *)subview withSizeFactor:(CGSize)sizeFactor
 {
-    [self setupScrollView];
-    [self createPatchView];
-    [self finishSetup];
+    NSMutableArray *constraints = [NSMutableArray arrayWithCapacity:2];
+    
+    NSLayoutConstraint *widthConstraint = [NSLayoutConstraint constraintWithItem:subview
+                                                                       attribute:NSLayoutAttributeWidth
+                                                                       relatedBy:NSLayoutRelationEqual
+                                                                          toItem:self
+                                                                       attribute:NSLayoutAttributeWidth
+                                                                      multiplier:sizeFactor.width
+                                                                        constant:0.0];
+    [constraints addObject:widthConstraint];
+    
+    NSLayoutConstraint *heightConstraint = [NSLayoutConstraint constraintWithItem:subview
+                                                                        attribute:NSLayoutAttributeHeight
+                                                                        relatedBy:NSLayoutRelationEqual
+                                                                           toItem:self
+                                                                        attribute:NSLayoutAttributeHeight
+                                                                       multiplier:sizeFactor.height
+                                                                         constant:0.0];
+    [constraints addObject:heightConstraint];
+    
+    return constraints;
 }
+
 
 #pragma mark - BbPatchViewEventDelegate
 

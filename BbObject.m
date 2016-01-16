@@ -124,6 +124,11 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     return YES;
 }
 
+- (void)loadBang
+{
+    
+}
+
 @end
 
 #pragma mark - BbObjectChild

@@ -16,5 +16,8 @@ CGFloat CGPointGetDistance(CGPoint point, CGPoint referencePoint);
 - (CGPoint)point2Position:(CGPoint)point;
 - (CGPoint)point2Offset:(CGPoint)point;
 - (CGPoint)position2Offset:(CGPoint)position;
+- (CGPoint)position2Point:(CGPoint)position;
+- (CGPoint)offset2Point:(CGPoint)offset;
+- (CGSize)multiplySize:(CGSize)size1 withSize:(CGSize)size2;
 
 @end

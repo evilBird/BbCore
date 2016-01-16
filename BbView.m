@@ -160,6 +160,16 @@ static CGFloat kDefaultPortViewSpacing = 10;
     [self.delegate objectView:self didChangePosition:_objectViewPosition];
 }
 
+- (void)setPositionWithValue:(NSValue *)value
+{
+    _objectViewPosition = value;
+    CGPoint point = [self position2Point:[value CGPointValue]];
+    [self moveToPoint:point];
+    //CGPoint position = [value CGPointValue];
+    //[self setPosition:position];
+}
+
+
 - (void)setPosition:(CGPoint)position
 {
     _myPosition = [self point2Position:position];
@@ -265,6 +275,12 @@ static CGFloat kDefaultPortViewSpacing = 10;
     [self setupLabel];
     [self setupInletViews];
     [self setupOutletViews];
+    [self updateAppearanceAnimated:NO];
+}
+
+- (void)setTitleText:(NSString *)titleText
+{
+    self.myTitleText = titleText;
     [self updateAppearanceAnimated:NO];
 }
 

@@ -50,6 +50,8 @@ typedef NS_ENUM(NSInteger, BbObjectViewEditingEvent) {
 
 #pragma mark - Determine what actions can be done with an object view
 
+- (void)doSelectors;
+
 - (BOOL)objectView:(id<BbObjectView>)sender canOpenChildView:(id<BbObjectView>)child;
 
 - (BOOL)objectView:(id<BbObjectView>)sender canTestObjectForChildView:(id<BbObjectView>)child;

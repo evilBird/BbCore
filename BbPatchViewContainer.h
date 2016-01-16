@@ -13,9 +13,9 @@
 
 @interface BbPatchViewContainer : UIView 
 
-- (instancetype)initWithPatchView:(BbPatchView *)patchView;
-
 @property (nonatomic,strong)      BbPatchView       *patchView;
 @property (nonatomic,strong)      BbScrollView      *scrollView;
+
+- (void)setPatchView:(BbPatchView *)patchView completion:(void(^)(void))completion;
 
 @end

@@ -30,8 +30,13 @@
 - (NSString *)titleTextForObjectView:(id<BbObjectView>)objectView
 {
     NSMutableArray *words = [NSMutableArray array];
-    NSString *className = NSStringFromClass([self class]);
-    [words addObject:className];
+    
+    if ( nil != self.name ) {
+        [words addObject:self.name];
+    }else{
+        NSString *className = NSStringFromClass([self class]);
+        [words addObject:className];
+    }
     
     if ( nil != self.objectArguments ) {
         [words addObject:self.objectArguments];

@@ -45,8 +45,38 @@
     return nil;
 }
 
++ (NSString *)getSelectorFromArray:(NSArray *)array
+{
+    if ( nil == array ) {
+        return nil;
+    }
+    
+    id first = array.firstObject;
+    
+    if ( [first isKindOfClass:[NSString class]] ) {
+        return first;
+    }
+    
+    return nil;
+}
+
++ (NSArray *)getArgumentsFromArray:(NSArray *)array
+{
+    if ( nil == array || array.count < 2 ) {
+        return nil;
+    }
+    NSMutableArray *copy = array.mutableCopy;
+    [copy removeObjectAtIndex:0];
+    
+    return [NSArray arrayWithArray:copy];
+}
+
 + (NSArray *)string2DoubleArray:(NSString *)string
 {
+    if ( nil == string || string.length == 0 ) {
+        return nil;
+    }
+    
     NSArray *array = [BbHelpers string2Array:string];
     NSMutableArray *result = [NSMutableArray arrayWithCapacity:array.count];
     for (NSString *aString in array ) {
@@ -58,6 +88,9 @@
 
 + (NSString *)doubleArrayToString:(NSArray *)doubleArray
 {
+    if ( nil == doubleArray || doubleArray.count == 0 ) {
+        return nil;
+    }
     NSMutableArray *formattedNumbers = [NSMutableArray arrayWithCapacity:doubleArray.count];
     for (NSNumber *aNumber in doubleArray) {
         [formattedNumbers addObject:[NSString stringWithFormat:@"%.4f",aNumber.doubleValue]];

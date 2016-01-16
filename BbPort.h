@@ -37,6 +37,7 @@ static NSString *kInputElement  =   @"inputElement";
 @property   (nonatomic,strong)              NSString                            *uniqueID;
 @property   (nonatomic,strong)              NSHashTable                         *observedPorts;
 
+
 - (void)commonInit;
 - (BOOL)connectToPort:(BbPort *)port;
 - (BOOL)disconnectFromPort:(BbPort *)port;
@@ -52,5 +53,7 @@ static NSString *kInputElement  =   @"inputElement";
 @interface BbPort (Meta)
 
 + (BbPortInputBlock)passThroughInputBlock;
++ (BbPortInputBlock)allowTypeInputBlock:(Class)type;
++ (BbPortInputBlock)allowTypesInputBlock:(NSArray *)types;
 
 @end
