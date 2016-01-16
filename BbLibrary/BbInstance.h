@@ -8,6 +8,9 @@
 
 #import "BbObject.h"
 
+static NSString *kSELF = @"self";
+static NSString *kSET = @"set";
+
 @interface BbInstance : BbObject
 
 @end

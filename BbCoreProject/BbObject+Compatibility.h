@@ -10,4 +10,15 @@
 
 @interface BbObject (Compatibility)
 
+- (BbInlet *)hotInlet;
+
+- (BbInlet *)coldInlet;
+
+- (BbOutlet *)mainOutlet;
+
+- (void)setName:(NSString *)name;
+- (BbPortInputBlock)calculateOutputBlock:(BbInlet *)inlet;
+- (BbPortInputBlock)hotInletRecivedValueBlock:(BbInlet *)inlet;
+- (BbPortInputBlock)hotInletReceivedBangBlock:(BbInlet *)inlet;
+
 @end

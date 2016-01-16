@@ -14,6 +14,7 @@
 @property (nonatomic,strong)        id          myInstance;
 @property (nonatomic,strong)        NSString    *className;
 
+
 @end
 
 @implementation BbInstance
@@ -28,17 +29,28 @@
     instanceInlet.hotInlet = YES;
     [self addChildObject:instanceInlet];
     
-    __block BbOutlet *selectorOutlet = [[BbOutlet alloc]init];
-    [self addChildObject:selectorOutlet];
-    
-    [selectorInlet setInputBlock:[BbPort allowTypeInputBlock:[NSArray class]]];
+    __block BbOutlet *mainOutlet = [[BbOutlet alloc]init];
+    [self addChildObject:mainOutlet];
     
     __weak BbInstance *weakself = self;
+    
     [selectorInlet setOutputBlock:^ (id value ){
-        if ( nil != weakself.myInstance ){
+        
+        if ( [value isKindOfClass:[BbBang class]] ) {
+            NSMutableArray *outputArray = [NSMutableArray array];
+            [outputArray addObject:kSELF];
+            [outputArray addObject:_myInstance];
+            mainOutlet.inputElement = outputArray;
+        }else if ( nil != weakself.myInstance ){
             NSString *selector = [BbHelpers getSelectorFromArray:value];
             NSArray *args = [BbHelpers getArgumentsFromArray:value];
-            selectorOutlet.inputElement = [NSInvocation doInstanceMethod:weakself.myInstance selector:selector arguments:args];
+            id output = [NSInvocation doInstanceMethod:weakself.myInstance selector:selector arguments:args];
+            if ( nil != output ) {
+                NSMutableArray *outputArray = [NSMutableArray array];
+                [outputArray addObject:selector];
+                [outputArray addObject:output];
+                mainOutlet.inputElement = outputArray;
+            }
         }
     }];
     
