@@ -21,6 +21,7 @@
     if ( index < ports.count ) {
         BbPort *aPort = ports[index];
         aPort.view = portView;
+        portView.dataSource = (id<BbObjectViewDataSource>)aPort;
     }
 }
 

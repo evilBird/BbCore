@@ -22,8 +22,8 @@
 @property (nonatomic,weak)                  id <BbObjectParent>                     parent;
 @property (nonatomic,strong)                NSString                                *uniqueID;
 
+@property (nonatomic,strong)                NSString                                *displayText;
 @property (nonatomic,strong)                NSString                                *objectArguments;
-
 @property (nonatomic,strong)                NSString                                *viewClass;
 @property (nonatomic,strong)                NSString                                *viewArguments;
 
@@ -35,7 +35,6 @@
 @property (nonatomic,strong)                NSHashTable                             *observers;
 @property (nonatomic,strong)                NSString                                *name;
 
-@property (nonatomic)                       NSUInteger                              myDepth;
 
 - (instancetype)initWithArguments:(NSString *)arguments;
 
@@ -46,6 +45,8 @@
 - (void)setupWithArguments:(id)arguments;
 
 + (NSString *)viewClass;
+
++ (NSString *)symbolAlias;
 
 @end
 

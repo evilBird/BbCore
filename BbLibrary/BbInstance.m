@@ -64,9 +64,14 @@
     }];
 }
 
++ (NSString *)symbolAlias
+{
+    return @"*i";
+}
+
 - (void)setupWithArguments:(id)arguments
 {
-    self.name = @"Instance";
+    self.name = @"*";
     self.className = arguments;
 }
 

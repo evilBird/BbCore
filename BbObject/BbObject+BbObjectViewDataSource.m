@@ -30,19 +30,23 @@
 - (NSString *)titleTextForObjectView:(id<BbObjectView>)objectView
 {
     NSMutableArray *words = [NSMutableArray array];
-    
+        
     if ( nil != self.name ) {
         [words addObject:self.name];
+    }else if ( [[self class] symbolAlias] ){
+        NSString *alias = [[self class]symbolAlias];
+        [words addObject:alias];
     }else{
         NSString *className = NSStringFromClass([self class]);
         [words addObject:className];
     }
     
     if ( nil != self.objectArguments ) {
-        [words addObject:self.objectArguments];
+        [words addObjectsFromArray:[self.objectArguments componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
     }
     
-    return [words componentsJoinedByString:@" "];
+    self.displayText = [words componentsJoinedByString:@" "];
+    return self.displayText;
 }
 
 

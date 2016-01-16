@@ -54,7 +54,7 @@
     }
     
     [self.childViews removeObject:view];
-    [view removeFromSuperView];
+    [view removeFromSuperview];
 }
 
 - (void)setSizeWithValue:(NSValue *)value

@@ -24,9 +24,14 @@
     }];
 }
 
++ (NSString *)symbolAlias
+{
+    return @"+";
+}
+
 - (void)setupWithArguments:(id)arguments
 {
-    self.name = @"+";
+    self.name = [[self class] symbolAlias];
     NSArray *args = [BbHelpers string2DoubleArray:arguments];
     if ( nil != args ) {
         [self.inlets[1]setOutputElement:args.firstObject];

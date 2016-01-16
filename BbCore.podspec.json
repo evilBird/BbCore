@@ -1,6 +1,6 @@
 {
   "name": "BbCore",
-  "version": "0.0.4",
+  "version": "0.0.7",
   "summary": "Core Objects for Bb.",
   "authors": { 
     "Travis Henspeter": "developer@birdsoundmusic.com"
@@ -16,15 +16,23 @@
   "requires_arc": true,
   "source": {
     "git": "https://github.com/evilBird/BbCore.git",
-    "tag": "0.0.4"
+    "tag": "0.0.7"
   },
   "frameworks": [
     "Foundation",
     "UIKit"
   ],
   "source_files":[
-	  "*Bb*.{h,m}",
-	  "NSMutableArray+Stack.{h,m}"
+	"BbObject/*.{h,m}",
+	"BbPorts/*.{h,m}",
+	"BbPatch/*.{h,m}",
+	"BbGlue/*.{h,m}",
+	"BbView/*.{h,m}",
+	"BbConnection/*.{h,m}",
+	"BbPatchView/*{h,m}",
+	"BbCategories/*.{h,m}",
+	"BbLibrary/*.{h,m}",
+	"Headers/*.h"  
   ],
   "dependencies":{
 	  "BbRuntime":[

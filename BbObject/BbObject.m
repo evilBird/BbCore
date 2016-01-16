@@ -53,7 +53,12 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 }
 
 - (void)setupWithArguments:(id)arguments {
-    
+    self.name = NSStringFromClass([self class]);
+}
+
++ (NSString *)symbolAlias
+{
+    return @"Object";
 }
 
 + (NSString *)viewClass
@@ -78,7 +83,7 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     _outlets = nil;
     
     if ( nil != _view ) {
-        [_view removeFromSuperView];
+        [_view removeFromSuperview];
     }
     
     _view = nil;
@@ -176,21 +181,24 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 - (NSString *)textDescription
 {
     NSMutableArray *myComponents = [NSMutableArray array];
+    
     [myComponents addObject:[self descriptionToken]];
     [myComponents addObject:self.viewClass];
     
     if ( nil != self.viewArguments ) {
-        [myComponents addObject:self.viewArguments];
+        [myComponents addObjectsFromArray:[self.viewArguments componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
     }
     
     [myComponents addObject:NSStringFromClass([self class])];
     
     if ( nil != self.objectArguments ) {
-        [myComponents addObject:self.objectArguments];
+        [myComponents addObjectsFromArray:[self.objectArguments componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
     }
-    
     NSString *endOfLine = @";\n";
-    NSString *myDescription = [[myComponents componentsJoinedByString:@" "]stringByAppendingString:endOfLine];
+    [myComponents addObject:endOfLine];
+    
+    NSString *myDescription = [myComponents componentsJoinedByString:@" "];
+    
     return myDescription;
 }
 

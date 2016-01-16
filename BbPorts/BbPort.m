@@ -124,7 +124,7 @@ static void *BbPortObservationContextXX     =       &BbPortObservationContextXX;
 - (void)dealloc
 {
     if ( nil != _view ) {
-        [_view removeFromSuperView];
+        [_view removeFromSuperview];
     }
     _view = nil;
     

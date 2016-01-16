@@ -62,7 +62,14 @@
 
 - (void)setPatchView:(BbPatchView *)patchView completion:(void (^)(void))completion
 {
+    BbPatchView *previousPatchView = _patchView;
+    [previousPatchView removeFromSuperview];
+    
     _patchView = patchView;
+    if ( nil == _patchView ) {
+        return;
+    }
+    
     [self setupPatchView];
     if ( nil != completion ) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -80,10 +87,6 @@
     bounds.size = [self multiplySize:bounds.size withSize:sizeFactor];
     self.patchView.frame = bounds;
     [self.scrollView addSubview:self.patchView];
-
-    //[self addConstraints:[self constrainSizeOfSubview:self.patchView withSizeFactor:sizeFactor]];
-    //[self layoutSubviews];
-    
     self.scrollView.contentSize = self.patchView.bounds.size;
     self.scrollView.zoomScale = [(NSNumber *)[self.patchView.dataSource zoomScaleForObjectView:self.patchView]doubleValue];
     CGPoint offsetFactor = [self.patchView.dataSource contentOffsetForObjectView:self.patchView].CGPointValue;
@@ -91,32 +94,6 @@
     offsetFactor.y *= self.patchView.bounds.size.height;
     self.scrollView.contentOffset = offsetFactor;
 }
-
-- (NSArray *)constrainSizeOfSubview:(UIView *)subview withSizeFactor:(CGSize)sizeFactor
-{
-    NSMutableArray *constraints = [NSMutableArray arrayWithCapacity:2];
-    
-    NSLayoutConstraint *widthConstraint = [NSLayoutConstraint constraintWithItem:subview
-                                                                       attribute:NSLayoutAttributeWidth
-                                                                       relatedBy:NSLayoutRelationEqual
-                                                                          toItem:self
-                                                                       attribute:NSLayoutAttributeWidth
-                                                                      multiplier:sizeFactor.width
-                                                                        constant:0.0];
-    [constraints addObject:widthConstraint];
-    
-    NSLayoutConstraint *heightConstraint = [NSLayoutConstraint constraintWithItem:subview
-                                                                        attribute:NSLayoutAttributeHeight
-                                                                        relatedBy:NSLayoutRelationEqual
-                                                                           toItem:self
-                                                                        attribute:NSLayoutAttributeHeight
-                                                                       multiplier:sizeFactor.height
-                                                                         constant:0.0];
-    [constraints addObject:heightConstraint];
-    
-    return constraints;
-}
-
 
 #pragma mark - BbPatchViewEventDelegate
 

@@ -40,6 +40,7 @@ typedef NS_ENUM(NSInteger, BbPatchViewType){
 @property (nonatomic,getter=isOpen)         BOOL                            open;
 @property (nonatomic,strong)                NSHashTable                     *childViews;
 @property (nonatomic,strong)                NSHashTable                     *connections;
+@property (nonatomic,strong)                NSString                        *pasteBoard;
 
 @property (nonatomic,weak)                  id<BbObjectViewDataSource>      dataSource;
 @property (nonatomic,weak)                  id<BbObjectViewEditingDelegate> delegate;

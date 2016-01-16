@@ -214,21 +214,24 @@
 
 - (NSString *)selectorText
 {
-    if ( nil == self.mySelectors ) {
-        return @"";
-    }
-    NSMutableString *selectors = [NSMutableString string];
+    NSMutableString *selectorText = [NSMutableString string];
     NSString *depthString = nil;
+    
     if ( nil != self.parent ) {
         depthString = [self.parent depthStringForChildObject:self];
     }else{
         depthString = @"";
     }
-    for (NSString *aSelectorDescription in self.mySelectors ) {
-        [selectors appendFormat:@"%@#S %@;\n",depthString,aSelectorDescription];
+    
+    if ( nil == self.mySelectors ) {
+        [selectorText appendFormat:@"%@#S loadChildViews;\n",depthString];
+    }else{
+        for (NSString *aSelectorDescription in self.mySelectors ) {
+            [selectorText appendFormat:@"%@#S %@;\n",depthString,aSelectorDescription];
+        }
     }
     
-    return selectors;
+    return selectorText;
 }
 
 - (NSString *)textDescription
@@ -250,6 +253,7 @@
     }
     
     NSString *selectorText = [self selectorText];
+    
     if ( nil != selectorText ) {
         [mutableString appendString:selectorText];
     }

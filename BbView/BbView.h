@@ -31,15 +31,14 @@
 @property (nonatomic,weak)                      id<BbObjectViewDelegate>        delegate;
 @property (nonatomic,weak)                      id<BbObjectViewEditingDelegate> editingDelegate;
 
+@property (nonatomic,weak)                      UIView                          *primaryContentView;
+
 @property (nonatomic,readonly)                  NSValue                         *objectViewPosition;
 
-+ (id<BbObjectView>)createPlaceholder;
-
-- (void)beginEditingWithDelegate:(id<BbObjectViewEditingDelegate>)editingDelegate;
 
 - (instancetype)initWithTitleText:(NSString *)text inlets:(NSUInteger)numInlets outlets:(NSUInteger)numOutlets;
 
-- (void)setTitle:(NSString *)title;
+- (void)updateAppearance;
 
 - (void)moveToPoint:(CGPoint)point;
 
@@ -49,8 +48,6 @@
 
 - (NSArray *)positionConstraints;
 
-- (void)updateLayout;
-
 - (void)reloadViewsWithDataSource:(id<BbObjectViewDataSource>)dataSource;
 
 @end
@@ -58,6 +55,10 @@
 @interface BbView (BbObjectView) <BbObjectView>
 
 #pragma mark - BbObjectView
+
+- (void)updateLayout;
+
++ (id<BbObjectView>)createPlaceholder;
 
 + (id<BbObjectView>)createViewWithDataSource:(id<BbObjectViewDataSource>)dataSource;
 

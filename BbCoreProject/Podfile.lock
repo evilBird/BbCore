@@ -1,0 +1,13 @@
+PODS:
+  - BbRuntime (0.0.3)
+  - UIView+Layout (0.1.2)
+
+DEPENDENCIES:
+  - BbRuntime
+  - UIView+Layout (~> 0.1.2)
+
+SPEC CHECKSUMS:
+  BbRuntime: da1fd19faee0cddffc089ae1f0be055cae2dd634
+  UIView+Layout: 7ab6ae08dcd5c2da86a2bb8cc543ac02d7c07d17
+
+COCOAPODS: 0.39.0

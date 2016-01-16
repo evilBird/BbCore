@@ -116,6 +116,8 @@ typedef NS_ENUM(NSInteger, BbObjectViewEditingEvent) {
 
 - (BOOL)objectView:(id<BbObjectView>)objectView shouldEndEditingWithText:(NSString *)text;
 
+- (void)objectView:(id<BbObjectView>)objectView didEndEditingWithText:(NSString *)text;
+
 #pragma mark - Editing state change handler
 
 - (void)objectView:(id<BbObjectView>)sender didChangeEditState:(NSInteger)editState;
@@ -158,7 +160,7 @@ typedef NS_ENUM(NSInteger, BbObjectViewEditingEvent) {
 @property (nonatomic,getter=isSelected)     BOOL                            selected;
 @property (nonatomic,getter=isEditing)      BOOL                            editing;
 
-- (void)removeFromSuperView;
+- (void)removeFromSuperview;
 
 @optional
 

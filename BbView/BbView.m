@@ -11,8 +11,6 @@
 #import "UIView+BbPatch.h"
 #import "BbPortView.h"
 
-static CGFloat kDefaultPortViewSpacing = 10;
-
 @interface BbView () <UITextFieldDelegate>
 
 @property (nonatomic)               NSUInteger          numIn;
@@ -63,6 +61,8 @@ static CGFloat kDefaultPortViewSpacing = 10;
     self.selectedBorderColor = self.defaultBorderColor;
     self.selectedTextColor = self.defaultTextColor;
 }
+
+
 
 - (void)setupLabel
 {
@@ -165,8 +165,6 @@ static CGFloat kDefaultPortViewSpacing = 10;
     _objectViewPosition = value;
     CGPoint point = [self position2Point:[value CGPointValue]];
     [self moveToPoint:point];
-    //CGPoint position = [value CGPointValue];
-    //[self setPosition:position];
 }
 
 
@@ -303,29 +301,14 @@ static CGFloat kDefaultPortViewSpacing = 10;
     
     self.inletsStackView.spacing = self.myMinimumSpacing;
     self.outletsStackView.spacing = self.myMinimumSpacing;
-    
-    if ( !animated ) {
-        self.backgroundColor = self.myFillColor;
-        self.layer.borderColor = self.myBorderColor.CGColor;
-        self.layer.borderWidth = 1.0;
-        self.myLabel.textColor = self.myTextColor;
-        self.myLabel.text = self.myTitleText;
-        [self.myLabel sizeToFit];
-        [self layoutIfNeeded];
-        return;
-    }
-    
-    __weak BbView *weakself = self;
-    [UIView animateWithDuration:0.2 animations:^{
-        weakself.backgroundColor = weakself.myFillColor;
-        weakself.layer.borderColor = weakself.myBorderColor.CGColor;
-        weakself.layer.borderWidth = 1.0;
-        weakself.myLabel.textColor = weakself.myTextColor;
-        weakself.myLabel.text = weakself.myTitleText;
-        [weakself.myLabel sizeToFit];
-        [weakself layoutIfNeeded];
-    }];
-    
+    self.backgroundColor = self.myFillColor;
+    self.layer.borderColor = self.myBorderColor.CGColor;
+    self.layer.borderWidth = 1.0;
+    self.myLabel.textColor = self.myTextColor;
+    self.myLabel.text = self.myTitleText;
+    self.myTextField.text = self.myTitleText;
+    [self.myLabel sizeToFit];
+    [self layoutIfNeeded];
 }
 
 - (void)calculateSpacingAndContentSize
@@ -463,6 +446,11 @@ static CGFloat kDefaultPortViewSpacing = 10;
 - (void)textFieldDidEndEditing:(UITextField *)textField
 {
     [textField removeTarget:self action:@selector(textFieldTextDidChange:) forControlEvents:UIControlEventAllEditingEvents];
+    self.myTitleText = textField.text;
+    self.editing = NO;
+    self.editState = BbObjectViewEditState_Default;
+    [self.editingDelegate objectView:self didEndEditingWithText:self.myTitleText];
+    [self updateAppearanceAnimated:NO];
 }
 
 #pragma mark - BbObjectView constructors

@@ -19,7 +19,16 @@
 
 - (void)setupPorts {}
 
-- (void)setupWithArguments:(id)arguments {}
+- (void)setupWithArguments:(id)arguments {
+    
+    NSArray *objectArgs = [arguments componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    self.name = objectArgs.firstObject;
+}
+
++ (NSString *)symbolAlias
+{
+    return @"Patch";
+}
 
 + (NSString *)viewClass
 {
@@ -42,7 +51,7 @@
     self.outlets = nil;
     
     if ( nil != self.view ) {
-        [self.view removeFromSuperView];
+        [(UIView *)self.view removeFromSuperview];
     }
     
     self.view = nil;

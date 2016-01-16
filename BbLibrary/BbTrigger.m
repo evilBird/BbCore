@@ -42,9 +42,14 @@
     }];
 }
 
++ (NSString *)symbolAlias
+{
+    return @"t";
+}
+
 - (void)setupWithArguments:(id)arguments
 {
-    self.name = @"t";
+    self.name = [[self class]symbolAlias];
     NSArray *toTrigger = [arguments componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     [self setupPortsWithArguments:toTrigger];
 }

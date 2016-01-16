@@ -8,15 +8,18 @@
 
 #import "BbObject.h"
 #import "BbConnection.h"
+#import "BbSymbolTable.h"
 
 @class BbPatchDescription;
+@class BbSymbolTable;
 
 @interface BbPatch : BbObject
 
-@property (nonatomic,strong)                NSMutableArray                          *mySelectors;
-@property (nonatomic,strong)                NSMutableArray                          *childObjects;
-@property (nonatomic,strong)                NSMutableArray                          *connections;
+@property (nonatomic,strong)                NSMutableArray                                      *mySelectors;
+@property (nonatomic,strong)                NSMutableArray                                      *childObjects;
+@property (nonatomic,strong)                NSMutableArray                                      *connections;
 
+@property (nonatomic,strong)                BbSymbolTable<BbTextCompletionDataSource>           *symbolTable;
 
 @end
 
@@ -41,6 +44,8 @@
 @end
 
 @interface BbPatch (BbObjectViewDelegate) <BbObjectViewEditingDelegate>
+
+
 
 - (BOOL)objectViewShouldBeginEditing:(id<BbObjectView>)objectView;
 

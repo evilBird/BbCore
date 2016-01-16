@@ -113,22 +113,41 @@
 
 - (void)objectView:(id<BbObjectView>)objectView didEditText:(NSString *)text
 {
-    NSLog(@"object view has text: %@",text);
+    if ( nil == self.symbolTable ) {
+        self.symbolTable = [BbSymbolTable new];
+    }
+    NSArray *searchResults = [self.symbolTable BbText:self searchKeywordsForText:text];
+    NSLog(@"\nSEARCHING %@...RESULTS: %@\n",text,[searchResults componentsJoinedByString:@" "]);
 }
 
 - (BOOL)objectView:(id<BbObjectView>)objectView shouldEndEditingWithText:(NSString *)text
 {
+    return YES;
+}
+
+- (void)objectView:(id<BbObjectView>)objectView didEndEditingWithText:(NSString *)text
+{
+    NSArray *textArray = [text componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    NSString *keyWord = textArray.firstObject;
+    if ( ![self.symbolTable BbText:self symbolExistsForKeyword:keyWord] ) {
+        return;
+    }
+    
+    NSString *symbol = [self.symbolTable BbText:self symbolForKeyword:keyWord];
+    NSMutableArray *mutableTextArray = textArray.mutableCopy;
+    [mutableTextArray replaceObjectAtIndex:0 withObject:symbol];
+    NSString *objectArgs = [mutableTextArray componentsJoinedByString:@" "];
     NSValue *position = [objectView objectViewPosition];
     NSMutableArray *viewArgArray = [NSMutableArray array];
     [viewArgArray addObject:NSStringFromClass([objectView class])];
     [viewArgArray addObject:[BbHelpers updateViewArgs:@"0 0" withPosition:position]];
     NSString *viewArgs = [viewArgArray componentsJoinedByString:@" "];
-    BbObjectDescription *objectDescription = [BbObjectDescription objectDescriptionWithArgs:text viewArgs:viewArgs];
+    
+    BbObjectDescription *objectDescription = [BbObjectDescription objectDescriptionWithArgs:objectArgs viewArgs:viewArgs];
     BbObject *object = [BbPatch objectWithDescription:objectDescription];
     [self addChildObject:object];
+    objectView.delegate = object;
     [objectView setDataSource:object reloadViews:YES];
-    NSLog(@"Object view ended editing with text: %@",text);
-    return YES;
 }
 
 #pragma mark - Editing state change handler

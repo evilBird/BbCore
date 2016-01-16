@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 #import "BbBridge.h"
 
+static CGFloat kDefaultPortViewSpacing = 10;
+
 @interface BbPortView : UIView  <BbObjectView>
 
 @property (nonatomic,strong)                UIColor             *defaultFillColor;

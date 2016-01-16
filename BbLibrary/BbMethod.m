@@ -25,9 +25,14 @@
     }];
 }
 
++ (NSString *)symbolAlias
+{
+    return @"SEL";
+}
+
 - (void)setupWithArguments:(id)arguments
 {
-    self.name = @"Method";
+    self.name = [[self class] symbolAlias];
 }
 
 @end

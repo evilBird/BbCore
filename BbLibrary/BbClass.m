@@ -56,6 +56,11 @@
     }];
 }
 
++ (NSString *)symbolAlias
+{
+    return @"*c";
+}
+
 - (void)setupWithArguments:(id)arguments
 {
     self.name = @"Class";
