@@ -9,6 +9,7 @@
 #import "BbPatchGestureRecognizer.h"
 #import <UIKit/UIGestureRecognizerSubclass.h>
 #import "UIView+BbPatch.h"
+#import "BbObjectView.h"
 
 static NSTimeInterval kCountAsRepeatMaxDuration = 0.2;
 
@@ -21,6 +22,19 @@ static NSTimeInterval kCountAsRepeatMaxDuration = 0.2;
 
 @implementation BbPatchGestureRecognizer
 
+- (id<BbObjectView>)getObjectViewFromHitView:(id)hitView
+{
+    if ( [hitView respondsToSelector:@selector(viewTypeCode)] ) {
+        return hitView;
+    }
+    
+    id superview = [(UIView *)hitView superview];
+    if ( nil != superview ) {
+        return [self getObjectViewFromHitView:superview];
+    }
+    
+    return nil;
+}
 
 - (CGPoint)locationOfTouches:(NSSet<UITouch *> *)touches
 {
@@ -62,9 +76,11 @@ static NSTimeInterval kCountAsRepeatMaxDuration = 0.2;
     self.previousLocation = self.location;
     self.movement = 0.0;
     self.numberOfTouches = touches.allObjects.count;
-    self.firstView = [self.view hitTest:self.location withEvent:event];
+    id hitView = [self.view hitTest:self.location withEvent:event];
+    self.firstView = [self getObjectViewFromHitView:hitView];
+    self.firstViewType = [self.firstView viewTypeCode];
     self.currentView = self.firstView;
-    self.lastView = nil;
+    self.currentViewType = [self.firstView viewTypeCode];
     self.state = UIGestureRecognizerStateBegan;
 }
 
@@ -75,7 +91,9 @@ static NSTimeInterval kCountAsRepeatMaxDuration = 0.2;
     self.location = [self locationOfTouches:touches];
     self.movement += fabs(CGPointGetDistance(self.location, self.previousLocation));
     self.numberOfTouches = touches.allObjects.count;
-    self.currentView =  [self.view hitTest:self.location withEvent:event];
+    id hitView = [self.view hitTest:self.location withEvent:event];
+    self.currentView =  [self getObjectViewFromHitView:hitView];
+    self.currentViewType = [self.currentView viewTypeCode];
     self.state = UIGestureRecognizerStateChanged;
 }
 
@@ -90,8 +108,9 @@ static NSTimeInterval kCountAsRepeatMaxDuration = 0.2;
     self.duration = [[NSDate date] timeIntervalSinceDate:self.firstTouchDate];
     self.location = [self locationOfTouches:touches];
     self.numberOfTouches = touches.allObjects.count;
-    self.currentView = [self.view hitTest:self.location withEvent:event];
-    self.lastView = self.currentView;
+    id hitView = [self.view hitTest:self.location withEvent:event];
+    self.currentView = [self getObjectViewFromHitView:hitView];
+    self.currentViewType = [self.currentView viewTypeCode];
     self.state = UIGestureRecognizerStateEnded;
 }
 

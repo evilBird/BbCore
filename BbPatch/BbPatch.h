@@ -9,6 +9,8 @@
 #import "BbObject.h"
 #import "BbConnection.h"
 #import "BbSymbolTable.h"
+#import "BbPatchInlet.h"
+#import "BbPatchOutlet.h"
 
 @class BbPatchDescription;
 @class BbSymbolTable;
@@ -18,6 +20,8 @@
 @property (nonatomic,strong)                NSMutableArray                                      *mySelectors;
 @property (nonatomic,strong)                NSMutableArray                                      *childObjects;
 @property (nonatomic,strong)                NSMutableArray                                      *connections;
+@property (nonatomic,strong)                NSMapTable                                          *inletMapTable;
+@property (nonatomic,strong)                NSMapTable                                          *outputMapTable;
 
 @property (nonatomic,strong)                BbSymbolTable<BbTextCompletionDataSource>           *symbolTable;
 
@@ -39,12 +43,17 @@
 
 - (NSString *)descriptionToken;
 
+- (void)addObjectPortForPatchPort:(id<BbObjectChild>)patchPort;
+
+- (void)insertObjectPortForPatchPort:(id<BbObjectChild>)patchPort atIndex:(NSUInteger)index;
+
+- (void)removeObjectPortForPatchPort:(id<BbObjectChild>)patchPort;
+
 - (BOOL)loadViews;
 
 @end
 
 @interface BbPatch (BbObjectViewDelegate) <BbObjectViewEditingDelegate>
-
 
 
 - (BOOL)objectViewShouldBeginEditing:(id<BbObjectView>)objectView;
@@ -79,9 +88,7 @@
 
 @interface BbPatch (Meta)
 
-+ (BbPatch *)patchWithDescription:(BbPatchDescription *)description;
-
-+ (BbObject *)objectWithDescription:(BbObjectDescription *)description;
++ (BbPatch *)objectWithDescription:(BbPatchDescription *)description;
 
 - (BbConnection *)connectionWithDescription:(BbConnectionDescription *)description;
 

@@ -10,6 +10,16 @@
 
 @implementation BbAbstractView
 
+- (BbViewType)viewTypeCode
+{
+    return BbViewType_Object;
+}
+
+- (BOOL)canReload
+{
+    return YES;
+}
+
 - (void)updateLayout
 {
     if ( nil == self.superview || CGRectIsEmpty(self.superview.bounds) ) {
@@ -223,27 +233,6 @@
 
 - (void)updateAppearance {
 
-    if ( self.selected ) {
-        
-        self.myFillColor = self.selectedFillColor;
-        self.myBorderColor = self.selectedBorderColor;
-        self.myTextColor = self.selectedTextColor;
-        
-    }else{
-        
-        self.myFillColor = self.defaultFillColor;
-        self.myBorderColor = self.defaultBorderColor;
-        self.myTextColor = self.defaultTextColor;
-    }
-    
-    self.inletsStackView.spacing = self.myMinimumSpacing;
-    self.outletsStackView.spacing = self.myMinimumSpacing;
-    self.backgroundColor = self.myFillColor;
-    self.layer.borderColor = self.myBorderColor.CGColor;
-    self.layer.borderWidth = 1.0;
-    
-    [self calculateSpacingAndContentSize];
-
 }
 
 - (void)reloadViewsWithDataSource:(id<BbObjectViewDataSource>)dataSource
@@ -259,7 +248,7 @@
     self.numIn = [dataSource numberOfInletsForObjectView:self];
     self.numOut = [dataSource numberOfOutletsForObjectView:self];
     self.myTitleText = [dataSource titleTextForObjectView:self];
-    [self primaryContentView];
+    [self setupPrimaryContentView];
     [self setupInletViews];
     [self setupOutletViews];
     [self updateAppearance];
@@ -431,7 +420,6 @@
     [textField removeTarget:self action:@selector(textFieldTextDidChange:) forControlEvents:UIControlEventAllEditingEvents];
     self.myTitleText = textField.text;
     self.editing = NO;
-    [self.editingDelegate objectView:self didEndEditingWithText:self.myTitleText];
     [self updateAppearance];
 }
 

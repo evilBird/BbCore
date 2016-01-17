@@ -8,6 +8,8 @@
 
 #import "BbPatch.h"
 #import "BbTextDescription.h"
+#import "BbPatchInlet.h"
+#import "BbPatchOutlet.h"
 
 @implementation BbPatch (BbObjectViewDelegate)
 
@@ -42,6 +44,9 @@
     if ( nil == child.dataSource ) {
         child.editingDelegate = self;
         child.editing = YES;
+    }else{
+        id<BbObjectChild> object = (id<BbObjectChild>)[child dataSource];
+        [self addChildObject:object];
     }
 }
 
@@ -98,12 +103,20 @@
             [self removeChildObject:connection];
         }
     }
+    
+    [sender updateAppearance];
 }
 
 #pragma mark - Handle edits in textfield
+
 - (BOOL)objectViewShouldBeginEditing:(id<BbObjectView>)objectView
 {
     if ( nil == objectView.dataSource ) {
+        objectView.editingDelegate = self;
+        return YES;
+    }
+    
+    if ( [objectView canEdit] ) {
         objectView.editingDelegate = self;
         return YES;
     }
@@ -113,10 +126,17 @@
 
 - (void)objectView:(id<BbObjectView>)objectView didEditText:(NSString *)text
 {
+    if ( ![objectView canReload] ) {
+        return;
+    }
+    
     if ( nil == self.symbolTable ) {
         self.symbolTable = [BbSymbolTable new];
     }
-    NSArray *searchResults = [self.symbolTable BbText:self searchKeywordsForText:text];
+    
+    
+    NSArray *textComponents = [text componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    NSArray *searchResults = [self.symbolTable BbText:self searchKeywordsForText:textComponents.firstObject];
     NSLog(@"\nSEARCHING %@...RESULTS: %@\n",text,[searchResults componentsJoinedByString:@" "]);
 }
 
@@ -127,27 +147,44 @@
 
 - (void)objectView:(id<BbObjectView>)objectView didEndEditingWithText:(NSString *)text
 {
+    
     NSArray *textArray = [text componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     NSString *keyWord = textArray.firstObject;
-    if ( ![self.symbolTable BbText:self symbolExistsForKeyword:keyWord] ) {
+    NSArray *searchResults = [self.symbolTable BbText:self searchKeywordsForText:keyWord];
+    
+    if ( nil == searchResults ) {
         return;
     }
     
-    NSString *symbol = [self.symbolTable BbText:self symbolForKeyword:keyWord];
+    NSString *symbol = [self.symbolTable BbText:self symbolForKeyword:searchResults.firstObject];
+    NSString *viewClass = [NSInvocation doClassMethod:symbol selector:@"viewClass" arguments:nil];
+    NSString *oldViewClass = NSStringFromClass([objectView class]);
     NSMutableArray *mutableTextArray = textArray.mutableCopy;
     [mutableTextArray replaceObjectAtIndex:0 withObject:symbol];
     NSString *objectArgs = [mutableTextArray componentsJoinedByString:@" "];
-    NSValue *position = [objectView objectViewPosition];
+    
     NSMutableArray *viewArgArray = [NSMutableArray array];
-    [viewArgArray addObject:NSStringFromClass([objectView class])];
+    NSValue *position = [objectView objectViewPosition];
+    [viewArgArray addObject:viewClass];
     [viewArgArray addObject:[BbHelpers updateViewArgs:@"0 0" withPosition:position]];
     NSString *viewArgs = [viewArgArray componentsJoinedByString:@" "];
-    
+
     BbObjectDescription *objectDescription = [BbObjectDescription objectDescriptionWithArgs:objectArgs viewArgs:viewArgs];
     BbObject *object = [BbPatch objectWithDescription:objectDescription];
     [self addChildObject:object];
-    objectView.delegate = object;
-    [objectView setDataSource:object reloadViews:YES];
+    
+    if ( [viewClass isEqualToString:oldViewClass] ) {
+        object.view = objectView;
+        objectView.delegate = object;
+        [objectView setDataSource:object reloadViews:YES];
+    }else{
+        [self.view removeChildObjectView:objectView];
+        [object loadView];
+        [object.view setDelegate:object];
+        [object.view setDataSource:object];
+        [self.view addChildObjectView:object.view];
+        [self.view updateAppearance];
+    }
 }
 
 #pragma mark - Editing state change handler

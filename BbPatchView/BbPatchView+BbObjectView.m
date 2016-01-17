@@ -17,7 +17,7 @@
     }
     
     [self layoutIfNeeded];
-    [self setNeedsDisplay];
+    [self updateAppearance];
 }
 
 + (id<BbObjectView>)createViewWithDataSource:(id<BbObjectViewDataSource>)dataSource

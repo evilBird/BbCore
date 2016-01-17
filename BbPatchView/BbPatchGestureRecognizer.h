@@ -7,27 +7,31 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "BbObjectView.h"
+#import "UIView+BbPatch.h"
 
 @interface BbPatchGestureRecognizer : UIGestureRecognizer
 
-@property (nonatomic,weak)                      UIView          *firstView;
-@property (nonatomic,weak)                      UIView          *currentView;
-@property (nonatomic,weak)                      UIView          *lastView;
+@property (nonatomic,weak)                      id<BbObjectView>    firstView;
+@property (nonatomic,weak)                      id<BbObjectView>    currentView;
 
-@property (nonatomic)                           CGPoint         location;
-@property (nonatomic)                           CGPoint         previousLocation;
-@property (nonatomic)                           CGPoint         deltaLocation;
+@property (nonatomic)                           BbViewType          firstViewType;
+@property (nonatomic)                           BbViewType          currentViewType;
 
-@property (nonatomic)                           CGPoint         position;
-@property (nonatomic)                           CGPoint         previousPosition;
-@property (nonatomic)                           CGPoint         deltaPosition;
+@property (nonatomic)                           CGPoint             location;
+@property (nonatomic)                           CGPoint             previousLocation;
+@property (nonatomic)                           CGPoint             deltaLocation;
 
-@property (nonatomic)                           NSUInteger      numberOfTouches;
-@property (nonatomic)                           NSUInteger      repeatCount;
-@property (nonatomic)                           NSTimeInterval  duration;
-@property (nonatomic)                           CGFloat         movement;
+@property (nonatomic)                           CGPoint             position;
+@property (nonatomic)                           CGPoint             previousPosition;
+@property (nonatomic)                           CGPoint             deltaPosition;
 
-@property (nonatomic,getter=isTracking)         BOOL            tracking;
+@property (nonatomic)                           NSUInteger          numberOfTouches;
+@property (nonatomic)                           NSUInteger          repeatCount;
+@property (nonatomic)                           NSTimeInterval      duration;
+@property (nonatomic)                           CGFloat             movement;
+
+@property (nonatomic,getter=isTracking)         BOOL                tracking;
 
 - (void)stopTracking;
 

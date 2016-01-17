@@ -12,6 +12,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
+
 typedef NS_ENUM(NSInteger, BbObjectViewEditState) {
     BbObjectViewEditState_Default    =   0,
     BbObjectViewEditState_Editing    =   1,
@@ -24,6 +25,15 @@ typedef NS_ENUM(NSInteger, BbObjectViewEditingEvent) {
     BbObjectViewEditingEvent_Changed,
     BbObjectViewEditingEvent_Ended,
     BbObjectViewEditingEvent_Cancelled
+};
+
+typedef NS_ENUM(NSInteger, BbViewType){
+    BbViewType_Unknown         =   -1,
+    BbViewType_Patch           =   0,
+    BbViewType_Object          =   1,
+    BbViewType_Inlet           =   2,
+    BbViewType_Outlet          =   3,
+    BbViewType_Control         =   4
 };
 
 @protocol BbObjectView;
@@ -65,6 +75,8 @@ typedef NS_ENUM(NSInteger, BbObjectViewEditingEvent) {
 @optional
 
 #pragma mark - View argument change handlers
+
+- (void)objectView:(id<BbObjectView>)sender userEnteredText:(NSString *)text;
 
 - (void)objectView:(id<BbObjectView>)sender didChangePosition:(NSValue *)position;
 
@@ -170,7 +182,15 @@ typedef NS_ENUM(NSInteger, BbObjectViewEditingEvent) {
 
 - (void)updateLayout;
 
+- (void)updateAppearance;
+
+- (void)setHighlightView:(BOOL)highlight;
+
 - (BOOL)canEdit;
+
+- (BOOL)canReload;
+
+- (BbViewType)viewTypeCode;
 
 - (CGPoint)center;
 

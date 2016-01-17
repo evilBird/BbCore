@@ -12,6 +12,17 @@
 #import "UIView+Layout.h"
 #import "UIView+BbPatch.h"
 
+typedef NS_ENUM(NSInteger, BbPatchViewType){
+    BbPatchViewType_Unknown         =   -1,
+    BbPatchViewType_Patch           =   0,
+    BbPatchViewType_Object          =   1,
+    BbPatchViewType_Inlet           =   2,
+    BbPatchViewType_Outlet          =   3,
+    BbPatchViewType_ActionObject    =   4,
+    BbPatchViewType_ObjectSubview   =   5,
+    BbPatchViewType_PatchOutlet     =   6,
+};
+
 @interface BbAbstractView : UIView <BbObjectView,UITextFieldDelegate>
 
 @property (nonatomic,strong)                    UIColor                         *defaultFillColor;
@@ -57,6 +68,10 @@
 
 - (instancetype)initWithTitleText:(NSString *)text inlets:(NSUInteger)numInlets outlets:(NSUInteger)numOutlets;
 
+- (BOOL)canReload;
+
+- (BbViewType)viewTypeCode;
+
 - (void)setupPrimaryContentView;
 
 - (void)setupInletViews;
@@ -64,6 +79,10 @@
 - (void)setupOutletViews;
 
 - (void)commonInit;
+
+- (NSArray *)makeInletViews:(NSUInteger)numIn;
+
+- (NSArray *)makeOutletViews:(NSUInteger)numOut;
 
 - (void)setupLabel;
 

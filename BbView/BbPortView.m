@@ -106,12 +106,19 @@
 
 @implementation BbInletView
 
-
+- (BbViewType)viewTypeCode
+{
+    return BbViewType_Inlet;
+}
 
 @end
 
 
 @implementation BbOutletView
 
+- (BbViewType)viewTypeCode
+{
+    return BbViewType_Outlet;
+}
 
 @end

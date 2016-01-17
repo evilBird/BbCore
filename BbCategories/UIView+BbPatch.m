@@ -7,6 +7,7 @@
 //
 
 #import "UIView+BbPatch.h"
+#import "BbRuntime.h"
 
 @implementation UIView (BbPatch)
 
@@ -97,6 +98,22 @@ CGFloat CGPointGetDistance(CGPoint point, CGPoint referencePoint)
     size1.width *= size2.width;
     size1.height *= size2.height;
     return size1;
+}
+
+- (BbViewType)myViewType
+{
+    SEL viewTypeSelector = NSSelectorFromString(@"viewTypeCode");
+    
+    if ( [self respondsToSelector:viewTypeSelector] ) {
+        id code = [NSInvocation doInstanceMethod:self selector:@"viewTypeCode" arguments:nil];
+        if ( [code isKindOfClass:[NSNumber class]] || [code isKindOfClass:[NSValue class]] ) {
+            return (BbViewType)[(NSNumber *)code integerValue];
+        }
+    }else if ( nil != self.superview ){
+        return [self.superview myViewType];
+    }
+    
+    return BbViewType_Unknown;
 }
 
 @end

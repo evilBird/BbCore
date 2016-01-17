@@ -26,23 +26,24 @@
 
 + (NSArray *)string2Array:(NSString *)string
 {
-    if ( nil == string ) {
-        return nil;
-    }
-    NSArray *components = [string componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    NSMutableArray *temp = [NSMutableArray array];
+    NSCharacterSet *whiteSpace = [NSCharacterSet whitespaceCharacterSet];
+    NSString *trimmedText = [string stringByTrimmingCharactersInSet:whiteSpace];
+    NSArray *components = [trimmedText componentsSeparatedByCharactersInSet:whiteSpace];
+    NSCharacterSet *digitsCharSet = [NSCharacterSet characterSetWithCharactersInString:@"0123456789.-+"];
+    NSCharacterSet *nonDigitsCharSet = [digitsCharSet invertedSet];
+    NSMutableArray *result = [NSMutableArray arrayWithCapacity:components.count];
     for (NSString *aComponent in components ) {
-        id argument = [BbHelpers stringComponent2Object:aComponent];
-        if ( nil != argument ) {
-            [temp addObject:argument];
+        NSString *trimmedComponent = [aComponent stringByTrimmingCharactersInSet:whiteSpace];
+        if ( [trimmedComponent rangeOfCharacterFromSet:nonDigitsCharSet].length > 0 ) {
+            [result addObject:trimmedComponent];
+        }else if ( [trimmedComponent rangeOfString:@"."].length > 0 ){
+            [result addObject:@([trimmedComponent doubleValue])];
+        }else{
+            [result addObject:@([trimmedComponent integerValue])];
         }
     }
     
-    if ( temp.count ) {
-        return [NSArray arrayWithArray:temp];
-    }
-    
-    return nil;
+    return [NSArray arrayWithArray:result];
 }
 
 + (NSString *)getSelectorFromArray:(NSArray *)array

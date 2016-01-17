@@ -136,6 +136,9 @@
     }else if ( [child isKindOfClass:[BbObject class]]){
         [self.childObjects addObject:child];
         child.parent = self;
+        if ( [child isKindOfClass:[BbPatchInlet class]] || [child isKindOfClass:[BbPatchOutlet class]] ) {
+            [self addObjectPortForPatchPort:child];
+        }
         return YES;
     }else{
         return NO;
@@ -176,6 +179,9 @@
     }else if ( [child isKindOfClass:[BbObject class]]){
         [self.childObjects removeObject:child];
         child.parent = nil;
+        if ( [child isKindOfClass:[BbPatchInlet class]] || [child isKindOfClass:[BbPatchOutlet class]] ) {
+            [self removeObjectPortForPatchPort:child];
+        }
         return YES;
     }else{
         return NO;

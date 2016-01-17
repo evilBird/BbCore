@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "BbObjectView.h"
 
 @interface UIView (BbPatch)
 
@@ -19,5 +20,7 @@ CGFloat CGPointGetDistance(CGPoint point, CGPoint referencePoint);
 - (CGPoint)position2Point:(CGPoint)position;
 - (CGPoint)offset2Point:(CGPoint)offset;
 - (CGSize)multiplySize:(CGSize)size1 withSize:(CGSize)size2;
+
+- (BbViewType)myViewType;
 
 @end

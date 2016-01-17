@@ -12,7 +12,7 @@
 
 @implementation BbPatch (Meta)
 
-+ (BbPatch *)patchWithDescription:(BbPatchDescription *)description
++ (BbPatch *)objectWithDescription:(BbPatchDescription *)description
 {
     BbPatch *patch = (BbPatch *)[NSInvocation doClassMethod:description.objectClass selector:@"alloc" arguments:nil];
     [NSInvocation doInstanceMethod:patch selector:@"initWithArguments:" arguments:description.objectArguments];
@@ -22,13 +22,9 @@
     
     if ( nil != description.childObjectDescriptions ) {
         for (id aDescription in description.childObjectDescriptions ) {
-            if ( [aDescription isKindOfClass:[BbPatchDescription class]] ) {
-                [patch addChildObject:[BbPatch patchWithDescription:aDescription]];
-            }else if ( [aDescription isKindOfClass:[BbObjectDescription class]]){
-                [patch addChildObject:[BbPatch objectWithDescription:aDescription]];
-            }else{
-                NSLog(@"Unhandled description: %@",aDescription);
-            }
+            NSString *className = [(BbObjectDescription *)aDescription objectClass];
+            id<BbObjectChild> child = [NSClassFromString(className) objectWithDescription:aDescription];
+            [patch addChildObject:child];
         }
     }
     
@@ -40,15 +36,6 @@
     }
     
     return patch;
-}
-
-+ (BbObject *)objectWithDescription:(BbObjectDescription *)description
-{
-    BbObject *object = (BbObject *)[NSInvocation doClassMethod:description.objectClass selector:@"alloc" arguments:nil];
-    [NSInvocation doInstanceMethod:object selector:@"initWithArguments:" arguments:description.objectArguments];
-    object.viewClass = description.viewClass;
-    object.viewArguments = description.viewArguments;
-    return object;
 }
 
 - (BbConnection *)connectionWithDescription:(BbConnectionDescription *)description

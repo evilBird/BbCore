@@ -48,6 +48,10 @@
 
 + (NSString *)symbolAlias;
 
++ (NSArray *)text2Array:(NSString *)text;
+
++ (BbObject *)objectWithDescription:(BbObjectDescription *)description;
+
 @end
 
 @interface BbObject (BbObject)
@@ -103,5 +107,7 @@
 @interface BbObject (BbObjectViewDelegate) <BbObjectViewDelegate>
 
 - (void)objectView:(id<BbObjectView>)sender didChangePosition:(NSValue *)position;
+
+- (void)objectView:(id<BbObjectView>)sender userEnteredText:(NSString *)text;
 
 @end

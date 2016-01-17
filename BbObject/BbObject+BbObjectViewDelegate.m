@@ -10,6 +10,12 @@
 
 @implementation BbObject (BbObjectViewDelegate)
 
+- (void)objectView:(id<BbObjectView>)sender userEnteredText:(NSString *)text
+{
+    self.objectArguments = [text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    NSLog(@"DO SOMETHING WITH TEXT: %@",text);
+}
+
 - (void)objectView:(id<BbObjectView>)sender didChangePosition:(NSValue *)position
 {
     [self setViewArguments:[BbHelpers updateViewArgs:self.viewArguments withPosition:position]];

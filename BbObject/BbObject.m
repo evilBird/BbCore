@@ -7,6 +7,7 @@
 //
 
 #import "BbObject.h"
+#import "BbTextDescription.h"
 
 static void     *BbObjectContextXX      =       &BbObjectContextXX;
 
@@ -64,6 +65,37 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 + (NSString *)viewClass
 {
     return @"BbView";
+}
+
++ (BbObject *)objectWithDescription:(BbObjectDescription *)description
+{
+    BbObject *object = (BbObject *)[NSInvocation doClassMethod:description.objectClass selector:@"alloc" arguments:nil];
+    [NSInvocation doInstanceMethod:object selector:@"initWithArguments:" arguments:description.objectArguments];
+    object.viewClass = description.viewClass;
+    object.viewArguments = description.viewArguments;
+    return object;
+}
+
++ (NSArray *)text2Array:(NSString *)text
+{
+    NSCharacterSet *whiteSpace = [NSCharacterSet whitespaceCharacterSet];
+    NSString *trimmedText = [text stringByTrimmingCharactersInSet:whiteSpace];
+    NSArray *components = [trimmedText componentsSeparatedByCharactersInSet:whiteSpace];
+    NSCharacterSet *digitsCharSet = [NSCharacterSet characterSetWithCharactersInString:@"0123456789.-+"];
+    NSCharacterSet *nonDigitsCharSet = [digitsCharSet invertedSet];
+    NSMutableArray *result = [NSMutableArray arrayWithCapacity:components.count];
+    for (NSString *aComponent in components ) {
+        NSString *trimmedComponent = [aComponent stringByTrimmingCharactersInSet:whiteSpace];
+        if ( [trimmedComponent rangeOfCharacterFromSet:nonDigitsCharSet].length > 0 ) {
+            [result addObject:trimmedComponent];
+        }else if ( [trimmedComponent rangeOfString:@"."].length > 0 ){
+            [result addObject:@([trimmedComponent doubleValue])];
+        }else{
+            [result addObject:@([trimmedComponent integerValue])];
+        }
+    }
+    
+    return [NSArray arrayWithArray:result];
 }
 
 - (void)dealloc

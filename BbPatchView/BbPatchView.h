@@ -7,18 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "BbBridge.h"
+#import "BbView.h"
 
-typedef NS_ENUM(NSInteger, BbPatchViewType){
-    BbPatchViewType_Unknown         =   -1,
-    BbPatchViewType_Patch           =   0,
-    BbPatchViewType_Object          =   1,
-    BbPatchViewType_Inlet           =   2,
-    BbPatchViewType_Outlet          =   3,
-    BbPatchViewType_ActionObject    =   4,
-    BbPatchViewType_ObjectSubview   =   5,
-    BbPatchViewType_PatchOutlet     =   6,
-};
 
 
 @protocol BbPatchViewEventDelegate <NSObject>
@@ -46,9 +36,9 @@ typedef NS_ENUM(NSInteger, BbPatchViewType){
 @property (nonatomic,weak)                  id<BbObjectViewEditingDelegate> delegate;
 
 
-- (void)redrawConnectionsIfNeeded;
-
 - (instancetype)initWithDataSource:(id<BbObjectViewDataSource>)dataSource;
+
+- (void)updateAppearance;
 
 @end
 
@@ -57,6 +47,7 @@ typedef NS_ENUM(NSInteger, BbPatchViewType){
 @end
 
 @interface BbPatchView (BbObjectView) <BbObjectView>
+
 
 - (void)layoutSubviews;
 

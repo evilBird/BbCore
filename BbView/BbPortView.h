@@ -7,7 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "BbBridge.h"
+#import "BbObjectView.h"
+#import "UIView+BbPatch.h"
+#import "UIView+Layout.h"
 
 static CGFloat kDefaultPortViewSpacing = 10;
 
@@ -31,8 +33,12 @@ static CGFloat kDefaultPortViewSpacing = 10;
 
 @interface BbInletView : BbPortView
 
+- (BbViewType)viewTypeCode;
+
 @end
 
 @interface BbOutletView : BbPortView
+
+- (BbViewType)viewTypeCode;
 
 @end
