@@ -44,7 +44,7 @@
     self.title = patchTitle;
     self.myPatchText = patchText;
     BbPatchDescription *description = [BbParseText parseText:self.myPatchText];
-    BbPatch *myPatch = [BbPatch patchWithDescription:description];
+    BbPatch *myPatch = [BbPatch objectWithDescription:description];
     BbPatchView *myPatchView = [[BbPatchView alloc]initWithDataSource:myPatch];
     myPatchView.delegate = myPatch;
     //myPatchView.translatesAutoresizingMaskIntoConstraints = NO;

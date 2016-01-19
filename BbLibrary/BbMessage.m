@@ -163,4 +163,10 @@
     NSLog(@"DO SOMETHING WITH TEXT: %@",text);
 }
 
+- (BOOL)objectView:(id<BbObjectView>)sender shouldEndEditingWithText:(NSString *)text
+{
+    text;
+    return YES;
+}
+
 @end

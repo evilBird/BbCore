@@ -25,7 +25,7 @@ typedef void (^BbPortOutputBlock)   (id value);
 static NSString *kOutputElement =   @"outputElement";
 static NSString *kInputElement  =   @"inputElement";
 
-@interface BbPort : NSObject
+@interface BbPort : NSObject <BbObject>
 
 @property   (nonatomic,weak)                id<BbObjectParent>                  parent;
 @property   (nonatomic,strong)              BbPortInputBlock                    inputBlock;
@@ -35,12 +35,26 @@ static NSString *kInputElement  =   @"inputElement";
 @property   (nonatomic)                     BbPortScope                         scope;
 @property   (nonatomic,strong)              id<BbObjectView>                    view;
 @property   (nonatomic,strong)              NSString                            *uniqueID;
+@property   (nonatomic,strong)              NSHashTable                         *observers;
 @property   (nonatomic,strong)              NSHashTable                         *observedPorts;
 
-
 - (void)commonInit;
+
 - (BOOL)connectToPort:(BbPort *)port;
+
 - (BOOL)disconnectFromPort:(BbPort *)port;
+
+#pragma mark - <BbObject>
+
+- (BOOL)startObservingObject:(id<BbObject>)object;
+
+- (BOOL)stopObservingObject:(id<BbObject>)object;
+
+- (BOOL)addObjectObserver:(id<BbObject>)object;
+
+- (BOOL)removeObjectObserver:(id<BbObject>)object;
+
+- (BOOL)removeAllObjectObservers;
 
 @end
 

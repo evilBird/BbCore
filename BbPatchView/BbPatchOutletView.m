@@ -23,7 +23,8 @@
 
 - (CGSize)intrinsicContentSize
 {
-    return CGSizeMake(kPatchOutletViewWidth, kPatchOutletViewHeight);
+    CGSize portSize = [BbPortView defaultPortViewSize];
+    return CGSizeMake(portSize.width*3, portSize.width*3);
 }
 
 - (void)setupOutletViews {}
@@ -40,7 +41,11 @@
         self.myFillColor = self.defaultFillColor;
         self.myBorderColor = self.defaultBorderColor;
     }
-    
+    self.backgroundColor = self.myFillColor;
+    self.layer.borderColor = self.myBorderColor.CGColor;
+    self.layer.borderWidth = 1.0;
+    [self invalidateIntrinsicContentSize];
+    //[self layoutIfNeeded];
     [self setNeedsDisplay];
 }
 

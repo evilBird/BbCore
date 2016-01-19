@@ -355,9 +355,9 @@
     CGSize labelSize = [BbAbstractView sizeForText:self.myTitleText attributes:[self myTextAttributes]];
     CGSize inletStackSize = [BbAbstractView sizeForPortViews:self.inletViews minimumSpacing:kDefaultPortViewSpacing];
     CGSize outletStackSize = [BbAbstractView sizeForPortViews:self.outletViews minimumSpacing:kDefaultPortViewSpacing];
-    
     CGSize size;
     size.height = labelSize.height+inletStackSize.height+outletStackSize.height;
+    
     CGFloat maxStackWidth = ( inletStackSize.width >= outletStackSize.width ) ? ( inletStackSize.width ) : ( outletStackSize.width );
     CGFloat maxLabelWidth = labelSize.width + [BbPortView defaultPortViewSize].width * 2;
     size.width = ( maxStackWidth >= maxLabelWidth ) ? ( maxStackWidth ) : ( maxLabelWidth );

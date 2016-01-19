@@ -30,15 +30,19 @@
 @property (nonatomic,getter=isOpen)         BOOL                            open;
 @property (nonatomic,strong)                NSHashTable                     *childViews;
 @property (nonatomic,strong)                NSHashTable                     *connections;
+@property (nonatomic,strong)                NSMapTable                      *pathConnectionMap;
 @property (nonatomic,strong)                NSString                        *pasteBoard;
 
 @property (nonatomic,weak)                  id<BbObjectViewDataSource>      dataSource;
-@property (nonatomic,weak)                  id<BbObjectViewEditingDelegate> delegate;
-
+@property (nonatomic,weak)                  id<BbObjectViewDelegate>        delegate;
+@property (nonatomic,weak)                  id<BbObjectViewEditingDelegate> editingDelegate;
 
 - (instancetype)initWithDataSource:(id<BbObjectViewDataSource>)dataSource;
-
 - (void)updateAppearance;
+
+- (void)cutSelected;
+- (void)copySelected;
+- (void)abstractCopied;
 
 @end
 

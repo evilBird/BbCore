@@ -82,6 +82,11 @@
     [self addChildObject:connection];
 }
 
+- (void)objectView:(id<BbObjectView>)sender didDeleteConnection:(id<BbConnection>)connection
+{
+    [self removeChildObject:(id<BbObjectChild>)connection];
+}
+
 - (void)objectView:(id<BbObjectView>)sender didDisconnectPortView:(id<BbObjectView>)sendingPortView fromPortView:(id<BbObjectView>)receivingPortView
 {
     BbPort *sendingPort = (BbPort *)[sendingPortView dataSource];
@@ -157,6 +162,11 @@
     }
     
     NSString *symbol = [self.symbolTable BbText:self symbolForKeyword:searchResults.firstObject];
+    
+    if ( nil == symbol ) {
+        return;
+    }
+    
     NSString *viewClass = [NSInvocation doClassMethod:symbol selector:@"viewClass" arguments:nil];
     NSString *oldViewClass = NSStringFromClass([objectView class]);
     NSMutableArray *mutableTextArray = textArray.mutableCopy;
@@ -169,8 +179,8 @@
     [viewArgArray addObject:[BbHelpers updateViewArgs:@"0 0" withPosition:position]];
     NSString *viewArgs = [viewArgArray componentsJoinedByString:@" "];
 
-    BbObjectDescription *objectDescription = [BbObjectDescription objectDescriptionWithArgs:objectArgs viewArgs:viewArgs];
-    BbObject *object = [BbPatch objectWithDescription:objectDescription];
+    id objectDescription = [BbObjectDescription objectDescriptionWithArgs:objectArgs viewArgs:viewArgs];
+    BbObject *object = [NSClassFromString(symbol) objectWithDescription:objectDescription];
     [self addChildObject:object];
     
     if ( [viewClass isEqualToString:oldViewClass] ) {
@@ -183,6 +193,8 @@
         [object.view setDelegate:object];
         [object.view setDataSource:object];
         [self.view addChildObjectView:object.view];
+        [object.view updateAppearance];
+        
         [self.view updateAppearance];
     }
 }

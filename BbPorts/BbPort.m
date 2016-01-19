@@ -41,7 +41,7 @@ static void *BbPortObservationContextXX     =       &BbPortObservationContextXX;
     self.outputBlock = nil;
     _inputElement = nil;
     _outputElement = nil;
-    self.observedPorts = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
+    self.observers = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
     self.validKeyPathArray = @[kOutputElement, kInputElement];
     self.validKeyPaths = [NSSet setWithArray:self.validKeyPathArray];
     [self addObserver:self forKeyPath:kInputElement options:NSKeyValueObservingOptionNew context:BbPortObservationContextXX];
@@ -50,47 +50,13 @@ static void *BbPortObservationContextXX     =       &BbPortObservationContextXX;
 
 - (BOOL)connectToPort:(BbPort *)port
 {
-    if ( [port.observedPorts containsObject:self] ) {
-        return NO;
-    }
-    
-    [self addObserver:port forKeyPath:kOutputElement options:NSKeyValueObservingOptionNew context:BbPortObservationContextXX];
-    [port.observedPorts addObject:self];
+    [self addObjectObserver:port];
     return YES;
 }
 
 - (BOOL)disconnectFromPort:(BbPort *)port
 {
-    if ( ![port.observedPorts containsObject:self] ) {
-        return NO;
-    }
-    
-    [self removeObserver:port forKeyPath:kOutputElement context:BbPortObservationContextXX];
-    [port.observedPorts removeObject:self];
-    return YES;
-}
-
-
-- (BOOL)connectToElement:(BbPortElement)element ofPort:(BbPort *)portToObserve
-{
-    if ( [self.observedPorts containsObject:portToObserve] ) {
-        return NO;
-    }
-    
-    NSString *keyPath = ( element == BbPortElement_Output ) ? ( kOutputElement ) : ( kInputElement );
-    [portToObserve addObserver:self forKeyPath:keyPath options:NSKeyValueObservingOptionNew context:BbPortObservationContextXX];
-    [self.observedPorts addObject:portToObserve];
-    return YES;
-}
-
-- (BOOL)disconnectFromElement:(BbPortElement)element ofPort:(BbPort *)portToObserve
-{
-    if ( ![self.observedPorts containsObject:portToObserve] ) {
-        return NO;
-    }
-    NSString *keyPath = ( element == BbPortElement_Output ) ? ( kOutputElement ) : ( kInputElement );
-    [portToObserve removeObserver:self forKeyPath:keyPath context:BbPortObservationContextXX];
-    [self.observedPorts removeObject:portToObserve];
+    [self removeObjectObserver:port];
     return YES;
 }
 
@@ -130,13 +96,8 @@ static void *BbPortObservationContextXX     =       &BbPortObservationContextXX;
     
     [self removeObserver:self forKeyPath:kInputElement context:BbPortObservationContextXX];
     [self removeObserver:self forKeyPath:kOutputElement context:BbPortObservationContextXX];
-    if ( _observedPorts.allObjects.count ) {
-        NSMutableArray *observedPorts = _observedPorts.allObjects.mutableCopy;
-        
-        for (BbPort *anObservedPort in observedPorts ) {
-            [anObservedPort disconnectFromPort:self];
-        }
-    }
+    
+    [self removeAllObjectObservers];
     
     _observedPorts = nil;
     _inputBlock = nil;
@@ -145,6 +106,55 @@ static void *BbPortObservationContextXX     =       &BbPortObservationContextXX;
     _outputElement = nil;
 }
 
+#pragma mark - <BbObject>
+
+- (BOOL)startObservingObject:(id<BbObject>)object
+{
+    NSObject *obj = (NSObject *)object;
+    [obj addObserver:self forKeyPath:@"outputElement" options:NSKeyValueObservingOptionNew context:BbPortObservationContextXX];
+    return YES;
+}
+
+- (BOOL)stopObservingObject:(id<BbObject>)object
+{
+    NSObject *obj = (NSObject *)object;
+    [obj removeObserver:self forKeyPath:@"outputElement" context:BbPortObservationContextXX];
+    return YES;
+}
+
+- (BOOL)addObjectObserver:(id<BbObject>)object
+{
+    if ( [self.observers containsObject:object] ) {
+        return NO;
+    }
+    [self.observers addObject:object];
+    [object startObservingObject:self];
+    return YES;
+}
+
+- (BOOL)removeObjectObserver:(id<BbObject>)object
+{
+    if ( ![self.observers containsObject:object] ) {
+        return NO;
+    }
+    
+    [self.observers removeObject:object];
+    return [object stopObservingObject:(id<BbObject>)self];
+}
+
+- (BOOL)removeAllObjectObservers
+{
+    if ( !self.observers.count ) {
+        return YES;
+    }
+    
+    NSMutableArray *observers = self.observers.allObjects.mutableCopy;
+    for (id<BbObject>anObserver in observers ) {
+        [self removeObjectObserver:anObserver];
+    }
+    
+    return YES;
+}
 
 @end
 

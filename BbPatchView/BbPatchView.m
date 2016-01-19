@@ -63,11 +63,49 @@ static CGFloat              kMaxMovement          = 20.0;
     [self addGestureRecognizer:self.gesture];
     self.childViews = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
     self.connections = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
+    self.pathConnectionMap = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsWeakMemory valueOptions:NSPointerFunctionsWeakMemory];
 }
 
 - (BbViewType)viewTypeCode
 {
     return BbViewType_Patch;
+}
+
+- (void)setEditState:(BbObjectViewEditState)editState
+{
+    BbObjectViewEditState prevState = _editState;
+    _editState = editState;
+    if ( _editState != prevState ) {
+        [self.editingDelegate objectView:self didChangeEditState:_editState];
+    }
+}
+
+- (void)cutSelected
+{
+    NSArray *selectedConnections = [self getSelectedConnections];
+    if ( nil != selectedConnections ) {
+        for (id<BbConnection> aConnection in selectedConnections ) {
+            [self.delegate objectView:self didDeleteConnection:aConnection];
+        }
+    }
+    
+    NSArray *selectedObjects = [self getSelectedObjects];
+    if ( nil != selectedObjects ) {
+        for (id <BbObjectView> childObjectView in selectedObjects ) {
+            [self.delegate objectView:self didRemoveChildObjectView:childObjectView];
+        }
+    }
+    
+}
+
+- (void)copySelected
+{
+    
+}
+
+- (void)abstractCopied
+{
+    
 }
 
 #pragma mark - Gestures
@@ -104,46 +142,102 @@ static CGFloat              kMaxMovement          = 20.0;
 
 - (void)handleGestureBegan:(BbPatchGestureRecognizer *)gesture
 {
-    BOOL isEditing = ( self.editState > BbObjectViewEditState_Default );
-
     switch (gesture.currentViewType) {
         
         case BbViewType_Object:
         {
+            switch ( self.editState ) {
+                case BbObjectViewEditState_Editing:
+                case BbObjectViewEditState_Selected:
+                case BbObjectViewEditState_Copied:
+                {
+                    if ( [gesture.currentView isSelected] ) {
+                        [gesture.currentView setSelected:NO];
+                    }else{
+                        [gesture.currentView setSelected:YES];
+                    }
+                }
+                    break;
+                    
+                default:
+                {
+                    [self.eventDelegate patchView:self setScrollViewShouldBegin:NO];
+                    self.selectedObject = gesture.currentView;
+                }
+                    break;
+            }
             //Select view and prepare to pan or move
-            [self.eventDelegate patchView:self setScrollViewShouldBegin:NO];
-            self.selectedObject = gesture.currentView;
 
         }
             break;
         case BbViewType_Outlet:
         {
-            if ( isEditing ) {
-                [gesture stopTracking];
-                return;
+            switch ( self.editState ) {
+                case BbObjectViewEditState_Editing:
+                case BbObjectViewEditState_Selected:
+                case BbObjectViewEditState_Copied:
+                {
+                    [gesture stopTracking];
+                    return;
+                }
+                    break;
+                    
+                default:
+                {
+                    //Select outlet and prepare to draw connection
+                    [self.eventDelegate patchView:self setScrollViewShouldBegin:NO];
+                    self.selectedOutlet = gesture.currentView;
+                }
+                    break;
             }
-            //Select outlet and prepare to draw connection
-            [self.eventDelegate patchView:self setScrollViewShouldBegin:NO];
-            self.selectedOutlet = gesture.currentView;
             
         }
             break;
         case BbViewType_Control:
         {
             [self.eventDelegate patchView:self setScrollViewShouldBegin:NO];
-            
-            if ( ! isEditing && ! gesture.currentView.isEditing ) {
-                //send object actions
-                [[gesture.currentView delegate]sendActionsForObjectView:gesture.currentView];
-                self.selectedObject = gesture.currentView;
+            switch ( self.editState ) {
+                case BbObjectViewEditState_Editing:
+                case BbObjectViewEditState_Selected:
+                case BbObjectViewEditState_Copied:
+                {
+                    if ( gesture.currentView.isSelected ) {
+                        [gesture.currentView setSelected:NO];
+                    }else{
+                        [gesture.currentView setSelected:YES];
+                    }
+                }
+                    break;
+                    
+                default:
+                {
+                    if ( ! gesture.currentView.isEditing ){
+                        [[gesture.currentView delegate]sendActionsForObjectView:gesture.currentView];
+                        self.selectedObject = gesture.currentView;
+                    }
+                }
+                    break;
             }
         }
             break;
         case BbViewType_Patch:
         {
-            if ( !gesture.repeatCount ) {
-                [gesture stopTracking];
-                [self.eventDelegate patchView:self setScrollViewShouldBegin:YES];
+            switch ( self.editState ) {
+                case BbObjectViewEditState_Editing:
+                case BbObjectViewEditState_Selected:
+                case BbObjectViewEditState_Copied:
+                {
+                }
+                    break;
+                    
+                default:
+                {
+                    if ( !gesture.repeatCount ) {
+                        [gesture stopTracking];
+                        [self.eventDelegate patchView:self setScrollViewShouldBegin:YES];
+                    }
+                }
+                    break;
             }
         }
             break;
@@ -159,16 +253,27 @@ static CGFloat              kMaxMovement          = 20.0;
 
 - (void)handleGestureMoved:(BbPatchGestureRecognizer *)gesture
 {
-    
-    BOOL isEditing = ( self.editState > BbObjectViewEditState_Default );
-    
     switch (gesture.currentViewType) {
             
         case BbViewType_Inlet:
         {
-            if ( !isEditing && nil != self.selectedOutlet ) {
-                self.selectedInlet = gesture.currentView;
-                [self updateAppearance];
+            switch ( self.editState ) {
+                case BbObjectViewEditState_Editing:
+                case BbObjectViewEditState_Selected:
+                case BbObjectViewEditState_Copied:
+                {
+                    
+                }
+                    break;
+                    
+                default:
+                {
+                    if ( nil != self.selectedOutlet ) {
+                        self.selectedInlet = gesture.currentView;
+                        [self updateAppearance];
+                    }
+                }
+                    break;
             }
         }
             break;
@@ -181,30 +286,53 @@ static CGFloat              kMaxMovement          = 20.0;
                 case BbViewType_Control:
                 case BbViewType_Object:
                 {
-                    if ( !isEditing && nil == self.selectedObject ) {
-                        [gesture stopTracking];
-                        return;
-                    }
-                    if ( isEditing ) {
-                        NSArray *selected = [self getSelectedObjects];
-                        //Move selected
-                    }else if ( nil != self.selectedObject ){
-                        CGPoint point = gesture.firstView.center;
-                        point.x+=gesture.deltaLocation.x;
-                        point.y+=gesture.deltaLocation.y;
-                        [gesture.firstView moveToPoint:point];
-                        [self updateAppearance];
+                    switch ( self.editState ) {
+                        case BbObjectViewEditState_Editing:
+                        case BbObjectViewEditState_Selected:
+                        case BbObjectViewEditState_Copied:
+
+                            break;
+                            
+                        default:
+                        {
+                            if ( nil == self.selectedObject ) {
+                                [gesture stopTracking];
+                                return;
+                            }else{
+                                    CGPoint point = gesture.firstView.center;
+                                    point.x+=gesture.deltaLocation.x;
+                                    point.y+=gesture.deltaLocation.y;
+                                    [gesture.firstView moveToPoint:point];
+                                    [self updateAppearance];
+                            }
+                        }
+                            break;
                     }
                 }
                     break;
                 case BbViewType_Outlet:
                 {
-                    if ( !isEditing ) {
-                        //Draw connection
-                        [self updateAppearance];
+                    switch ( self.editState ) {
+                        case BbObjectViewEditState_Editing:
+                        case BbObjectViewEditState_Selected:
+                        case BbObjectViewEditState_Copied:
+                        {
+                            
+                        }
+                            break;
+                            
+                        default:
+                        {
+                            [self updateAppearance];
+                        }
+                            break;
                     }
                 }
                     break;
+                case BbViewType_Patch:
+                {
+                    
+                }
                     
                 default:
                     
@@ -217,46 +345,125 @@ static CGFloat              kMaxMovement          = 20.0;
 
 - (void)handleGestureEnded:(BbPatchGestureRecognizer *)gesture
 {
-    
-    BOOL isEditing = ( self.editState > BbObjectViewEditState_Default );
-
     switch ( gesture.currentViewType ) {
             
         case BbViewType_Inlet:
         {
-            if ( !isEditing && nil != self.selectedInlet && nil != self.selectedOutlet ) {
-                //make connection
-                [self.delegate objectView:self didConnectPortView:self.selectedOutlet toPortView:self.selectedInlet];
+            switch ( self.editState ) {
+                case BbObjectViewEditState_Editing:
+                case BbObjectViewEditState_Selected:
+                case BbObjectViewEditState_Copied:
+                {
+                    
+                }
+                    break;
+                    
+                default:
+                {
+                    if ( nil != self.selectedInlet && nil != self.selectedOutlet ) {
+                        //make connection
+                        [self.delegate objectView:self didConnectPortView:self.selectedOutlet toPortView:self.selectedInlet];
+                    }
+                }
+                    break;
             }
         }
             break;
         case BbViewType_Patch:
         {
-            if ( !isEditing && gesture.repeatCount && gesture.movement < kMaxMovement ) {
-                // add box
-                id <BbObjectView> placeholder = [BbView<BbObjectView> createPlaceholder];
-                [self addChildObjectView:placeholder];
-                [placeholder moveToPoint:gesture.location];
-                [self.delegate objectView:self didAddChildObjectView:placeholder];
+            switch ( self.editState ) {
+                case BbObjectViewEditState_Editing:
+                case BbObjectViewEditState_Selected:
+                case BbObjectViewEditState_Copied:
+                {
+                    BOOL updateSelected = NO;
+                    for (id<BbConnection> aConnection in self.connections.allObjects ) {
+                        UIBezierPath *path = aConnection.path;
+                        if ( [self bezierPath:path containsPoint:gesture.location] ) {
+                            if ( aConnection.isSelected ) {
+                                [aConnection setSelected:NO];
+                            }else{
+                                [aConnection setSelected:YES];
+                            }
+                            updateSelected = YES;
+                        }
+                    }
+                    
+                    if ( updateSelected ) {
+                        NSArray *selectedConnections = [self getSelectedConnections];
+                        if ( nil != selectedConnections && selectedConnections.count ) {
+                            if ( self.editState == BbObjectViewEditState_Editing ) {
+                                self.editState = BbObjectViewEditState_Selected;
+                            }
+                        }else{
+                            if ( self.editState == BbObjectViewEditState_Selected ) {
+                                self.editState = BbObjectViewEditState_Default;
+                            }
+                        }
+                    }
+                    
+                }
+                    break;
+                    
+                default:
+                {
+                    if ( gesture.repeatCount && gesture.movement < kMaxMovement ) {
+                        // add box
+                        id <BbObjectView> placeholder = [BbView<BbObjectView> createPlaceholder];
+                        [self addChildObjectView:placeholder];
+                        [placeholder moveToPoint:gesture.location];
+                        [self.delegate objectView:self didAddChildObjectView:placeholder];
+                    }
+                }
+                    break;
             }
         }
             break;
         case BbViewType_Object:
         case BbViewType_Control:
         {
-            if ( !isEditing ) {
-                
-                if ( gesture.repeatCount && gesture.movement < kMaxMovement ) {
-                    //show box options
-                    BOOL canOpen = [self.dataSource objectView:self canOpenChildView:gesture.currentView];
-                    BOOL canGetHelp = [self.dataSource objectView:self canOpenHelpObjectForChildView:gesture.currentView];
-                    BOOL canTest = [self.dataSource objectView:self canTestObjectForChildView:gesture.currentView];
+            switch ( self.editState ) {
+                case BbObjectViewEditState_Editing:
+                {
+                    NSArray *selected = [self getSelectedObjects];
+                    if ( nil != selected && selected.count ) {
+                        self.editState = BbObjectViewEditState_Selected;
+                    }
                     
-                }else if ( gesture.duration > kLongPressMinDuration  && gesture.movement < kMaxMovement ){
-                    //edit box
-                    gesture.currentView.editing = [self.delegate objectViewShouldBeginEditing:gesture.currentView];
                 }
+                    break;
+                case BbObjectViewEditState_Selected:
+                {
+                    NSArray *selected = [self getSelectedObjects];
+                    if ( nil == selected || !selected.count ) {
+                        self.editState = BbObjectViewEditState_Editing;
+                    }
+                }
+                case BbObjectViewEditState_Copied:
+                {
+                    
+                }
+                    break;
+                    
+                default:
+                {
+                    if ( gesture.repeatCount && gesture.movement < kMaxMovement ) {
+                        //show box options
+                        BOOL canOpen = [self.dataSource objectView:self canOpenChildView:gesture.currentView];
+                        BOOL canGetHelp = [self.dataSource objectView:self canOpenHelpObjectForChildView:gesture.currentView];
+                        BOOL canTest = [self.dataSource objectView:self canTestObjectForChildView:gesture.currentView];
+                        
+                    }else if ( gesture.duration > kLongPressMinDuration  && gesture.movement < kMaxMovement ){
+                        //edit box
+                        if ( !gesture.currentView.isEditing && [gesture.currentView canEdit] ) {
+                            gesture.currentView.editingDelegate = (id<BbObjectViewEditingDelegate>)self.delegate;
+                            gesture.currentView.editing = YES;
+                        }
+                    }
+                }
+                    break;
             }
+            
         }
             break;
         default:
@@ -335,6 +542,13 @@ static CGFloat              kMaxMovement          = 20.0;
     return [children filteredArrayUsingPredicate:pred];
 }
 
+- (NSArray *)getSelectedConnections
+{
+    NSArray *connections = self.connections.allObjects;
+    NSPredicate *pred = [NSPredicate predicateWithFormat:@"%K == 1",@"selected"];
+    return [connections filteredArrayUsingPredicate:pred];
+}
+
 #pragma mark - Connections
 
 - (void)addConnection:(id<BbConnection>)connection
@@ -384,17 +598,18 @@ static CGFloat              kMaxMovement          = 20.0;
         [self.activeConnection stroke];
     }
     
-    if ( self.connections.allObjects.count ) {
+    if ( self.connections.allObjects.count ) {        
         for (id<BbConnection> connection in self.connections ) {
             if (nil != [connection inletView] && nil != [connection outletView] ){
-               CGPoint origin = [self convertPoint:[connection outletView].center fromView:[connection outletView].superview];
+                CGPoint origin = [self convertPoint:[connection outletView].center fromView:[connection outletView].superview];
                 CGPoint terminus = [self convertPoint:[connection inletView].center fromView:[connection inletView].superview];
                 UIBezierPath *path = [UIBezierPath bezierPath];
                 [path moveToPoint:origin];
                 [path addLineToPoint:terminus];
-                [path setLineWidth:6];
-                [[UIColor blackColor] setStroke];
+                [path setLineWidth:[connection strokeWidth]];
+                [[connection strokeColor] setStroke];
                 [path stroke];
+                connection.path = path;
             }
         }
         

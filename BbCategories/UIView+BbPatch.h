@@ -20,7 +20,7 @@ CGFloat CGPointGetDistance(CGPoint point, CGPoint referencePoint);
 - (CGPoint)position2Point:(CGPoint)position;
 - (CGPoint)offset2Point:(CGPoint)offset;
 - (CGSize)multiplySize:(CGSize)size1 withSize:(CGSize)size2;
-
+- (BOOL)bezierPath:(UIBezierPath *)path containsPoint:(CGPoint)point;
 - (BbViewType)myViewType;
 
 @end

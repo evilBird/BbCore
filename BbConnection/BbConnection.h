@@ -20,8 +20,15 @@
 @property (nonatomic,strong)                            NSString                                *senderID;
 @property (nonatomic,strong)                            NSString                                *receiverID;
 
+@property (nonatomic,strong)                            UIBezierPath                            *path;
+@property (nonatomic,readonly)                          UIColor                                 *strokeColor;
+@property (nonatomic,readonly)                          CGFloat                                 strokeWidth;
+
 @property (nonatomic)                                   BOOL                                    needsRedraw;
 @property (nonatomic,getter=isValid)                    BOOL                                    valid;
+@property (nonatomic,getter=isSelected)                 BOOL                                    selected;
+
+
 
 - (instancetype)initWithSender:(id<BbObjectChild>)sender
                       receiver:(id<BbObjectChild>)receiver;

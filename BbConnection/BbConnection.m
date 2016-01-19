@@ -65,6 +65,20 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
 
 #pragma mark - BbConnection Protocol
 
+- (UIColor *)strokeColor
+{
+    if ( self.isSelected ) {
+        return [UIColor colorWithWhite:0.4 alpha:1.0];
+    }
+    
+    return [UIColor blackColor];
+}
+
+- (CGFloat)strokeWidth
+{
+    return 6.0;
+}
+
 - (UIView *)parentView
 {
     return (UIView *)[self.parent view];

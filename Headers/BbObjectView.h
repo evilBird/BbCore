@@ -37,6 +37,7 @@ typedef NS_ENUM(NSInteger, BbViewType){
 };
 
 @protocol BbObjectView;
+@protocol BbConnection;
 
 @protocol BbObjectViewDataSource <NSObject>
 
@@ -102,6 +103,8 @@ typedef NS_ENUM(NSInteger, BbViewType){
 
 - (void)objectView:(id<BbObjectView>)sender didConnectPortView:(id<BbObjectView>)sendingPortView toPortView:(id<BbObjectView>)receivingPortView;
 
+- (void)objectView:(id<BbObjectView>)sender didDeleteConnection:(id<BbConnection>)connection;
+
 - (void)objectView:(id<BbObjectView>)sender didDisconnectPortView:(id<BbObjectView>)sendingPortView fromPortView:(id<BbObjectView>)receivingPortView;
 
 #pragma mark - Target/Action type methods
@@ -161,6 +164,13 @@ typedef NS_ENUM(NSInteger, BbViewType){
 - (UIView *)parentView;
 - (UIView *)inletView;
 - (UIView *)outletView;
+
+@optional
+
+@property   (nonatomic,strong)              UIBezierPath        *path;
+@property   (nonatomic,getter=isSelected)   BOOL                selected;
+@property   (nonatomic,readonly)            UIColor             *strokeColor;
+@property   (nonatomic,readonly)            CGFloat             strokeWidth;
 
 @end
 

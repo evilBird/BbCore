@@ -8,9 +8,6 @@
 
 #import "BbAbstractView.h"
 
-static CGFloat kPatchInletViewWidth = 44;
-static CGFloat kPatchInletViewHeight = 30;
-
 @interface BbPatchInletView : BbAbstractView
 
 @end

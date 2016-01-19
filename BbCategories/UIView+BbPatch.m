@@ -100,6 +100,13 @@ CGFloat CGPointGetDistance(CGPoint point, CGPoint referencePoint)
     return size1;
 }
 
+- (BOOL)bezierPath:(UIBezierPath *)path containsPoint:(CGPoint)point
+{
+    CGPathRef pathRef = path.CGPath;
+    CGRect boundingRect = CGPathGetBoundingBox(pathRef);
+    return CGRectContainsPoint(boundingRect, point);
+}
+
 - (BbViewType)myViewType
 {
     SEL viewTypeSelector = NSSelectorFromString(@"viewTypeCode");

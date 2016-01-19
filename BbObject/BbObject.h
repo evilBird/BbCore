@@ -111,3 +111,4 @@
 - (void)objectView:(id<BbObjectView>)sender userEnteredText:(NSString *)text;
 
 @end
+

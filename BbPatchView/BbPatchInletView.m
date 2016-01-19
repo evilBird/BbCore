@@ -20,12 +20,20 @@
     BbOutletView *outletView = self.outletViews.firstObject;
     [self addSubview:outletView];
     [self addConstraint:[outletView pinEdge:LayoutEdge_Left toSuperviewEdge:LayoutEdge_Left]];
-    [self addConstraint:[outletView pinEdge:LayoutEdge_Top toSuperviewEdge:LayoutEdge_Top]];
+    [self addConstraint:[outletView pinEdge:LayoutEdge_Bottom toSuperviewEdge:LayoutEdge_Bottom]];
 }
 
 - (CGSize)intrinsicContentSize
 {
-    return CGSizeMake(kPatchInletViewWidth, kPatchInletViewHeight);
+    CGSize portSize = [BbPortView defaultPortViewSize];
+    return CGSizeMake(portSize.width*3, portSize.width*3);
+}
+
+- (void)calculateSpacingAndContentSize
+{
+    CGSize portSize = [BbPortView defaultPortViewSize];
+    self.myContentSize = CGSizeMake(portSize.width*3, portSize.width*3);
+    [self invalidateIntrinsicContentSize];
 }
 
 - (void)updateAppearance
@@ -40,7 +48,11 @@
         self.myFillColor = self.defaultFillColor;
         self.myBorderColor = self.defaultBorderColor;
     }
-    
+    self.backgroundColor = self.myFillColor;
+    self.layer.borderColor = self.myBorderColor.CGColor;
+    self.layer.borderWidth = 1.0;
+    [self invalidateIntrinsicContentSize];
+    //[self layoutIfNeeded];
     [self setNeedsDisplay];
 }
 
