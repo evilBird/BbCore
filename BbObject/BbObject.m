@@ -13,7 +13,6 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 
 @interface BbObject ()
 
-
 @end
 
 @implementation BbObject
@@ -22,7 +21,7 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 {
     self = [super init];
     if ( self ) {
-        _objectArguments = arguments;
+        _creationArguments = arguments;
         [self commonInit];
         [self setupPorts];
         [self setupWithArguments:arguments];
@@ -33,21 +32,24 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 
 - (void)commonInit
 {
-    self.uniqueID = [BbHelpers createUniqueIDString];
+    self.displayText = nil;
+    self.userText = nil;
+    
+    self.uniqueID = [NSString uniqueIDString];
     self.inlets = [NSMutableArray array];
     self.outlets = [NSMutableArray array];
-    self.observers = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
+    self.entityObservers = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
 }
 
 - (void)setupPorts
 {
     BbInlet *hotInlet = [[BbInlet alloc]init];
-    hotInlet.hotInlet = YES;
-    [self addChildObject:hotInlet];
+    hotInlet.hot = YES;
+    [self addChildEntity:hotInlet];
     BbInlet *coldInlet = [[BbInlet alloc]init];
-    [self addChildObject:coldInlet];
+    [self addChildEntity:coldInlet];
     BbOutlet *mainOutlet = [[BbOutlet alloc]init];
-    [self addChildObject:mainOutlet];
+    [self addChildEntity:mainOutlet];
     hotInlet.outputBlock = ^(id value){
         mainOutlet.inputElement = value;
     };
@@ -71,258 +73,343 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 {
     BbObject *object = (BbObject *)[NSInvocation doClassMethod:description.objectClass selector:@"alloc" arguments:nil];
     [NSInvocation doInstanceMethod:object selector:@"initWithArguments:" arguments:description.objectArguments];
-    object.viewClass = description.viewClass;
     object.viewArguments = description.viewArguments;
     return object;
 }
 
-+ (NSArray *)text2Array:(NSString *)text
+- (NSUInteger)hash
 {
-    NSCharacterSet *whiteSpace = [NSCharacterSet whitespaceCharacterSet];
-    NSString *trimmedText = [text stringByTrimmingCharactersInSet:whiteSpace];
-    NSArray *components = [trimmedText componentsSeparatedByCharactersInSet:whiteSpace];
-    NSCharacterSet *digitsCharSet = [NSCharacterSet characterSetWithCharactersInString:@"0123456789.-+"];
-    NSCharacterSet *nonDigitsCharSet = [digitsCharSet invertedSet];
-    NSMutableArray *result = [NSMutableArray arrayWithCapacity:components.count];
-    for (NSString *aComponent in components ) {
-        NSString *trimmedComponent = [aComponent stringByTrimmingCharactersInSet:whiteSpace];
-        if ( [trimmedComponent rangeOfCharacterFromSet:nonDigitsCharSet].length > 0 ) {
-            [result addObject:trimmedComponent];
-        }else if ( [trimmedComponent rangeOfString:@"."].length > 0 ){
-            [result addObject:@([trimmedComponent doubleValue])];
-        }else{
-            [result addObject:@([trimmedComponent integerValue])];
-        }
-    }
-    
-    return [NSArray arrayWithArray:result];
+    return [_uniqueID hash];
+}
+
+- (BOOL)isEqual:(id)object
+{
+    return ([self hash] == [object hash]);
 }
 
 - (void)dealloc
 {
-    
-    [self removeAllObjectObservers];
-    
-    for (BbInlet *anInlet in _inlets.mutableCopy ) {
-        [self removeChildObject:anInlet];
+    [self removeAllEntityObservers];
+    [self unloadView];
+
+    for (id<BbEntity> anInlet in _inlets.mutableCopy ) {
+        [self removeChildEntity:anInlet];
     }
     _inlets = nil;
     
-    for (BbOutlet *anOutlet in _outlets.mutableCopy ) {
-        [self removeChildObject:anOutlet];
+    for (id<BbEntity> anOutlet in _outlets.mutableCopy ) {
+        [self removeChildEntity:anOutlet];
     }
     
     _outlets = nil;
     
-    if ( nil != _view ) {
-        [_view removeFromSuperview];
-    }
-    
-    _view = nil;
 }
 
 @end
 
+#pragma mark - BbObject (BbEntityProtocol)
 
-#pragma mark - BbObject
+@implementation BbObject (BbEntityProtocol)
 
-@implementation BbObject (BbObject)
-
-- (BOOL)addObjectObserver:(id<BbObject>)object
+- (BOOL)addEntityObserver:(id<BbEntity>)entity
 {
-    if ( [self.observers containsObject:object] ) {
+    if ( [self.entityObservers containsObject:entity] ) {
         return NO;
     }
-    [self.observers addObject:object];
-    [object startObservingObject:self];
+    [self.entityObservers addObject:entity];
+    [entity startObservingEntity:self];
     return YES;
 }
 
-- (BOOL)removeObjectObserver:(id<BbObject>)object
+- (BOOL)removeEntityObserver:(id<BbEntity>)entity
 {
-    if ( ![self.observers containsObject:object] ) {
+    if ( ![self.entityObservers containsObject:entity] ) {
         return NO;
     }
     
-    [self.observers removeObject:object];
-    return [object stopObservingObject:(id<BbObject>)self];
+    [self.entityObservers removeObject:entity];
+    return [entity stopObservingEntity:self];
 }
 
-- (BOOL)removeAllObjectObservers{
-    if ( !self.observers.count ) {
+- (BOOL)startObservingEntity:(id<BbEntity>)entity
+{
+    return NO;
+}
+
+- (BOOL)stopObservingEntity:(id<BbEntity>)entity
+{
+    return NO;
+}
+
+- (BOOL)removeAllEntityObservers
+{
+    if ( !self.entityObservers.count ) {
         return YES;
     }
     
-    NSMutableArray *observers = self.observers.allObjects.mutableCopy;
-    for (id<BbObject>anObserver in observers ) {
-        [self removeObjectObserver:anObserver];
+    NSMutableArray *observers = self.entityObservers.allObjects.mutableCopy;
+    for (id<BbEntity>anObserver in observers ) {
+        [self removeEntityObserver:anObserver];
     }
     
     return YES;
 }
 
-- (void)loadBang
+- (BOOL)isChildOfEntity:(id<BbEntity>)entity
 {
+    if ( nil == self.parent ) {
+        return NO;
+    }
     
+    return ( self.parent == entity );
 }
 
-@end
-
-#pragma mark - BbObjectChild
-
-@implementation BbObject (BbObjectChild)
-
-- (BOOL)loadView
+- (NSUInteger)indexInParentEntity
 {
-    self.view = [NSInvocation doClassMethod:[[self class] viewClass] selector:@"createViewWithDataSource:" arguments:self];
-    self.view.delegate = self;
-    if ( nil != self.view ) {
-        
-        for (NSUInteger i = 0 ; i < self.inlets.count ; i ++ ) {
-            id<BbObjectView> view = [self.view viewForInletAtIndex:i];
-            [self.inlets[i]setView:view];
-            [view setDataSource:self.inlets[i]];
+    if ( nil == self.parent ){
+        return BbIndexInParentNotFound;
+    }
+    
+    return [self.parent indexOfChildEntity:self];
+}
+
+- (BOOL)isParentOfEntity:(id<BbEntity>)entity
+{
+    if ( nil == entity ) {
+        return NO;
+    }
+    
+    if ( [entity isKindOfClass:[BbInlet class]] ) {
+        if ( nil == self.inlets || self.inlets.count == 0 ) {
+            return NO;
+        }else{
+            NSSet *inletsSet = [NSSet setWithArray:self.inlets];
+            return [inletsSet containsObject:entity];
         }
         
-        for (NSUInteger i = 0; i < self.outlets.count; i++) {
-            id<BbObjectView> view = [self.view viewForOutletAtIndex:i];
-            [self.outlets[i]setView:view];
-            [view setDataSource:self.outlets[i]];
+    }else if ( [entity isKindOfClass:[BbOutlet class]] ){
+        if ( nil == self.outlets || self.outlets.count == 0 ) {
+            return NO;
+        }else{
+            NSSet *outletsSet = [NSSet setWithArray:self.outlets];
+            return [outletsSet containsObject:entity];
         }
-        
+    }
+    
+    return NO;
+}
+
+- (BOOL)addChildEntity:(id<BbEntity>)entity
+{
+    if ( nil == entity || [self isParentOfEntity:entity] ) {
+        return NO;
+    }
+    
+    if ( [entity isKindOfClass:[BbInlet class]] ) {
+        [self.inlets addObject:entity];
+        entity.parent = self;
+        return YES;
+    }else if ( [entity isKindOfClass:[BbOutlet class]] ){
+        [self.outlets addObject:entity];
+        entity.parent = self;
         return YES;
     }
     
     return NO;
 }
 
-- (NSUInteger)indexInParent
+- (BOOL)insertChildEntity:(id<BbEntity>)entity atIndex:(NSUInteger)index
 {
-    if ( nil == self.parent ) {
-        return BbIndexInParentNotFound;
+    if ( nil == entity || [self isParentOfEntity:entity] ) {
+        return NO;
     }
     
-    return [self.parent indexOfChildObject:self];
+    if ( [entity isKindOfClass:[BbInlet class]] ) {
+        if ( index > self.inlets.count ) {
+            return NO;
+        }else if ( index == self.inlets.count ){
+            [self addChildEntity:entity];
+            return YES;
+        }else{
+            [self.inlets insertObject:entity atIndex:index];
+            entity.parent = self;
+            return YES;
+        }
+    }else if ( [entity isKindOfClass:[BbOutlet class]] ){
+        if ( index > self.outlets.count ) {
+            return NO;
+        }else if ( index == self.outlets.count ){
+            [self addChildEntity:entity];
+            return YES;
+        }else{
+            [self.outlets insertObject:entity atIndex:index];
+            entity.parent = self;
+            return YES;
+        }
+    }
+    
+    return NO;
 }
 
-- (NSString *)descriptionToken
+- (BOOL)removeChildEntity:(id<BbEntity>)entity
 {
-    return @"#X";
+    if ( nil == entity || [self isParentOfEntity:entity] == NO ) {
+        return NO;
+    }
+    
+    if ( [entity isKindOfClass:[BbInlet class]] ) {
+        NSUInteger index = [entity indexInParentEntity];
+        if ( index >= self.inlets.count ) {
+            return NO;
+        }
+        [self.inlets removeObjectAtIndex:index];
+        entity.parent = nil;
+        return YES;
+    }else if ( [entity isKindOfClass:[BbOutlet class]] ){
+        NSUInteger index = [entity indexInParentEntity];
+        if ( index >= self.outlets.count ) {
+            return NO;
+        }
+        
+        [self.outlets removeObjectAtIndex:index];
+        entity.parent = nil;
+        return YES;
+    }
+    return NO;
+}
+
+- (NSUInteger)indexOfChildEntity:(id<BbEntity>)entity
+{
+    if ( nil == entity || [self isParentOfEntity:entity] == NO ) {
+        return BbIndexInParentNotFound;
+    }
+    if ( [entity isKindOfClass:[BbInlet class]] ) {
+        return [self.inlets indexOfObject:entity];
+    }else if ( [entity isKindOfClass:[BbOutlet class]] ){
+        return [self.outlets indexOfObject:entity];
+    }
+    
+    return BbIndexInParentNotFound;
+}
+
+- (BOOL)replaceChildEntity:(id<BbEntity>)entityToReplace withEntity:(id<BbEntity>)replacementEntity
+{
+    if ( nil == entityToReplace || nil == replacementEntity ){
+        return NO;
+    }
+    if ( [self isParentOfEntity:entityToReplace] == NO || [self isParentOfEntity:replacementEntity] == YES ) {
+        return NO;
+    }
+    
+    NSUInteger index = [entityToReplace indexInParentEntity];
+    if ( index == BbIndexInParentNotFound ) {
+        return NO;
+    }
+    
+    return ([self removeChildEntity:entityToReplace] && [self insertChildEntity:replacementEntity atIndex:index]);
+    
 }
 
 - (NSString *)textDescription
 {
     NSMutableArray *myComponents = [NSMutableArray array];
     
-    [myComponents addObject:[self descriptionToken]];
-    [myComponents addObject:self.viewClass];
+    [myComponents addObject:[self textDescriptionToken]];
+    [myComponents addObject:[[self class] viewClass]];
     
-    if ( nil != self.viewArguments ) {
-        [myComponents addObjectsFromArray:[self.viewArguments componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
+    NSArray *viewArguments = [self.viewArguments getArguments];
+    if ( nil != viewArguments && viewArguments.count ) {
+        [myComponents addObjectsFromArray:viewArguments];
     }
     
     [myComponents addObject:NSStringFromClass([self class])];
+    NSArray *creationArguments = [self.creationArguments getArguments];
     
-    if ( nil != self.objectArguments ) {
-        [myComponents addObjectsFromArray:[self.objectArguments componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
+    if ( nil != creationArguments ) {
+        [myComponents addObjectsFromArray:creationArguments];
     }
-    NSString *endOfLine = @";\n";
-    [myComponents addObject:endOfLine];
+    [myComponents addObject:@";\n"];
     
-    NSString *myDescription = [myComponents componentsJoinedByString:@" "];
-    
+    NSString *myDescription = [myComponents getString];
     return myDescription;
+}
+
+- (NSString *)textDescriptionToken
+{
+    return @"#X";
+}
+
+- (NSString *)depthStringForChild:(id<BbEntity>)entity
+{
+    return @"";
 }
 
 @end
 
-#pragma mark - BbObjectParent
+#pragma mark - BbObject (BbObjectProtocol)
 
-@implementation BbObject (BbObjectParent)
+@implementation BbObject (BbObjectProtocol)
 
-- (BOOL)isParentObject:(id<BbObjectChild>)child
+- (id<BbObjectView>)loadView
 {
-    if ( [child isKindOfClass:[BbInlet class]] ) {
-        return [self.inlets containsObject:child];
+    NSString *viewClass = [[self class] viewClass];
+    NSString *viewArguments = self.viewArguments;
+    NSArray *argumentArray = @[self,viewArguments];
+    self.view = [NSInvocation doClassMethod:viewClass selector:@"viewWithEntity:arguments:" arguments:argumentArray];
+    if ( nil != self.view ) {
+        
+        for (id<BbEntity> inlet in self.inlets ) {
+            [(id<BbObjectView>)self.view setEntity:inlet forInletViewAtIndex:[inlet indexInParentEntity]];
+        }
+        
+        for (id<BbEntity> outlet in self.outlets) {
+            [(id<BbObjectView>)self.view setEntity:outlet forOutletViewAtIndex:[outlet indexInParentEntity]];
+        }
     }
     
-    if ( [child isKindOfClass:[BbOutlet class]] ) {
-        return [self.outlets containsObject:child];
-    }
-    
-    return NO;
+    return _view;
 }
 
-- (BOOL)addChildObject:(id<BbObjectChild>)child
+- (void)unloadView
 {
-    if ( [self isParentObject:child] ) {
-        return NO;
+    if ( nil == self.view ) {
+        return;
     }
     
-    if ( [child isKindOfClass:[BbInlet class]] ) {
-        [self.inlets addObject:child];
-        child.parent = self;
-        return YES;
-    }else if ( [child isKindOfClass:[BbOutlet class]] ){
-        [self.outlets addObject:child];
-        child.parent = self;
-        return YES;
-    }
-    
-    return NO;
+    [NSInvocation doInstanceMethod:self.view selector:@"removeFromSuperview" arguments:nil];
+    self.view = nil;
 }
 
-- (BOOL)insertChildObject:(id<BbObjectChild>)child atIndex:(NSUInteger)index
+- (BOOL)objectView:(id<BbObjectView>)sender didChangeValue:(NSValue *)value forViewArgumentKey:(NSString *)key
 {
-    if ( [self isParentObject:child] ) {
-        return NO;
-    }
-    
-    if ( [child isKindOfClass:[BbInlet class]] && index <= self.inlets.count ) {
-        [self.inlets insertObject:child atIndex:index];
-        child.parent = self;
-        return YES;
-    }else if ( [child isKindOfClass:[BbOutlet class]] && index <= self.outlets.count ){
-        [self.outlets insertObject:child atIndex:index];
-        child.parent = self;
+    if ( [key isEqualToString:kViewArgumentKeyPosition] ) {
+        CGPoint point = value.CGPointValue;
+        NSString *valueString = NSStringFromCGPoint(point);
+        self.viewArguments = valueString;
         return YES;
     }
-    
-    return NO;
+    return YES;
 }
 
-- (BOOL)removeChildObject:(id<BbObjectChild>)child
+- (BOOL)objectViewShouldBeginEditing:(id<BbObjectView>)sender
 {
-    if ( ![self isParentObject:child] ) {
-        return NO;
-    }
-    
-    if ( [child isKindOfClass:[BbInlet class]] ) {
-        [self.inlets removeObject:child];
-        child.parent = nil;
-        return YES;
-    }else if ( [child isKindOfClass:[BbOutlet class]] ){
-        [self.outlets removeObject:child];
-        child.parent = nil;
-        return YES;
-    }
-    
-    return NO;
+    return YES;
 }
 
-- (NSUInteger)indexOfChildObject:(id<BbObjectChild>)child
+- (id<BbObjectViewEditingDelegate>)editingDelegateForObjectView:(id<BbObjectView>)sender
 {
-    if ( ![self isParentObject:child] ) {
-        return BbIndexInParentNotFound;
+    if ( [self.parent conformsToProtocol:NSProtocolFromString(@"BbObjectViewEditingDelegate")]) {
+        return (id<BbObjectViewEditingDelegate>)self.parent;
     }
     
-    if ( [child isKindOfClass:[BbInlet class]] ) {
-        return [self.inlets indexOfObject:child];
-    }else if ( [child isKindOfClass:[BbOutlet class]] ){
-        return [self.outlets indexOfObject:child];
-    }
-    
-    return BbIndexInParentNotFound;
+    return nil;
+}
+
+- (void)objectView:(id<BbObjectView>)sender didBeginEditingWithDelegate:(id<BbObjectViewEditingDelegate>)editingDelegate {}
+
+- (void)objectView:(id<BbObjectView>)sender didEndEditingWithUserText:(NSString *)userText
+{
+    self.userText = userText;
 }
 
 @end

@@ -22,11 +22,11 @@
 - (void)setupPorts
 {
     BbInlet *selectorInlet = [[BbInlet alloc]init];
-    selectorInlet.hotInlet = YES;
+    selectorInlet.hot = YES;
     [self addChildObject:selectorInlet];
     
     BbInlet *instanceInlet = [[BbInlet alloc]init];
-    instanceInlet.hotInlet = YES;
+    instanceInlet.hot = YES;
     [self addChildObject:instanceInlet];
     
     __block BbOutlet *mainOutlet = [[BbOutlet alloc]init];

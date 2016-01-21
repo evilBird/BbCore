@@ -12,7 +12,6 @@
 
 @interface BbInlet : BbPort
 
-@property   (nonatomic,getter=isHotInlet)   BOOL                              hotInlet;
-@property   (nonatomic,weak)                BbOutlet                          *targetOutlet;
+@property   (nonatomic,getter=isHot)   BOOL                              hot;
 
 @end

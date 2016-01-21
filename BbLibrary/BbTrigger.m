@@ -19,7 +19,7 @@
 - (void)setupPortsWithArguments:(NSArray *)arguments
 {
     BbInlet *hotInlet = [[BbInlet alloc]init];
-    hotInlet.hotInlet = YES;
+    hotInlet.hot = YES;
     [self addChildObject:hotInlet];
     for ( NSUInteger i = 0 ; i < arguments.count; i ++ ) {
         BbOutlet *outlet = [[BbOutlet alloc]init];

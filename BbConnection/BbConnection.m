@@ -7,9 +7,6 @@
 //
 
 #import "BbConnection.h"
-#import "BbPort.h"
-#import "BbObject.h"
-#import "BbHelpers.h"
 
 static NSString  *kObservedKeyPath = @"viewArguments";
 
@@ -17,19 +14,24 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
 
 @interface BbConnection ()
 
-@property      (nonatomic,getter=isObservingSender)                  BOOL           observingSender;
-@property      (nonatomic,getter=isObservingReceiver)                BOOL           observingReceiver;
+@property (nonatomic,strong)            UIBezierPath            *myPath;
 
 @end
 
 @implementation BbConnection
 
-- (instancetype)initWithSender:(id<BbObjectChild>)sender receiver:(id<BbObjectChild>)receiver
++ (BbConnection *)connectionWithSender:(id<BbEntity>)sender receiver:(id<BbEntity>)receiver parent:(id<BbPatch>)parent
+{
+    return [[BbConnection alloc]initWithSender:sender receiver:receiver parent:parent];
+}
+
+- (instancetype)initWithSender:(id<BbEntity>)sender receiver:(id<BbEntity>)receiver parent:(id<BbPatch>)parent
 {
     self = [super init];
     if ( self ) {
         _sender = sender;
         _receiver = receiver;
+        _parent = parent;
         [self commonInit];
     }
     
@@ -38,46 +40,16 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
 
 - (void)commonInit
 {
-    self.uniqueID = [BbHelpers createUniqueIDString];
+    self.uniqueID = [NSString uniqueIDString];
     self.senderID = [self.sender uniqueID];
     self.receiverID = [self.receiver uniqueID];
-    [[self.sender parent]addObjectObserver:self];
-    [[self.receiver parent]addObjectObserver:self];
-}
-
-#pragma mark - Accessors
-
-- (void)setValid:(BOOL)valid
-{
-    BOOL wasValid = self.isValid;
-    _valid = valid;
-    if ( _valid != wasValid ) {
-        [self validityDidChange:valid];
-    }
-}
-
-- (void)validityDidChange:(BOOL)validity
-{
-    if ( !validity ) {
-        [self.parent removeChildObject:self];
+    self.entityObservers = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
+    if ( [self.sender.parent addEntityObserver:self] && [self.receiver.parent addEntityObserver:self] ) {
+        self.valid = YES;
     }
 }
 
 #pragma mark - BbConnection Protocol
-
-- (UIColor *)strokeColor
-{
-    if ( self.isSelected ) {
-        return [UIColor colorWithWhite:0.4 alpha:1.0];
-    }
-    
-    return [UIColor blackColor];
-}
-
-- (CGFloat)strokeWidth
-{
-    return 6.0;
-}
 
 - (UIView *)parentView
 {
@@ -89,18 +61,35 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
     return (UIView *)[self.sender view];
 }
 
+- (UIView *)outletParentView
+{
+    return (UIView *)[self.sender.parent view];
+}
+
 - (UIView *)inletView
 {
     return (UIView *)[self.receiver view];
 }
 
-- (BOOL)validate
+- (UIView *)inletParentView
 {
-    if ( nil != self.sender && nil != self.receiver && nil != self.parent ) {
-        return YES;
-    }
+    return (UIView *)[self.receiver.parent view];
+}
+
+- (void)updatePath
+{
+    UIView *parentView = [self parentView];
+    UIView *senderView = [self outletView];
+    UIView *senderParentView = [self outletParentView];
+    CGPoint startPoint = [parentView convertPoint:senderView.center fromView:senderParentView];
     
-    return NO;
+    UIView *receiverView = [self inletView];
+    UIView *receiverParentView = [self inletParentView];
+    CGPoint endPoint = [parentView convertPoint:receiverView.center fromView:receiverParentView];
+    
+    [self.myPath removeAllPoints];
+    [self.myPath moveToPoint:startPoint];
+    [self.myPath addLineToPoint:endPoint];
 }
 
 #pragma mark - KVO
@@ -108,8 +97,8 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if (context == BbConnectionPathObservationContextXX) {
-        if ( [object isParentObject:self.sender] || [object isParentObject:self.receiver] ) {
-            self.needsRedraw = YES;
+        if ( [object isParentOfEntity:self.sender] || [object isParentOfEntity:self.receiver] ) {
+            [self updatePath];
         }
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
@@ -118,75 +107,109 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
 
 - (void)dealloc
 {
-    [_sender removeObjectObserver:self];
+    [_sender.parent removeEntityObserver:self];
     _sender = nil;
-    [_receiver removeObjectObserver:self];
+    [_receiver.parent removeEntityObserver:self];
     _receiver = nil;
     _parent = nil;
 }
 
 @end
 
-@implementation BbConnection (BbObject)
+@implementation BbConnection (BbEntityProtocol)
 
-#pragma mark - BbObject Protcol
-
-- (BOOL)startObservingObject:(id<BbObject>)object
+- (id)loadPath
 {
-    NSObject *obj = (NSObject *)object;
-    [obj addObserver:self forKeyPath:kObservedKeyPath options:NSKeyValueObservingOptionNew context:BbConnectionPathObservationContextXX];
-    id <BbObjectParent> parent = (id<BbObjectParent>)object;
-    
-    if ( [parent isParentObject:self.sender] ) {
-        self.observingSender = YES;
-        self.valid = [self validate];
-    }else if ( [parent isParentObject:self.receiver] ){
-        self.observingReceiver = YES;
-        self.valid = [self validate];
-    }
-    
-    return YES;
+    self.myPath = [UIBezierPath bezierPath];
+    self.path = self.myPath;
+    [self updatePath];
+    return self.path;
 }
 
-- (BOOL)stopObservingObject:(id<BbObject>)object
+- (void)unloadPath
 {
-    NSObject *obj = (NSObject *)object;
-    [obj removeObserver:self forKeyPath:kObservedKeyPath context:BbConnectionPathObservationContextXX];
-    id <BbObjectParent> parent = (id<BbObjectParent>)object;
-    if ( [parent isParentObject:self.sender] ) {
-        self.observingSender = NO;
-        self.valid = [self validate];
-    }else if ( [parent isParentObject:self.receiver] ){
-        self.observingReceiver = NO;
-        self.valid = [self validate];
+    if ( nil == self.myPath && nil == self.path ) {
+        return;
     }
-    
-    return YES;
+    [self.myPath removeAllPoints];
+    self.myPath = nil;
+    self.path = nil;
 }
 
-@end
-
-@implementation BbConnection (BbObjectChild)
-
-- (NSUInteger)indexInParent
+- (NSUInteger)indexInParentEntity
 {
     if ( nil == self.parent ) {
         return BbIndexInParentNotFound;
     }
     
-    return [self.parent indexOfChildObject:self];
+    return [self.parent indexOfChildEntity:self];
+}
+
+- (NSString *)textDescriptionToken
+{
+    return @"#X";
 }
 
 - (NSString *)textDescription
 {
-    NSUInteger senderIndex = [self.sender indexInParent];
-    NSUInteger receiverIndex = [self.receiver indexInParent];
-    NSUInteger senderParentIndex = [self.parent indexOfChildObject:[self.sender parent]];
-    NSUInteger receiverParentIndex = [self.parent indexOfChildObject:[self.receiver parent]];
+    NSUInteger senderIndex = [self.sender indexInParentEntity];
+    NSUInteger receiverIndex = [self.receiver indexInParentEntity];
+    NSUInteger senderParentIndex = [self.sender.parent indexInParentEntity];
+    NSUInteger receiverParentIndex = [self.receiver.parent indexInParentEntity];
     NSString *className = NSStringFromClass([self class]);
-    NSString *token = @"#X";
+    NSString *token = [self textDescriptionToken];
     NSString *description = [NSString stringWithFormat:@"%@ %@ %@ %@ %@ %@;\n",token,className,@(senderParentIndex),@(senderIndex),@(receiverParentIndex),@(receiverIndex)];
     return description;
 }
 
+- (BOOL)addEntityObserver:(id<BbEntity>)entity
+{
+    if ( nil == entity || [self.entityObservers containsObject:entity] ) {
+        return NO;
+    }
+    
+    if ( [entity startObservingEntity:self] ) {
+        [self.entityObservers addObject:entity];
+        return YES;
+    }
+    
+    return NO;
+}
+
+- (BOOL)removeEntityObserver:(id<BbEntity>)entity
+{
+    if ( nil == entity || [self.entityObservers containsObject:entity] == NO ) {
+        return NO;
+    }
+    
+    if ( [entity stopObservingEntity:self] ) {
+        [self.entityObservers removeObject:entity];
+        return YES;
+    }
+    
+    return NO;
+}
+
+- (BOOL)removeAllEntityObservers
+{
+    for ( id <BbEntity> entity in self.entityObservers.allObjects ) {
+        [self removeEntityObserver:entity];
+    }
+    return YES;
+}
+
+- (BOOL)startObservingEntity:(id<BbEntity>)entity
+{
+    [(NSObject *)entity addObserver:self forKeyPath:kObservedKeyPath options:NSKeyValueObservingOptionNew context:BbConnectionPathObservationContextXX];
+    return YES;
+}
+
+- (BOOL)stopObservingEntity:(id<BbEntity>)entity
+{
+    [(NSObject *)entity removeObserver:self forKeyPath:kObservedKeyPath context:BbConnectionPathObservationContextXX];
+    self.valid = NO;
+    return YES;
+}
+
 @end
+

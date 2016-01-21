@@ -74,7 +74,7 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
     for ( NSDictionary *inletAttrs in sortedInlets ) {
         __block BbPatchInlet *patchInlet = inletAttrs[kPortAttributeKeyPort];
         BbInlet *myInlet = [[BbInlet alloc]init];
-        myInlet.hotInlet = YES;
+        myInlet.hot = YES;
         [self addChildObject:myInlet];
         [myInlet setOutputBlock:^(id value){
             [patchInlet.inlets.firstObject setInputElement:value];

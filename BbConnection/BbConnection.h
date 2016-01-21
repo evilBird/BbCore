@@ -7,51 +7,49 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "BbObjectView.h"
-#import "BbObjectChild.h"
+#import <BbCoreProtocols.h>
 
 @interface BbConnection : NSObject
 
-@property (nonatomic,weak)                              id <BbObjectParent>                     parent;
-@property (nonatomic,weak)                              id <BbObjectChild>                      sender;
-@property (nonatomic,weak)                              id <BbObjectChild>                      receiver;
+@property (nonatomic,weak)                              id <BbPatch>                            parent;
+@property (nonatomic,weak)                              id <BbEntity>                           sender;
+@property (nonatomic,weak)                              id <BbEntity>                           receiver;
 
 @property (nonatomic,strong)                            NSString                                *uniqueID;
 @property (nonatomic,strong)                            NSString                                *senderID;
 @property (nonatomic,strong)                            NSString                                *receiverID;
 
-@property (nonatomic,strong)                            UIBezierPath                            *path;
-@property (nonatomic,readonly)                          UIColor                                 *strokeColor;
-@property (nonatomic,readonly)                          CGFloat                                 strokeWidth;
-
-@property (nonatomic)                                   BOOL                                    needsRedraw;
+@property (nonatomic)                                   id                                      path;
 @property (nonatomic,getter=isValid)                    BOOL                                    valid;
 @property (nonatomic,getter=isSelected)                 BOOL                                    selected;
 
+- (instancetype)initWithSender:(id<BbEntity>)sender
+                      receiver:(id<BbEntity>)receiver
+                        parent:(id<BbPatch>)parent;
 
-
-- (instancetype)initWithSender:(id<BbObjectChild>)sender
-                      receiver:(id<BbObjectChild>)receiver;
-
-#pragma mark - BbConnection
-
-- (BOOL)validate;
-- (UIView *)parentView;
-- (UIView *)inletView;
-- (UIView *)outletView;
++ (BbConnection *)connectionWithSender:(id<BbEntity>)sender receiver:(id<BbEntity>)receiver parent:(id<BbPatch>)parent;
 
 @end
 
-@interface BbConnection (BbObject) <BbObject>
+@interface BbConnection (BbEntityProtocol) <BbConnection, BbEntity>
 
-- (BOOL)startObservingObject:(id<BbObject>)object;
-- (BOOL)stopObservingObject:(id<BbObject>)object;
+- (BOOL)addEntityObserver:(id<BbEntity>)entity;
 
-@end
+- (BOOL)removeEntityObserver:(id<BbEntity>)entity;
 
-@interface BbConnection (BbObjectChild) <BbObjectChild>
+- (BOOL)startObservingEntity:(id<BbEntity>)entity;
 
-- (NSUInteger)indexInParent;
+- (BOOL)stopObservingEntity:(id<BbEntity>)entity;
+
+- (BOOL)removeAllEntityObservers;
+
+- (BOOL)isChildOfEntity:(id<BbEntity>)entity;
+
+- (NSUInteger)indexInParentEntity;
+
 - (NSString *)textDescription;
 
+- (NSString *)textDescriptionToken;
+
 @end
+

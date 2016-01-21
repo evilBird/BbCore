@@ -22,7 +22,7 @@
     
     BbInlet *selectorInlet = self.inlets[0];
     BbInlet *classNameInlet = self.inlets[1];
-    classNameInlet.hotInlet = YES;
+    classNameInlet.hot = YES;
     __block BbOutlet *mainOutlet = self.outlets[0];
     [selectorInlet setInputBlock:[BbPort allowTypesInputBlock:@[[NSString class],[NSArray class]]]];
     [classNameInlet setInputBlock:[BbPort allowTypesInputBlock:@[[NSString class],[NSArray class]]]];

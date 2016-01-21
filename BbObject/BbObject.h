@@ -10,31 +10,29 @@
 #import "BbInlet.h"
 #import "BbOutlet.h"
 #import "BbRuntime.h"
-#import "BbHelpers.h"
-#import "BbBridge.h"
 #import "BbBang.h"
+#import "BbCoreProtocols.h"
+#import "BbCoreUtils.h"
 
 @class BbObjectDescription;
 @class BbConnectionDescription;
 
 @interface BbObject : NSObject
 
-@property (nonatomic,weak)                  id <BbObjectParent>                     parent;
-@property (nonatomic,strong)                NSString                                *uniqueID;
+@property (nonatomic,weak)                  id <BbEntity,BbObject>                          parent;
+@property (nonatomic,strong)                id <BbEntityView,BbObjectView>                  view;
 
-@property (nonatomic,strong)                NSString                                *displayText;
-@property (nonatomic,strong)                NSString                                *objectArguments;
-@property (nonatomic,strong)                NSString                                *viewClass;
-@property (nonatomic,strong)                NSString                                *viewArguments;
+@property (nonatomic,strong)                NSMutableArray                                  *inlets;
+@property (nonatomic,strong)                NSMutableArray                                  *outlets;
 
-@property (nonatomic,strong)                NSMutableArray                          *inlets;
-@property (nonatomic,strong)                NSMutableArray                          *outlets;
+@property (nonatomic,strong)                NSString                                        *uniqueID;
+@property (nonatomic,strong)                NSString                                        *displayText;
+@property (nonatomic,strong)                NSString                                        *creationArguments;
+@property (nonatomic,strong)                NSString                                        *viewArguments;
 
-@property (nonatomic,strong)                id<BbObjectView>                         view;
-
-@property (nonatomic,strong)                NSHashTable                             *observers;
-@property (nonatomic,strong)                NSString                                *name;
-
+@property (nonatomic,strong)                NSString                                        *userText;
+@property (nonatomic,strong)                NSHashTable                                     *entityObservers;
+@property (nonatomic,strong)                NSString                                        *name;
 
 - (instancetype)initWithArguments:(NSString *)arguments;
 
@@ -48,67 +46,59 @@
 
 + (NSString *)symbolAlias;
 
-+ (NSArray *)text2Array:(NSString *)text;
-
 + (BbObject *)objectWithDescription:(BbObjectDescription *)description;
 
 @end
 
-@interface BbObject (BbObject)
+@interface BbObject (BbEntityProtocol) <BbEntity>
 
-- (BOOL)addObjectObserver:(id<BbObject>)object;
+- (BOOL)addEntityObserver:(id<BbEntity>)entity;
 
-- (BOOL)removeObjectObserver:(id<BbObject>)object;
+- (BOOL)removeEntityObserver:(id<BbEntity>)entity;
 
-- (BOOL)removeAllObjectObservers;
+- (BOOL)startObservingEntity:(id<BbEntity>)entity;
 
-- (void)loadBang;
+- (BOOL)stopObservingEntity:(id<BbEntity>)entity;
 
-@end
+- (BOOL)removeAllEntityObservers;
 
-@interface BbObject (BbObjectChild) <BbObjectChild>
+- (BOOL)isChildOfEntity:(id<BbEntity>)entity;
 
-- (BOOL)loadView;
+- (NSUInteger)indexInParentEntity;
 
-- (NSUInteger)indexInParent;
+- (BOOL)isParentOfEntity:(id<BbEntity>)entity;
+
+- (BOOL)addChildEntity:(id<BbEntity>)entity;
+
+- (BOOL)insertChildEntity:(id<BbEntity>)entity atIndex:(NSUInteger)index;
+
+- (BOOL)removeChildEntity:(id<BbEntity>)entity;
+
+- (NSUInteger)indexOfChildEntity:(id<BbEntity>)entity;
 
 - (NSString *)textDescription;
 
-- (NSString *)descriptionToken;
+- (NSString *)textDescriptionToken;
+
+- (NSString *)depthStringForChild:(id<BbEntity>)entity;
 
 @end
 
-@interface BbObject (BbObjectParent)<BbObjectParent>
+@interface BbObject (BbObjectProtocol) <BbObject>
 
-- (BOOL)isParentObject:(id<BbObjectChild>)child;
+- (id<BbObjectView>)loadView;
 
-- (BOOL)addChildObject:(id<BbObjectChild>)child;
+- (void)unloadView;
 
-- (BOOL)insertChildObject:(id<BbObjectChild>)child atIndex:(NSUInteger)index;
+- (BOOL)objectView:(id<BbObjectView>)sender didChangeValue:(NSValue *)value forViewArgumentKey:(NSString *)key;
 
-- (BOOL)removeChildObject:(id<BbObjectChild>)child;
+- (BOOL)objectViewShouldBeginEditing:(id<BbObjectView>)sender;
 
-- (NSUInteger)indexOfChildObject:(id<BbObjectChild>)child;
+- (id<BbObjectViewEditingDelegate>)editingDelegateForObjectView:(id<BbObjectView>)sender;
 
-@end
+- (void)objectView:(id<BbObjectView>)sender didBeginEditingWithDelegate:(id<BbObjectViewEditingDelegate>)editingDelegate;
 
-@interface BbObject (BbObjectViewDataSource) <BbObjectViewDataSource>
-
-- (NSUInteger)numberOfInletsForObjectView:(id<BbObjectView>)objectView;
-
-- (NSUInteger)numberOfOutletsForObjectView:(id<BbObjectView>)objectView;
-
-- (NSString *)titleTextForObjectView:(id<BbObjectView>)objectView;
-
-- (NSValue *)positionForObjectView:(id<BbObjectView>)objectView;
-
-@end
-
-@interface BbObject (BbObjectViewDelegate) <BbObjectViewDelegate>
-
-- (void)objectView:(id<BbObjectView>)sender didChangePosition:(NSValue *)position;
-
-- (void)objectView:(id<BbObjectView>)sender userEnteredText:(NSString *)text;
+- (void)objectView:(id<BbObjectView>)sender didEndEditingWithUserText:(NSString *)userText;
 
 @end
 

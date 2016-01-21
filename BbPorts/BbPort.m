@@ -7,10 +7,6 @@
 //
 
 #import "BbPort.h"
-#import "BbHelpers.h"
-#import "BbObject.h"
-
-
 
 static void *BbPortObservationContextXX     =       &BbPortObservationContextXX;
 
@@ -35,13 +31,12 @@ static void *BbPortObservationContextXX     =       &BbPortObservationContextXX;
 
 - (void)commonInit
 {
-    self.uniqueID = [BbHelpers createUniqueIDString];
+    self.uniqueID = [NSString uniqueIDString];
     self.inputBlock = [BbPort passThroughInputBlock];
-    
     self.outputBlock = nil;
     _inputElement = nil;
     _outputElement = nil;
-    self.observers = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
+    self.entityObservers = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
     self.validKeyPathArray = @[kOutputElement, kInputElement];
     self.validKeyPaths = [NSSet setWithArray:self.validKeyPathArray];
     [self addObserver:self forKeyPath:kInputElement options:NSKeyValueObservingOptionNew context:BbPortObservationContextXX];
@@ -50,14 +45,24 @@ static void *BbPortObservationContextXX     =       &BbPortObservationContextXX;
 
 - (BOOL)connectToPort:(BbPort *)port
 {
-    [self addObjectObserver:port];
+    [self addEntityObserver:port];
     return YES;
 }
 
 - (BOOL)disconnectFromPort:(BbPort *)port
 {
-    [self removeObjectObserver:port];
+    [self removeEntityObserver:port];
     return YES;
+}
+
+- (NSUInteger)hash
+{
+    return [_uniqueID hash];
+}
+
+- (BOOL)isEqual:(id)object
+{
+    return ([self hash] == [object hash]);
 }
 
 #pragma mark - KVO
@@ -89,72 +94,91 @@ static void *BbPortObservationContextXX     =       &BbPortObservationContextXX;
 
 - (void)dealloc
 {
-    if ( nil != _view ) {
-        [_view removeFromSuperview];
-    }
-    _view = nil;
-    
+    [self removeAllEntityObservers];
+
     [self removeObserver:self forKeyPath:kInputElement context:BbPortObservationContextXX];
     [self removeObserver:self forKeyPath:kOutputElement context:BbPortObservationContextXX];
     
-    [self removeAllObjectObservers];
-    
-    _observedPorts = nil;
+    _entityObservers = nil;
     _inputBlock = nil;
     _outputBlock = nil;
     _inputElement = nil;
     _outputElement = nil;
 }
 
-#pragma mark - <BbObject>
+@end
 
-- (BOOL)startObservingObject:(id<BbObject>)object
-{
-    NSObject *obj = (NSObject *)object;
-    [obj addObserver:self forKeyPath:@"outputElement" options:NSKeyValueObservingOptionNew context:BbPortObservationContextXX];
-    return YES;
-}
+@implementation BbPort (BbEntityProtocol)
 
-- (BOOL)stopObservingObject:(id<BbObject>)object
+- (BOOL)addEntityObserver:(id<BbEntity>)entity
 {
-    NSObject *obj = (NSObject *)object;
-    [obj removeObserver:self forKeyPath:@"outputElement" context:BbPortObservationContextXX];
-    return YES;
-}
-
-- (BOOL)addObjectObserver:(id<BbObject>)object
-{
-    if ( [self.observers containsObject:object] ) {
-        return NO;
-    }
-    [self.observers addObject:object];
-    [object startObservingObject:self];
-    return YES;
-}
-
-- (BOOL)removeObjectObserver:(id<BbObject>)object
-{
-    if ( ![self.observers containsObject:object] ) {
+    if ( [self.entityObservers containsObject:entity] ) {
         return NO;
     }
     
-    [self.observers removeObject:object];
-    return [object stopObservingObject:(id<BbObject>)self];
-}
-
-- (BOOL)removeAllObjectObservers
-{
-    if ( !self.observers.count ) {
+    if ( [entity startObservingEntity:self] ) {
+        [self.entityObservers addObject:entity];
         return YES;
     }
     
-    NSMutableArray *observers = self.observers.allObjects.mutableCopy;
-    for (id<BbObject>anObserver in observers ) {
-        [self removeObjectObserver:anObserver];
+    return NO;
+}
+
+- (BOOL)removeEntityObserver:(id<BbEntity>)entity
+{
+    if ( [self.entityObservers containsObject:entity] == NO ){
+        return NO;
+    }
+    
+    if ( [entity stopObservingEntity:self] ) {
+        [self.entityObservers removeObject:entity];
+        return YES;
+    }
+    return NO;
+}
+
+- (BOOL)startObservingEntity:(id<BbEntity>)entity
+{
+    [(NSObject *)entity addObserver:self forKeyPath:@"outputElement" options:NSKeyValueObservingOptionNew context:BbPortObservationContextXX];
+    return YES;
+}
+
+- (BOOL)stopObservingEntity:(id<BbEntity>)entity
+{
+    [(NSObject *)entity removeObserver:self forKeyPath:@"outputElement" context:BbPortObservationContextXX];
+    return YES;
+}
+
+- (BOOL)removeAllEntityObservers
+{
+    NSArray *entityObservers = self.entityObservers.allObjects;
+    for (id <BbEntity> anObserver in entityObservers ) {
+        [self removeEntityObserver:anObserver];
     }
     
     return YES;
 }
+
+- (BOOL)isChildOfEntity:(id<BbEntity>)entity
+{
+    if ( nil == self.parent ) {
+        return NO;
+    }
+    
+    return ( self.parent == entity );
+}
+
+- (NSUInteger)indexInParentEntity
+{
+    if ( nil == self.parent ) {
+        return BbIndexInParentNotFound;
+    }
+    
+    return [self.parent indexOfChildEntity:self];
+}
+
+@end
+
 
 @end
 

@@ -17,13 +17,82 @@
 
 @interface BbPatch : BbObject
 
-@property (nonatomic,strong)                NSMutableArray                                      *mySelectors;
-@property (nonatomic,strong)                NSMutableArray                                      *childObjects;
+@property (nonatomic,strong)                NSMutableArray                                      *selectors;
+@property (nonatomic,strong)                NSMutableArray                                      *objects;
 @property (nonatomic,strong)                NSMutableArray                                      *connections;
-@property (nonatomic,strong)                NSMapTable                                          *inletMapTable;
-@property (nonatomic,strong)                NSMapTable                                          *outputMapTable;
 
 @property (nonatomic,strong)                BbSymbolTable<BbTextCompletionDataSource>           *symbolTable;
+
+@end
+
+@interface BbPatch (BbEntityProtocol) <BbEntity>
+
+- (BOOL)isParentOfEntity:(id<BbEntity>)entity;
+
+- (BOOL)addChildEntity:(id<BbEntity>)entity;
+
+- (BOOL)insertChildEntity:(id<BbEntity>)entity atIndex:(NSUInteger)index;
+
+- (BOOL)removeChildEntity:(id<BbEntity>)entity;
+
+- (NSUInteger)indexOfChildEntity:(id<BbEntity>)entity;
+
+- (BOOL)replaceChildEntity:(id<BbEntity>)entityToReplace withEntity:(id<BbEntity>)replacementEntity;
+
+- (NSString *)textDescription;
+
+- (NSString *)textDescriptionToken;
+
+- (NSString *)depthStringForChild:(id<BbEntity>)entity;
+
+@end
+
+@interface BbPatch (BbObjectProtocol) <BbObject>
+
+
++ (NSString *)symbolAlias;
+
+- (id<BbPatchView>)loadView;
+
+- (void)unloadView;
+
+- (BOOL)objectView:(id<BbObjectView>)sender didChangeValue:(NSValue *)value forViewArgumentKey:(NSString *)key;
+
+- (BOOL)objectViewShouldBeginEditing:(id<BbObjectView>)sender;
+
+- (id<BbObjectViewEditingDelegate>)editingDelegateForObjectView:(id<BbObjectView>)sender;
+
+- (void)objectView:(id<BbObjectView>)sender didBeginEditingWithDelegate:(id<BbObjectViewEditingDelegate>)editingDelegate;
+
+- (void)objectView:(id<BbObjectView>)sender didEndEditingWithUserText:(NSString *)userText;
+
+@end
+
+@interface BbPatch (BbPatchProtocol) <BbPatch>
+
+- (NSArray *)loadChildViews;
+
+- (NSArray *)loadChildConnections;
+
+- (void)unloadChildViews;
+
+- (void)unloadChildConnections;
+
+- (void)patchView:(id<BbPatchView>)sender didConnectOutletView:(id<BbEntityView>)outletView toInletView:(id<BbEntityView>)inletView;
+
+- (void)patchView:(id<BbPatchView>)sender didAddPlaceholderObjectView:(id<BbObjectView>)objectView;
+
+- (void)patchView:(id<BbPatchView>)sender didAddChildObjectView:(id<BbObjectView>)objectView;
+
+- (void)patchView:(id<BbPatchView>)sender didAddChildConnection:(id<BbConnection>)connection;
+
+- (void)patchView:(id<BbPatchView>)sender didRemoveChildConnection:(id<BbConnection>)connection;
+
+- (void)patchView:(id<BbPatchView>)sender didRemoveChildObjectView:(id<BbObjectView>)objectView;
+
+@end
+
+@interface BbPatch (BbPatchViewEditingDelegate) <BbPatchViewEditingDelegate>
 
 @end
 

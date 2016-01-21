@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "BbBridge.h"
+#import "BbCoreProtocols.h"
 
 typedef NS_ENUM(NSUInteger, BbPortScope) {
     BbPortScope_Output,
@@ -25,18 +25,17 @@ typedef void (^BbPortOutputBlock)   (id value);
 static NSString *kOutputElement =   @"outputElement";
 static NSString *kInputElement  =   @"inputElement";
 
-@interface BbPort : NSObject <BbObject>
+@interface BbPort : NSObject
 
-@property   (nonatomic,weak)                id<BbObjectParent>                  parent;
+@property   (nonatomic,weak)                id<BbEntity,BbObject>               parent;
 @property   (nonatomic,strong)              BbPortInputBlock                    inputBlock;
 @property   (nonatomic,strong)              BbPortOutputBlock                   outputBlock;
 @property   (nonatomic,weak)                id                                  inputElement;
 @property   (nonatomic,weak)                id                                  outputElement;
 @property   (nonatomic)                     BbPortScope                         scope;
-@property   (nonatomic,strong)              id<BbObjectView>                    view;
+@property   (nonatomic,strong)              id<BbEntityView>                    view;
 @property   (nonatomic,strong)              NSString                            *uniqueID;
-@property   (nonatomic,strong)              NSHashTable                         *observers;
-@property   (nonatomic,strong)              NSHashTable                         *observedPorts;
+@property   (nonatomic,strong)              NSHashTable                         *entityObservers;
 
 - (void)commonInit;
 
@@ -44,23 +43,23 @@ static NSString *kInputElement  =   @"inputElement";
 
 - (BOOL)disconnectFromPort:(BbPort *)port;
 
-#pragma mark - <BbObject>
-
-- (BOOL)startObservingObject:(id<BbObject>)object;
-
-- (BOOL)stopObservingObject:(id<BbObject>)object;
-
-- (BOOL)addObjectObserver:(id<BbObject>)object;
-
-- (BOOL)removeObjectObserver:(id<BbObject>)object;
-
-- (BOOL)removeAllObjectObservers;
-
 @end
 
-@interface BbPort (BbObjectChild) <BbObjectChild>
+@interface BbPort (BbEntityProtocol) <BbEntity>
 
-- (NSUInteger)indexInParent;
+- (BOOL)addEntityObserver:(id<BbEntity>)entity;
+
+- (BOOL)removeEntityObserver:(id<BbEntity>)entity;
+
+- (BOOL)startObservingEntity:(id<BbEntity>)entity;
+
+- (BOOL)stopObservingEntity:(id<BbEntity>)entity;
+
+- (BOOL)removeAllEntityObservers;
+
+- (BOOL)isChildOfEntity:(id<BbEntity>)entity;
+
+- (NSUInteger)indexInParentEntity;
 
 @end
 

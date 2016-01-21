@@ -13,7 +13,7 @@
 - (void)setupPorts
 {
     BbInlet *hotInlet = [[BbInlet alloc]init];
-    hotInlet.hotInlet = YES;
+    hotInlet.hot = YES;
     [self addChildObject:hotInlet];
     BbInlet *coldInlet = [[BbInlet alloc]init];
     [self addChildObject:coldInlet];
