@@ -86,6 +86,8 @@
 
 @interface BbObject (BbObjectProtocol) <BbObject>
 
+- (NSSet *)connectionMemberships;
+
 - (id<BbObjectView>)loadView;
 
 - (void)unloadView;
@@ -97,6 +99,10 @@
 - (id<BbObjectViewEditingDelegate>)editingDelegateForObjectView:(id<BbObjectView>)sender;
 
 - (void)objectView:(id<BbObjectView>)sender didBeginEditingWithDelegate:(id<BbObjectViewEditingDelegate>)editingDelegate;
+
+@end
+
+@interface BbObject (BbObjectEditingDelegate)
 
 - (void)objectView:(id<BbObjectView>)sender didEndEditingWithUserText:(NSString *)userText;
 

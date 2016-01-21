@@ -45,14 +45,12 @@ static void *BbPortObservationContextXX     =       &BbPortObservationContextXX;
 
 - (BOOL)connectToPort:(BbPort *)port
 {
-    [self addEntityObserver:port];
-    return YES;
+    return [self addEntityObserver:port];
 }
 
 - (BOOL)disconnectFromPort:(BbPort *)port
 {
-    [self removeEntityObserver:port];
-    return YES;
+    return [self removeEntityObserver:port];
 }
 
 - (NSUInteger)hash

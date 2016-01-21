@@ -91,10 +91,6 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 
 - (id<BbEntityView>)getViewForEntity:(id<BbEntity>)entity;
 
-- (void)removeViewForEntity:(id<BbEntity>)entity;
-
-- (void)addViewForEntity:(id<BbEntity>)entity;
-
 - (void)setEntity:(id<BbEntity>)entity forInletViewAtIndex:(NSUInteger)index;
 
 - (void)setEntity:(id<BbEntity>)entity forOutletViewAtIndex:(NSUInteger)index;
@@ -116,6 +112,8 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 - (NSString *)objectView:(id<BbObjectView>)sender suggestCompletionForUserText:(NSString *)userText;
 
 - (BOOL)objectView:(id<BbObjectView>)sender shouldEndEditingWithUserText:(NSString *)userText;
+
+- (void)objectView:(id<BbObjectView>)sender didEndEditingWithUserText:(NSString *)userText;
 
 @end
 

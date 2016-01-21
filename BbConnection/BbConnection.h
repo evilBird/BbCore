@@ -20,14 +20,18 @@
 @property (nonatomic,strong)                            NSString                                *receiverID;
 
 @property (nonatomic)                                   id                                      path;
-@property (nonatomic,getter=isValid)                    BOOL                                    valid;
+@property (nonatomic)                                   BOOL                                    pathIsValid;
 @property (nonatomic,getter=isSelected)                 BOOL                                    selected;
+@property (nonatomic,getter=isConnected)                BOOL                                    connected;
 
 - (instancetype)initWithSender:(id<BbEntity>)sender
                       receiver:(id<BbEntity>)receiver
                         parent:(id<BbPatch>)parent;
 
 + (BbConnection *)connectionWithSender:(id<BbEntity>)sender receiver:(id<BbEntity>)receiver parent:(id<BbPatch>)parent;
+
+- (BOOL)connect;
+- (BOOL)disconnect;
 
 @end
 

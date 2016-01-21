@@ -13,6 +13,8 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 
 @interface BbObject ()
 
+@property (nonatomic,strong)        NSHashTable         *memberOfConnections;
+
 @end
 
 @implementation BbObject
@@ -39,6 +41,7 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     self.inlets = [NSMutableArray array];
     self.outlets = [NSMutableArray array];
     self.entityObservers = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
+    self.memberOfConnections = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
 }
 
 - (void)setupPorts
@@ -116,9 +119,19 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     if ( [self.entityObservers containsObject:entity] ) {
         return NO;
     }
-    [self.entityObservers addObject:entity];
-    [entity startObservingEntity:self];
-    return YES;
+    
+    if ( [entity startObservingEntity:self] ) {
+        
+        [self.entityObservers addObject:entity];
+        
+        if ( [entity isKindOfClass:NSClassFromString(@"BbConnection")] ) {
+            [self.memberOfConnections addObject:entity];
+        }
+        
+        return YES;
+    }
+    
+    return NO;
 }
 
 - (BOOL)removeEntityObserver:(id<BbEntity>)entity
@@ -127,8 +140,15 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
         return NO;
     }
     
-    [self.entityObservers removeObject:entity];
-    return [entity stopObservingEntity:self];
+    if ( [entity stopObservingEntity:self] ) {
+        [self.entityObservers removeObject:self];
+        if ( [self.memberOfConnections containsObject:entity] ) {
+            [self.memberOfConnections removeObject:entity];
+        }
+        return YES;
+    }
+    
+    return NO;
 }
 
 - (BOOL)startObservingEntity:(id<BbEntity>)entity
@@ -148,6 +168,7 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     }
     
     NSMutableArray *observers = self.entityObservers.allObjects.mutableCopy;
+    
     for (id<BbEntity>anObserver in observers ) {
         [self removeEntityObserver:anObserver];
     }
@@ -350,6 +371,16 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 
 @implementation BbObject (BbObjectProtocol)
 
+- (NSSet *)connectionMemberships
+{
+    NSArray *memberships = self.memberOfConnections.allObjects;
+    if ( nil == memberships || memberships.count == 0 ) {
+        return [NSSet set];
+    }
+    
+    return [NSSet setWithArray:memberships];
+}
+
 - (id<BbObjectView>)loadView
 {
     NSString *viewClass = [[self class] viewClass];
@@ -406,6 +437,10 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 }
 
 - (void)objectView:(id<BbObjectView>)sender didBeginEditingWithDelegate:(id<BbObjectViewEditingDelegate>)editingDelegate {}
+
+@end
+
+@implementation BbObject (BbObjectEditingDelegate)
 
 - (void)objectView:(id<BbObjectView>)sender didEndEditingWithUserText:(NSString *)userText
 {

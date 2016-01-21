@@ -55,6 +55,8 @@
     
     _objects = nil;
     
+    [self unloadChildConnectionPaths];
+    [self unloadChildViews];
     [self unloadView];
 }
 
@@ -162,11 +164,22 @@
     
     if ( [entity isKindOfClass:[BbConnection class]] ) {
         NSUInteger index = [entity indexInParentEntity];
+        [(BbConnection *)entity disconnect];
         [self.connections removeObjectAtIndex:index];
         entity.parent = nil;
         return YES;
     }else if ([entity isKindOfClass:[BbObject class]] ){
+        
         NSUInteger index = [entity indexInParentEntity];
+        NSSet *connectionsToRemove = [(id<BbObject>)entity connectionMemberships];
+        
+        if ( nil != connectionsToRemove && connectionsToRemove.allObjects.count > 0 ) {
+            for (id<BbConnection> aConnection in connectionsToRemove.allObjects ) {
+                [self removeChildEntity:aConnection];
+                [self.view removeConnectionPath:aConnection.path];
+            }
+        }
+        
         [self.objects removeObjectAtIndex:index];
         entity.parent = nil;
         return YES;
@@ -343,13 +356,34 @@
 - (void)objectView:(id<BbObjectView>)sender didBeginEditingWithDelegate:(id<BbObjectViewEditingDelegate>)editingDelegate {}
 
 - (void)objectView:(id<BbObjectView>)sender didEndEditingWithUserText:(NSString *)userText {
-
+    
+    
 }
 
 @end
 
 
 @implementation BbPatch (BbPatchProtocol)
+
+- (void)doSelectors
+{
+    [self doPendingSelectors:self.selectors];
+}
+
+- (void)doPendingSelectors:(NSArray *)selectors
+{
+    if ( nil == selectors || selectors.count == 0 ) {
+        return;
+    }
+    NSMutableArray *selectorsCopy = selectors.mutableCopy;
+    NSString *mySelector = selectorsCopy.firstObject;
+    if ( [self respondsToSelector:NSSelectorFromString(mySelector)]) {
+        [self performSelector:NSSelectorFromString(mySelector)];
+    }
+    
+    [selectorsCopy removeObjectAtIndex:0];
+    [self doPendingSelectors:selectorsCopy];
+}
 
 - (NSArray *)loadChildViews
 {
@@ -380,7 +414,7 @@
     return;
 }
 
-- (NSArray *)loadChildConnections
+- (NSArray *)loadChildConnectionPaths
 {
     if ( nil == self.connections ) {
         return nil;
@@ -396,7 +430,7 @@
     return paths;
 }
 
-- (void)unloadChildConnections
+- (void)unloadChildConnectionPaths
 {
     if ( nil == self.connections ) {
         return;
@@ -409,36 +443,106 @@
 
 - (void)patchView:(id<BbPatchView>)sender didConnectOutletView:(id<BbEntityView>)outletView toInletView:(id<BbEntityView>)inletView
 {
-    BbConnection<BbConnection> *newConnection = 
+    BbConnection<BbConnection> *newConnection = [BbConnection connectionWithSender:outletView.entity receiver:inletView.entity parent:self];
+    if ( [newConnection connect] ) {
+        [self addChildEntity:newConnection];
+        id newPath = [newConnection loadPath];
+        if ( nil != newPath && [newConnection pathIsValid] ) {
+            [sender addConnectionPath:newPath];
+        }
+    }else{
+        NSAssert(newConnection.isConnected, @"ERROR MAKING CONNECTION");
+    }
 }
 
 - (void)patchView:(id<BbPatchView>)sender didAddPlaceholderObjectView:(id<BbObjectView>)objectView
 {
-    
+    [objectView beginEditingWithDelegate:self];
 }
 
 - (void)patchView:(id<BbPatchView>)sender didAddChildObjectView:(id<BbObjectView>)objectView
 {
-    
+    id <BbObject> object = objectView.entity;
+    BOOL ok = [self addChildEntity:object];
+    NSAssert(ok, @"ERROR ADDING CHILD OBJECT");
 }
 
-- (void)patchView:(id<BbPatchView>)sender didAddChildConnection:(id<BbConnection>)connection
-{
-    
-}
+- (void)patchView:(id<BbPatchView>)sender didAddChildConnection:(id<BbConnection>)connection {}
 
-- (void)patchView:(id<BbPatchView>)sender didRemoveChildConnection:(id<BbConnection>)connection
-{
-    
-}
+- (void)patchView:(id<BbPatchView>)sender didRemoveChildConnection:(id<BbConnection>)connection {}
 
 - (void)patchView:(id<BbPatchView>)sender didRemoveChildObjectView:(id<BbObjectView>)objectView
 {
-    
+    id <BbObject> object = objectView.entity;
+    BOOL ok = [self removeChildEntity:object];
+    NSAssert(ok,@"ERROR REMOVING CHILD ENTITY");
 }
 
 @end
 
 @implementation BbPatch (BbPatchViewEditingDelegate)
+
+- (NSString *)objectView:(id<BbObjectView>)sender suggestCompletionForUserText:(NSString *)userText
+{
+    if ( nil == self.symbolTable ) {
+        self.symbolTable = [BbSymbolTable new];
+    }
+    
+    
+    NSArray *textComponents = [userText componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    NSArray *searchResults = [self.symbolTable BbText:self searchKeywordsForText:textComponents.firstObject];
+    
+    if ( nil != searchResults && searchResults.count > 0 ) {
+        NSString *keyword = searchResults.firstObject;
+        return [self.symbolTable BbText:self symbolForKeyword:keyword];
+    }
+    
+    return nil;
+}
+
+- (BOOL)objectView:(id<BbObjectView>)sender shouldEndEditingWithUserText:(NSString *)userText
+{
+    return YES;
+}
+
+- (void)objectView:(id<BbObjectView>)sender didEndEditingWithUserText:(NSString *)userText
+{
+    
+    id<BbObject> oldObject = sender.entity;
+    id<BbObject> newObject = [self createObjectIfNeededForView:sender withUserText:userText];
+    [self.view updateAppearance];
+}
+
+- (id<BbObject>)createObjectIfNeededForView:(id<BbObjectView>)view withUserText:(NSString *)userText
+{
+    NSArray *textArray = [userText getComponents];
+    NSString *keyWord = textArray.firstObject;
+    NSArray *searchResults = [self.symbolTable BbText:self searchKeywordsForText:keyWord];
+    
+    if ( nil == searchResults ) {
+        return nil;
+    }
+    
+    NSString *symbol = [self.symbolTable BbText:self symbolForKeyword:searchResults.firstObject];
+    
+    if ( nil == symbol ) {
+        return nil;
+    }
+    
+    NSMutableArray *mutableTextArray = textArray.mutableCopy;
+    [mutableTextArray replaceObjectAtIndex:0 withObject:symbol];
+    NSString *creationArguments = [mutableTextArray getString];
+    
+    NSMutableArray *viewArgArray = [NSMutableArray array];
+    NSString *viewClass = [NSInvocation doClassMethod:symbol selector:@"viewClass" arguments:nil];
+    [viewArgArray addObject:viewClass];
+    NSValue *position = [view position];
+    NSString *positionString = NSStringFromCGPoint([position CGPointValue]);
+    [viewArgArray addObjectsFromArray:[positionString getArguments]];
+    NSString *viewArguments = [viewArgArray getString];
+    id objectDescription = [BbObjectDescription objectDescriptionWithArgs:creationArguments viewArgs:viewArguments];
+    BbObject *object = [NSClassFromString(symbol) objectWithDescription:objectDescription];
+    return (id<BbObject>)object;
+}
 
 @end

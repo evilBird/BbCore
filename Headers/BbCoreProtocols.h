@@ -60,14 +60,14 @@
 @property (nonatomic,strong)    id<BbEntityView,BbObjectView>           view;
 @property (nonatomic,weak)      id<BbEntity,BbObject,BbPatch>           parent;
 
-@property (nonatomic,strong)    NSString                        *creationArguments;
-@property (nonatomic,strong)    NSString                        *viewArguments;
+@property (nonatomic,strong)    NSString                                *creationArguments;
+@property (nonatomic,strong)    NSString                                *viewArguments;
 
-@property (nonatomic,strong)    NSMutableArray                  *inlets;
-@property (nonatomic,strong)    NSMutableArray                  *outlets;
+@property (nonatomic,strong)    NSMutableArray                          *inlets;
+@property (nonatomic,strong)    NSMutableArray                          *outlets;
 
-@property (nonatomic,strong)    NSString                        *displayText;
-@property (nonatomic,strong)    NSString                        *userText;
+@property (nonatomic,strong)    NSString                                *displayText;
+@property (nonatomic,strong)    NSString                                *userText;
 
 + (NSString *)symbolAlias;
 
@@ -85,7 +85,7 @@
 
 - (void)objectView:(id<BbObjectView>)sender didBeginEditingWithDelegate:(id<BbObjectViewEditingDelegate>)editingDelegate;
 
-- (void)objectView:(id<BbObjectView>)sender didEndEditingWithUserText:(NSString *)userText;
+- (NSSet *)connectionMemberships;
 
 @end
 
@@ -96,7 +96,8 @@
 @property (nonatomic,weak)                      id<BbEntity>                                                        receiver;
 
 @property (nonatomic,getter=isSelected)         BOOL                                                                selected;
-@property (nonatomic,getter=isValid)            BOOL                                                                valid;
+@property (nonatomic,getter=isConnected)        BOOL                                                                connected;
+@property (nonatomic)                           BOOL                                                                pathIsValid;
 @property (nonatomic,strong)                    id                                                                  path;
 
 - (id)loadPath;
@@ -119,9 +120,9 @@
 
 - (void)unloadChildViews;
 
-- (NSArray *)loadChildConnections;
+- (NSArray *)loadChildConnectionPaths;
 
-- (void)unloadChildConnections;
+- (void)unloadChildConnectionPaths;
 
 - (void)patchView:(id<BbPatchView>)sender didConnectOutletView:(id<BbEntityView>)outletView toInletView:(id<BbEntityView>)inletView;
 

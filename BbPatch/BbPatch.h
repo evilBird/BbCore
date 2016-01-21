@@ -11,6 +11,7 @@
 #import "BbSymbolTable.h"
 #import "BbPatchInlet.h"
 #import "BbPatchOutlet.h"
+#import "BbTextDescription.h"
 
 @class BbPatchDescription;
 @class BbSymbolTable;
@@ -72,11 +73,11 @@
 
 - (NSArray *)loadChildViews;
 
-- (NSArray *)loadChildConnections;
+- (NSArray *)loadChildConnectionPaths;
 
 - (void)unloadChildViews;
 
-- (void)unloadChildConnections;
+- (void)unloadChildConnectionPaths;
 
 - (void)patchView:(id<BbPatchView>)sender didConnectOutletView:(id<BbEntityView>)outletView toInletView:(id<BbEntityView>)inletView;
 
@@ -92,66 +93,11 @@
 
 @end
 
-@interface BbPatch (BbPatchViewEditingDelegate) <BbPatchViewEditingDelegate>
+@interface BbPatch (BbObjectViewEditingDelegate) <BbObjectViewEditingDelegate>
 
-@end
+- (NSString *)objectView:(id<BbObjectView>)sender suggestCompletionForUserText:(NSString *)userText;
 
-@interface BbPatch (BbObjectParent) <BbObjectParent>
-
-- (NSString *)depthStringForChildObject:(id<BbObjectChild>)child;
-
-- (void)didAddChildConnection:(BbConnection *)connection;
-
-- (void)didRemoveChildConnection:(BbConnection *)connection;
-
-- (void)doSelectors;
-
-- (NSString *)selectorText;
-
-- (NSString *)textDescription;
-
-- (NSString *)descriptionToken;
-
-- (void)addObjectPortForPatchPort:(id<BbObjectChild>)patchPort;
-
-- (void)insertObjectPortForPatchPort:(id<BbObjectChild>)patchPort atIndex:(NSUInteger)index;
-
-- (void)removeObjectPortForPatchPort:(id<BbObjectChild>)patchPort;
-
-- (BOOL)loadViews;
-
-@end
-
-@interface BbPatch (BbObjectViewDelegate) <BbObjectViewEditingDelegate>
-
-
-- (BOOL)objectViewShouldBeginEditing:(id<BbObjectView>)objectView;
-
-- (void)objectView:(id<BbObjectView>)objectView didEditText:(NSString *)text;
-
-- (BOOL)objectView:(id<BbObjectView>)objectView shouldEndEditingWithText:(NSString *)text;
-
-- (void)objectViewDidAppear:(id<BbObjectView>)sender;
-
-- (void)objectView:(id<BbObjectView>)sender didChangePosition:(NSValue *)position;
-
-- (void)objectView:(id<BbObjectView>)sender didChangeContentOffset:(NSValue *)offset;
-
-- (void)objectView:(id<BbObjectView>)sender didChangeZoomScale:(NSValue *)zoomScale;
-
-- (void)objectView:(id<BbObjectView>)sender didChangeSize:(NSValue *)viewSize;
-
-- (void)objectView:(id<BbObjectView>)sender didRequestPlaceholderViewAtPosition:(NSValue *)position;
-
-@end
-
-@interface BbPatch (BbObjectViewDataSource)
-
-- (NSValue *)contentOffsetForObjectView:(id<BbObjectView>)objectView;
-
-- (NSValue *)zoomScaleForObjectView:(id<BbObjectView>)objectView;
-
-- (NSValue *)sizeForObjectView:(id<BbObjectView>)objectView;
+- (BOOL)objectView:(id<BbObjectView>)sender shouldEndEditingWithUserText:(NSString *)userText;
 
 @end
 
