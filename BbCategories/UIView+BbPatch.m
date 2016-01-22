@@ -107,20 +107,5 @@ CGFloat CGPointGetDistance(CGPoint point, CGPoint referencePoint)
     return CGRectContainsPoint(boundingRect, point);
 }
 
-- (BbViewType)myViewType
-{
-    SEL viewTypeSelector = NSSelectorFromString(@"viewTypeCode");
-    
-    if ( [self respondsToSelector:viewTypeSelector] ) {
-        id code = [NSInvocation doInstanceMethod:self selector:@"viewTypeCode" arguments:nil];
-        if ( [code isKindOfClass:[NSNumber class]] || [code isKindOfClass:[NSValue class]] ) {
-            return (BbViewType)[(NSNumber *)code integerValue];
-        }
-    }else if ( nil != self.superview ){
-        return [self.superview myViewType];
-    }
-    
-    return BbViewType_Unknown;
-}
 
 @end

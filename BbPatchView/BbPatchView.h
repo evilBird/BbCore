@@ -10,16 +10,7 @@
 #import "BbView.h"
 #import "BbMessageView.h"
 #import "BbScrollView.h"
-
-@protocol BbPatchViewEventDelegate <NSObject>
-
-- (void)patchView:(id)sender didChangeSize:(NSValue *)size;
-- (void)patchView:(id)sender didChangeContentOffset:(NSValue *)offset;
-- (void)patchView:(id)sender didChangeZoomScale:(NSValue *)zoom;
-- (void)patchView:(id)sender setScrollViewShouldBegin:(BOOL)shouldBegin;
-- (void)patchView:(id)sender setScrollViewShouldCancel:(BOOL)shouldCancel;
-
-@end
+#import "BbPatchGestureRecognizer.h"
 
 @class BbView;
 
@@ -29,12 +20,14 @@
 
 @property (nonatomic,strong)                        NSHashTable                             *childObjectViews;
 @property (nonatomic,strong)                        NSHashTable                             *childConnectionPaths;
-@property (nonatomic,weak)                          id<BbObjectViewEditingDelegate>         editingDelegate;
+@property (nonatomic,weak)                          id<BbObjectViewEditingDelegate>          editingDelegate;
 
 @property (nonatomic)                               BbPatchViewEditState                    editState;
 @property (nonatomic)                               BbEntityViewType                        entityViewType;
 
-@property (nonatomic,strong)                        BbScrollView                            *scrollView;
+@property (nonatomic,strong)                        BbPatchGestureRecognizer                *gesture;
+@property (nonatomic,strong)                          BbScrollView                            *scrollView;
+
 @property (nonatomic,weak)                          id<BbEntityView>                        selectedInlet;
 @property (nonatomic,weak)                          id<BbEntityView>                        selectedOutlet;
 @property (nonatomic,weak)                          id<BbObjectView>                        selectedObject;

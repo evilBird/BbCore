@@ -9,7 +9,7 @@
 #import "BbParseText.h"
 #import "BbRuntime.h"
 #import "BbPatch.h"
-#import "BbObjectParent.h"
+#import "BbCoreProtocols.h"
 
 static NSString     *kParentToken       =       @"N";
 static NSString     *kChildToken        =       @"X";

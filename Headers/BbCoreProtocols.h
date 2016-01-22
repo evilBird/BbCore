@@ -111,6 +111,10 @@
 
 @optional
 
+- (NSArray *)loadChildViews;
+
+- (void)unloadChildViews;
+
 - (void)sendActionsForView:(id<BbObjectView>)sender;
 
 - (BOOL)objectViewShouldBeginEditing:(id<BbObjectView>)sender;
@@ -131,10 +135,6 @@
 @property (nonatomic,strong)    NSMutableArray                                  *selectors;
 
 - (id<BbPatchView>)loadView;
-
-- (NSArray *)loadChildViews;
-
-- (void)unloadChildViews;
 
 - (NSArray *)loadChildConnectionPaths;
 

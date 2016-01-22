@@ -35,19 +35,17 @@
     return @"BbPatchInletView";
 }
 
-- (NSUInteger)numberOfInletsForObjectView:(id<BbObjectView>)objectView
+- (NSArray *)loadChildViews
 {
-    return 0;
-}
+    NSMutableArray *childViews = [NSMutableArray arrayWithCapacity:(self.inlets.count+self.outlets.count)];
 
-- (NSUInteger)numberOfOutletsForObjectView:(id<BbObjectView>)objectView
-{
-    return self.outlets.count;
-}
-
-- (NSString *)titleTextForObjectView:(id<BbObjectView>)objectView
-{
-    return @"";
+    for (id<BbEntity> outlet in self.outlets) {
+        id<BbEntityView> outletView = [outlet loadView];
+        outlet.view = outletView;
+        outletView.entity = outlet;
+        [childViews addObject:outletView];
+    }
+    return childViews;
 }
 
 @end

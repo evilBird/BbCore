@@ -7,31 +7,32 @@
 //
 
 #import "BbPatchViewController.h"
-#import "UIView+Layout.h"
-#import "BbPatch.h"
+#import "BbScrollView.h"
+#import "BbPatchView.h"
 #import "BbTextDescription.h"
 #import "BbParseText.h"
-#import "BbPatchViewContainer.h"
-#import "BbPatchView.h"
-#import "BbScrollView.h"
+#import "BbPatch.h"
 
-@interface BbPatchViewController ()
+@interface BbPatchViewController () 
 
-@property (nonatomic,strong)        BbPatchViewContainer        *patchViewContainer;
-@property (nonatomic,strong)        BbPatch                     *myPatch;
-@property (nonatomic,strong)        NSString                    *myPatchText;
-
+@property (nonatomic,strong)            BbScrollView            *scrollView;
+@property (nonatomic,strong)            BbPatch                 *patch;
 @end
 
 @implementation BbPatchViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.patchViewContainer = [[BbPatchViewContainer alloc]init];
-    self.patchViewContainer.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.view addSubview:self.patchViewContainer];
-    [self.view addConstraints:[self.patchViewContainer pinEdgesToSuperWithInsets:UIEdgeInsetsZero]];
+    [self setupScrollView];
+    [self.view layoutIfNeeded];
+    [self setupPatchView];
     // Do any additional setup after loading the view.
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [self.patch.view updateAppearance];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -39,9 +40,30 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (void)setPatch:(NSString *)patchTitle withText:(NSString *)patchText completion:(void (^)(void))completion
+- (void)setupScrollView
 {
+    self.scrollView = [[BbScrollView alloc]initWithFrame:CGRectZero];
+    self.scrollView.translatesAutoresizingMaskIntoConstraints = NO;
+    self.scrollView.minimumZoomScale = 0.5;
+    self.scrollView.maximumZoomScale = 2.0;
+    self.scrollView.backgroundColor = [UIColor lightGrayColor];
+    [self.view addSubview:self.scrollView];
+    [self.view addConstraints:[self.scrollView pinEdgesToSuperWithInsets:UIEdgeInsetsZero]];
 }
+
+- (void)setPatchText:(NSString *)text
+{
+    BbPatchDescription *description = [BbParseText parseText:text];
+    self.patch = [BbPatch objectWithDescription:description];
+}
+
+- (void)setupPatchView
+{
+    BbPatchView *patchView = (BbPatchView *)[self.patch loadView];
+    patchView.scrollView = self.scrollView;
+    patchView.backgroundColor = [UIColor whiteColor];
+}
+
 
 /*
 #pragma mark - Navigation

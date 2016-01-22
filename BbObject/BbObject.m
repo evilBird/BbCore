@@ -405,22 +405,34 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     self.view = [NSInvocation doClassMethod:viewClass selector:@"viewWithEntity:" arguments:argumentArray];
     if ( nil != self.view ) {
         
-        for (id<BbEntity> inlet in self.inlets ) {
-            id<BbEntityView> inletView = [inlet loadView];
-            inlet.view = inletView;
-            inletView.entity = inlet;
-            [self.view addChildEntityView:inletView];
-        }
+        NSArray *childViews = [self loadChildViews];
         
-        for (id<BbEntity> outlet in self.outlets) {
-            id<BbEntityView> outletView = [outlet loadView];
-            outlet.view = outletView;
-            outletView.entity = outlet;
-            [self.view addChildEntityView:outletView];
+        for (id<BbEntityView> aChildView in childViews ) {
+            [self.view addChildEntityView:aChildView];
         }
     }
     
     return _view;
+}
+
+- (NSArray *)loadChildViews
+{
+    NSMutableArray *childViews = [NSMutableArray arrayWithCapacity:(self.inlets.count+self.outlets.count)];
+    
+    for (id<BbEntity> inlet in self.inlets ) {
+        id<BbEntityView> inletView = [inlet loadView];
+        inlet.view = inletView;
+        inletView.entity = inlet;
+        [childViews addObject:inletView];
+    }
+    
+    for (id<BbEntity> outlet in self.outlets) {
+        id<BbEntityView> outletView = [outlet loadView];
+        outlet.view = outletView;
+        outletView.entity = outlet;
+        [childViews addObject:outletView];
+    }
+    return childViews;
 }
 
 - (void)unloadView
@@ -428,6 +440,17 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     if ( nil == self.view ) {
         return;
     }
+
+    [self unloadChildViews];
+    
+    id<BbObjectView> parentView = (id<BbObjectView>)self.parent.view;
+    [parentView removeChildEntityView:self.view];
+    
+    self.view = nil;
+}
+
+- (void)unloadChildViews
+{
     for (id<BbEntity> inlet in self.inlets ) {
         [inlet unloadView];
     }
@@ -435,11 +458,6 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     for (id<BbEntity> outlet in self.outlets ) {
         [outlet unloadView];
     }
-    
-    id<BbObjectView> parentView = (id<BbObjectView>)self.parent.view;
-    [parentView removeChildEntityView:self.view];
-    
-    self.view = nil;
 }
 
 - (BOOL)objectView:(id<BbObjectView>)sender didChangeValue:(NSValue *)value forViewArgumentKey:(NSString *)key

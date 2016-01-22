@@ -35,20 +35,17 @@
     return @"outlet";
 }
 
-- (NSUInteger)numberOfInletsForObjectView:(id<BbObjectView>)objectView
+- (NSArray *)loadChildViews
 {
-    return self.inlets.count;
+    NSMutableArray *childViews = [NSMutableArray arrayWithCapacity:(self.inlets.count+self.outlets.count)];
+    
+    for (id<BbEntity> inlet in self.inlets ) {
+        id<BbEntityView> inletView = [inlet loadView];
+        inlet.view = inletView;
+        inletView.entity = inlet;
+        [childViews addObject:inletView];
+    }
+    
+    return childViews;
 }
-
-- (NSUInteger)numberOfOutletsForObjectView:(id<BbObjectView>)objectView
-{
-    return 0;
-}
-
-- (NSString *)titleTextForObjectView:(id<BbObjectView>)objectView
-{
-    return @"";
-}
-
-
 @end

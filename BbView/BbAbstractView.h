@@ -48,6 +48,7 @@
 
 - (BOOL)canEdit;
 
+- (void)commonInit;
 
 @property (nonatomic,strong)                    UIColor                         *defaultFillColor;
 @property (nonatomic,strong)                    UIColor                         *selectedFillColor;

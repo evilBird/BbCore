@@ -44,13 +44,10 @@
     self.highlightLocked = NO;
 }
 
-- (BbViewType)viewTypeCode
-{
-    return BbViewType_Control;
-}
-
 - (void)setupAppearance
 {
+    self.entityViewType = BbEntityViewType_Control;
+    self.layer.borderWidth = 2;
     self.translatesAutoresizingMaskIntoConstraints = NO;
     self.defaultFillColor = [UIColor colorWithWhite:0.85 alpha:1.0];
     self.defaultBorderColor = [UIColor darkGrayColor];

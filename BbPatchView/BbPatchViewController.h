@@ -10,9 +10,6 @@
 
 @interface BbPatchViewController : UIViewController
 
-- (void)setPatch:(NSString *)patchTitle withText:(NSString *)patchText completion:(void(^)(void))completion;
-
-@property (nonatomic,strong)        NSString            *patchTitle;
-@property (nonatomic,readonly)      NSString            *patchText;
+- (void)setPatchText:(NSString *)text;
 
 @end

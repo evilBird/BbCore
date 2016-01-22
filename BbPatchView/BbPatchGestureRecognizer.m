@@ -9,7 +9,7 @@
 #import "BbPatchGestureRecognizer.h"
 #import <UIKit/UIGestureRecognizerSubclass.h>
 #import "UIView+BbPatch.h"
-#import "BbObjectView.h"
+#import "BbCoreProtocols.h"
 
 static NSTimeInterval kCountAsRepeatMaxDuration = 0.2;
 
@@ -24,7 +24,7 @@ static NSTimeInterval kCountAsRepeatMaxDuration = 0.2;
 
 - (id<BbObjectView>)getObjectViewFromHitView:(id)hitView
 {
-    if ( [hitView respondsToSelector:@selector(viewTypeCode)] ) {
+    if ( [hitView respondsToSelector:@selector(entityViewType)] ) {
         return hitView;
     }
     
@@ -78,9 +78,9 @@ static NSTimeInterval kCountAsRepeatMaxDuration = 0.2;
     self.numberOfTouches = touches.allObjects.count;
     id hitView = [self.view hitTest:self.location withEvent:event];
     self.firstView = [self getObjectViewFromHitView:hitView];
-    self.firstViewType = [self.firstView viewTypeCode];
+    self.firstViewType = [self.firstView entityViewType];
     self.currentView = self.firstView;
-    self.currentViewType = [self.firstView viewTypeCode];
+    self.currentViewType = [self.firstView entityViewType];
     self.state = UIGestureRecognizerStateBegan;
 }
 
@@ -93,7 +93,7 @@ static NSTimeInterval kCountAsRepeatMaxDuration = 0.2;
     self.numberOfTouches = touches.allObjects.count;
     id hitView = [self.view hitTest:self.location withEvent:event];
     self.currentView =  [self getObjectViewFromHitView:hitView];
-    self.currentViewType = [self.currentView viewTypeCode];
+    self.currentViewType = [self.currentView entityViewType];
     self.state = UIGestureRecognizerStateChanged;
 }
 
@@ -110,7 +110,7 @@ static NSTimeInterval kCountAsRepeatMaxDuration = 0.2;
     self.numberOfTouches = touches.allObjects.count;
     id hitView = [self.view hitTest:self.location withEvent:event];
     self.currentView = [self getObjectViewFromHitView:hitView];
-    self.currentViewType = [self.currentView viewTypeCode];
+    self.currentViewType = [self.currentView entityViewType];
     self.state = UIGestureRecognizerStateEnded;
 }
 

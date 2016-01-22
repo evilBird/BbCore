@@ -103,6 +103,8 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 
 - (void)removeChildEntityView:(id<BbEntityView>)entityView;
 
+- (NSArray *)positionConstraints;
+
 - (void)updateAppearance;
 
 @optional

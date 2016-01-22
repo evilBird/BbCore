@@ -135,7 +135,7 @@
     return nil;
 }
 
-- (void)sendActionsForObjectView:(id<BbObjectView>)sender
+- (void)sendActionsForView:(id<BbObjectView>)sender
 {
     BbBang *aBang = [BbBang bang];
     [self.inlets[0] setInputElement:aBang];
@@ -156,6 +156,16 @@
     return @"BbMessageView";
 }
 
+- (id<BbObjectViewEditingDelegate>)editingDelegateForObjectView:(id<BbObjectView>)sender
+{
+    return self;
+}
+
+- (NSString *)objectView:(id<BbObjectView>)sender suggestCompletionForUserText:(NSString *)userText
+{
+    return @"";
+}
+
 - (void)objectView:(id<BbObjectView>)sender userEnteredText:(NSString *)text
 {
     self.displayText = text;
@@ -167,6 +177,14 @@
 {
     text;
     return YES;
+}
+
+- (void)objectView:(id<BbObjectView>)sender didEndEditingWithUserText:(NSString *)userText
+{
+    self.creationArguments = userText;
+    self.displayText = userText;
+    [self updateDefaultOutputAndPlaceholderMapWithText:userText];
+    
 }
 
 @end

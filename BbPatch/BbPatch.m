@@ -274,11 +274,13 @@
 
 - (id<BbPatchView>)loadView
 {
-    NSString *viewClass = [[self class] viewClass];
-    NSString *viewArguments = self.viewArguments;
-    NSArray *argumentArray = @[self,viewArguments];
-    self.view = [NSInvocation doClassMethod:viewClass selector:@"viewWithEntity:arguments:" arguments:argumentArray];
-    return (id<BbPatchView>)self.view;
+    self.view = (id<BbPatchView>)[super loadView];
+    NSArray *connections = [self loadChildConnectionPaths];
+    for (id<BbConnectionPath> aPath in connections ) {
+        [self.view addConnectionPath:aPath];
+    }
+    
+    return self.view;
 }
 
 - (void)unloadView
@@ -372,7 +374,6 @@
         id<BbObjectView> aChildView = [anObject loadView];
         if ( nil != aChildView ) {
             [childViews addObject:aChildView];
-            aChildView.parentView = self.view;
         }
     }
     

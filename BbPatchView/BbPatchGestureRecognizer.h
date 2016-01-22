@@ -7,16 +7,16 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "BbObjectView.h"
+#import "BbCoreViewProtocols.h"
 #import "UIView+BbPatch.h"
 
 @interface BbPatchGestureRecognizer : UIGestureRecognizer
 
-@property (nonatomic,weak)                      id<BbObjectView>    firstView;
-@property (nonatomic,weak)                      id<BbObjectView>    currentView;
+@property (nonatomic,weak)                      id<BbEntityView,BbObjectView>    firstView;
+@property (nonatomic,weak)                      id<BbEntityView,BbObjectView>    currentView;
 
-@property (nonatomic)                           BbViewType          firstViewType;
-@property (nonatomic)                           BbViewType          currentViewType;
+@property (nonatomic)                           BbEntityViewType          firstViewType;
+@property (nonatomic)                           BbEntityViewType          currentViewType;
 
 @property (nonatomic)                           CGPoint             location;
 @property (nonatomic)                           CGPoint             previousLocation;

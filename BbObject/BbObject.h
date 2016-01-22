@@ -92,6 +92,10 @@
 
 - (void)unloadView;
 
+- (NSArray *)loadChildViews;
+
+- (void)unloadChildViews;
+
 - (BOOL)objectView:(id<BbObjectView>)sender didChangeValue:(NSValue *)value forViewArgumentKey:(NSString *)key;
 
 - (BOOL)objectViewShouldBeginEditing:(id<BbObjectView>)sender;

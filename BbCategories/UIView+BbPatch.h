@@ -7,7 +7,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "BbObjectView.h"
 
 @interface UIView (BbPatch)
 
@@ -21,6 +20,5 @@ CGFloat CGPointGetDistance(CGPoint point, CGPoint referencePoint);
 - (CGPoint)offset2Point:(CGPoint)offset;
 - (CGSize)multiplySize:(CGSize)size1 withSize:(CGSize)size2;
 - (BOOL)bezierPath:(UIBezierPath *)path containsPoint:(CGPoint)point;
-- (BbViewType)myViewType;
 
 @end

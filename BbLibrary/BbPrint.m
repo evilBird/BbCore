@@ -36,6 +36,9 @@
 {
     self.name = @"print";
     NSString *text = arguments;
+    if ( nil != arguments ) {
+        self.displayText = [NSString stringWithFormat:@"print %@",arguments];
+    }
     if (text) {
         self.text = [NSString stringWithString:text];
     }else{

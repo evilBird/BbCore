@@ -26,6 +26,11 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
 
 @implementation BbAbstractView
 
++ (id<BbObjectView>)viewWithEntity:(id<BbEntity,BbObject>)entity
+{
+    return [[BbAbstractView alloc]initWithEntity:entity];
+}
+
 - (instancetype)initWithEntity:(id<BbEntity,BbObject>)entity
 {
     self = [super initWithFrame:CGRectZero];
@@ -48,7 +53,6 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
     [self setupAppearance];
     [self setupPortviewStacks];
     [self setupTextDisplay];
-    [self setupPositionConstraints];
 }
 
 - (void)setupAppearance
@@ -93,9 +97,12 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
     UITextField *textField = [UITextField new];
     textField.translatesAutoresizingMaskIntoConstraints = NO;
     textField.delegate = self;
+    textField.placeholder = @"Enter text here...";
+    textField.textAlignment = NSTextAlignmentCenter;
     [self addSubview:textField];
     [self addConstraint:[textField alignCenterXToSuperOffset:0.0]];
     [self addConstraint:[textField alignCenterYToSuperOffset:0.0]];
+    self.textField = textField;
 }
 
 - (void)setupPositionConstraints
@@ -107,7 +114,7 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
 - (void)didMoveToSuperview
 {
     [super didMoveToSuperview];
-    
+    [self setupPositionConstraints];
     if ( nil != self.entity ) {
         NSString *viewArgs = self.entity.viewArguments;
         _position = [BbHelpers positionFromViewArgs:viewArgs];
@@ -134,12 +141,13 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
 
 - (void)moveToPosition:(NSValue *)positionValue
 {
-    if ( nil == self.superview ) {
+    if ( nil == self.superview || CGRectIsEmpty(self.superview.bounds)) {
         return;
     }
     
     _position = positionValue;
     CGPoint position = [positionValue CGPointValue];
+    CGPoint point = [self position2Point:position];
     CGPoint offsets = [self position2Offset:position];
     self.centerXConstraint.constant = offsets.x;
     self.centerYConstraint.constant = offsets.y;
@@ -303,6 +311,10 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
 - (void)addChildEntityView:(id<BbEntityView>)entityView
 {
     if ( nil == entityView ) {
+        return;
+    }
+    
+    if ( [self.inletViews containsObject:entityView] || [self.outletViews containsObject:entityView] ) {
         return;
     }
     
