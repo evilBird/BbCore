@@ -14,7 +14,6 @@
 {
     [super commonInit];
     self.objects = [NSMutableArray array];
-    self.connections = [NSMutableArray array];
     self.selectors = [NSMutableArray array];
 }
 
@@ -43,12 +42,6 @@
     
     self.outlets = nil;
     
-    for ( id<BbEntity> aConnection in _connections.mutableCopy ) {
-        [self removeChildEntity:aConnection];
-    }
-    
-    _connections = nil;
-    
     for ( id<BbEntity> anObject in _objects.mutableCopy ) {
         [self removeChildEntity:anObject];
     }
@@ -74,14 +67,7 @@
         return NO;
     }
     
-    if ( [entity isKindOfClass:[BbConnection class]] ) {
-        if ( nil == self.connections || self.connections.count == 0 ) {
-            return NO;
-        }else{
-            NSSet *connections = [NSSet setWithArray:self.connections];
-            return [connections containsObject:entity];
-        }
-    }else if ( [entity isKindOfClass:[BbObject class]] ){
+    if ( [entity isKindOfClass:[BbObject class]] ){
         if ( nil == self.objects || self.objects.count == 0 ) {
             return NO;
         }else{
@@ -102,11 +88,7 @@
         return NO;
     }
     
-    if ( [entity isKindOfClass:[BbConnection class]] ) {
-        [self.connections addObject:entity];
-        entity.parent = self;
-        return YES;
-    }else if ( [entity isKindOfClass:[BbObject class]] ){
+    if ( [entity isKindOfClass:[BbObject class]] ){
         [self.objects addObject:entity];
         entity.parent = self;
         return YES;
@@ -124,19 +106,7 @@
     if ( nil == entity || [self isParentOfEntity:entity] ) {
         return NO;
     }
-    
-    if ( [entity isKindOfClass:[BbConnection class]]) {
-        if ( index > self.connections.count ) {
-            return NO;
-        }else if ( index == self.connections.count ){
-            [self addChildEntity:entity];
-            return YES;
-        }else {
-            [self.connections insertObject:entity atIndex:index];
-            entity.parent = self;
-            return YES;
-        }
-    }else if ( [entity isKindOfClass:[BbObject class]] ){
+    if ( [entity isKindOfClass:[BbObject class]] ){
         if ( index > self.objects.count ) {
             return NO;
         }else if ( index == self.objects.count ){
@@ -162,21 +132,17 @@
         return NO;
     }
     
-    if ( [entity isKindOfClass:[BbConnection class]] ) {
-        NSUInteger index = [entity indexInParentEntity];
-        [(BbConnection *)entity disconnect];
-        [self.connections removeObjectAtIndex:index];
-        entity.parent = nil;
-        return YES;
-    }else if ([entity isKindOfClass:[BbObject class]] ){
+    if ([entity isKindOfClass:[BbObject class]] ){
         
         NSUInteger index = [entity indexInParentEntity];
-        NSSet *connectionsToRemove = [(id<BbObject>)entity connectionMemberships];
+        NSSet *connectionsToRemove = [entity childConnections];
         
-        if ( nil != connectionsToRemove && connectionsToRemove.allObjects.count > 0 ) {
-            for (id<BbConnection> aConnection in connectionsToRemove.allObjects ) {
-                [self removeChildEntity:aConnection];
-                [self.view removeConnectionPath:aConnection.path];
+        if ( nil != connectionsToRemove && connectionsToRemove.allObjects.count ) {
+            
+            for (BbConnection<BbEntity> *aConnection in connectionsToRemove.allObjects ) {
+                if ( [aConnection.parent removeChildEntity:aConnection] ) {
+                    [self.view removeConnectionPath:aConnection.path];
+                }
             }
         }
         
@@ -197,11 +163,7 @@
     if ( nil == entity || [self isParentOfEntity:entity] == NO ) {
         return BbIndexInParentNotFound;
     }
-    
-    if ( [entity isKindOfClass:[BbConnection class]] ) {
-        return [self.connections indexOfObject:entity];
-    }
-    
+
     if ( [entity isKindOfClass:[BbObject class]] ) {
         return [self.objects indexOfObject:entity];
     }
@@ -217,7 +179,6 @@
 
 - (NSString *)selectorText
 {
-    
     NSMutableString *selectorText = [NSMutableString string];
     NSString *depthString = nil;
     
@@ -248,10 +209,10 @@
             [mutableString appendFormat:@"%@%@",depthString,[anObject textDescription]];
         }
     }
-    
-    if ( nil != self.connections ) {
-        for (id<BbEntity> aConnection in self.connections ) {
-            NSString *depthString = [aConnection.parent depthStringForChild:aConnection];
+    NSSet *connections = [self childConnections];
+    if ( nil != connections ) {
+        for (id<BbEntity> aConnection in connections.allObjects ) {
+            NSString *depthString = [self depthStringForChild:aConnection];
             [mutableString appendFormat:@"%@%@",depthString,[aConnection textDescription]];
         }
     }
@@ -272,8 +233,8 @@
 
 - (NSString *)depthStringForChild:(id<BbEntity>)entity
 {
-    if ( nil == entity || [self isParentOfEntity:entity] == NO ) {
-        return [super depthStringForChild:entity];
+    if ( nil == entity ) {
+        return @"";
     }
     
     NSString *depthString = @"\t";
@@ -283,6 +244,22 @@
     }
     
     return [depthString stringByAppendingString:[self.parent depthStringForChild:self]];
+}
+
+- (NSSet *)childConnections
+{
+    NSMutableSet *childConnections = [NSMutableSet set];
+    for (id<BbObject> anObject in self.objects ) {
+        NSSet *connections = [anObject childConnections];
+        if ( nil != connections ) {
+            NSMutableSet *toAdd = [NSMutableSet setWithSet:connections];
+            NSSet *existing = [NSSet setWithSet:childConnections];
+            [toAdd minusSet:existing];
+            [childConnections addObjectsFromArray:toAdd.allObjects];
+        }
+    }
+    
+    return [NSSet setWithSet:childConnections];
 }
 
 @end
@@ -416,12 +393,14 @@
 
 - (NSArray *)loadChildConnectionPaths
 {
-    if ( nil == self.connections ) {
+    NSSet *connections = [self childConnections];
+    
+    if ( nil == connections ) {
         return nil;
     }
     
-    NSMutableArray *paths = [NSMutableArray arrayWithCapacity:self.connections.count];
-    for (BbConnection<BbConnection> *aConnection in self.connections ) {
+    NSMutableArray *paths = [NSMutableArray arrayWithCapacity:connections.allObjects.count];
+    for (BbConnection<BbConnection> *aConnection in connections.allObjects ) {
         id aPath = [aConnection loadPath];
         if ( nil != aPath ) {
             [paths addObject:aPath];
@@ -432,22 +411,23 @@
 
 - (void)unloadChildConnectionPaths
 {
-    if ( nil == self.connections ) {
+    NSSet *connections = [self childConnections];
+    if ( nil == connections ) {
         return;
     }
     
-    for (BbConnection<BbConnection> *aConnection in self.connections ) {
+    for (BbConnection<BbConnection> *aConnection in connections.allObjects ) {
         [aConnection unloadPath];
     }
 }
 
 - (void)patchView:(id<BbPatchView>)sender didConnectOutletView:(id<BbEntityView>)outletView toInletView:(id<BbEntityView>)inletView
 {
-    BbConnection<BbConnection> *newConnection = [BbConnection connectionWithSender:outletView.entity receiver:inletView.entity parent:self];
-    if ( [newConnection connect] ) {
-        [self addChildEntity:newConnection];
-        id newPath = [newConnection loadPath];
-        if ( nil != newPath && [newConnection pathIsValid] ) {
+    BbConnection<BbConnection> *newConnection = [BbConnection connectionWithSender:outletView.entity receiver:inletView.entity];
+    
+    if ( [outletView.entity addChildEntity:newConnection] ) {
+        id<BbConnectionPath> newPath = [newConnection loadPath];
+        if ( nil != newPath && newPath.isValid ) {
             [sender addConnectionPath:newPath];
         }
     }else{
@@ -460,7 +440,7 @@
     [objectView beginEditingWithDelegate:self];
 }
 
-- (void)patchView:(id<BbPatchView>)sender didAddChildObjectView:(id<BbObjectView>)objectView
+- (void)patchView:(id<BbPatchView>)sender didAddChildEntityView:(id<BbObjectView>)objectView
 {
     id <BbObject> object = objectView.entity;
     BOOL ok = [self addChildEntity:object];
@@ -480,7 +460,7 @@
 
 @end
 
-@implementation BbPatch (BbPatchViewEditingDelegate)
+@implementation BbPatch (BbObjectViewEditingDelegate)
 
 - (NSString *)objectView:(id<BbObjectView>)sender suggestCompletionForUserText:(NSString *)userText
 {

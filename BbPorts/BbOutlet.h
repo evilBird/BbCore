@@ -10,4 +10,20 @@
 
 @interface BbOutlet : BbPort
 
+@property (nonatomic,strong)        NSMutableArray          *strongConnections;
+
+@end
+
+@interface BbOutlet (BbEntityProtocol) <BbEntity>
+
++ (NSString *)viewClass;
+
+- (NSSet *)childConnections;
+
+- (BOOL)addChildEntity:(id<BbEntity>)entity;
+
+- (BOOL)removeChildEntity:(id<BbEntity>)entity;
+
+- (BOOL)isParentOfEntity:(id<BbEntity>)entity;
+
 @end

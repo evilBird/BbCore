@@ -20,7 +20,7 @@
 
 @property (nonatomic,strong)                NSMutableArray                                      *selectors;
 @property (nonatomic,strong)                NSMutableArray                                      *objects;
-@property (nonatomic,strong)                NSMutableArray                                      *connections;
+//@property (nonatomic,strong)                NSMutableArray                                      *connections;
 
 @property (nonatomic,strong)                BbSymbolTable<BbTextCompletionDataSource>           *symbolTable;
 
@@ -45,6 +45,8 @@
 - (NSString *)textDescriptionToken;
 
 - (NSString *)depthStringForChild:(id<BbEntity>)entity;
+
+- (NSSet *)childConnections;
 
 @end
 
@@ -83,7 +85,7 @@
 
 - (void)patchView:(id<BbPatchView>)sender didAddPlaceholderObjectView:(id<BbObjectView>)objectView;
 
-- (void)patchView:(id<BbPatchView>)sender didAddChildObjectView:(id<BbObjectView>)objectView;
+- (void)patchView:(id<BbPatchView>)sender didAddChildEntityView:(id<BbObjectView>)objectView;
 
 - (void)patchView:(id<BbPatchView>)sender didAddChildConnection:(id<BbConnection>)connection;
 

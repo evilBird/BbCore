@@ -13,6 +13,7 @@
 #import "BbParseText.h"
 #import "BbPatchViewContainer.h"
 #import "BbPatchView.h"
+#import "BbScrollView.h"
 
 @interface BbPatchViewController ()
 
@@ -40,25 +41,6 @@
 
 - (void)setPatch:(NSString *)patchTitle withText:(NSString *)patchText completion:(void (^)(void))completion
 {
-    self.patchTitle = patchTitle;
-    self.title = patchTitle;
-    self.myPatchText = patchText;
-    BbPatchDescription *description = [BbParseText parseText:self.myPatchText];
-    BbPatch *myPatch = [BbPatch objectWithDescription:description];
-    BbPatchView *myPatchView = [[BbPatchView alloc]initWithDataSource:myPatch];
-    myPatchView.delegate = myPatch;
-    //myPatchView.translatesAutoresizingMaskIntoConstraints = NO;
-    myPatch.view = myPatchView;
-    self.myPatch = myPatch;
-    __weak BbPatchViewController *weakself = self;
-    [self.patchViewContainer setPatchView:myPatchView completion:^{
-        [weakself.myPatch doSelectors];
-        if ( nil != completion ) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                completion();
-            });
-        }
-    }];
 }
 
 /*

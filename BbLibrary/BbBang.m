@@ -7,7 +7,7 @@
 //
 
 #import "BbBang.h"
-#import "BbHelpers.h"
+#import "BbCoreProtocols.h"
 
 @implementation BbBang
 
@@ -21,7 +21,7 @@
     self = [super init];
     if (self) {
         _timeStamp = [NSDate date];
-        _uniqueID = [BbHelpers createUniqueIDString];
+        _uniqueID = [NSString uniqueIDString];
     }
     
     return self;

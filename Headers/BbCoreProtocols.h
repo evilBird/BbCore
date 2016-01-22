@@ -10,12 +10,15 @@
 #define BbProtocols_h
 
 #import "BbCoreViewProtocols.h"
+#import "BbHelpers.h"
+
+#pragma mark - BbEntity Protocol
 
 @protocol BbEntity <NSObject>
 
 @property (nonatomic,strong)        NSString                    *uniqueID;
 @property (nonatomic,strong)        NSHashTable                 *entityObservers;
-@property (nonatomic,weak)          id<BbEntity,BbObject>       parent;
+@property (nonatomic,weak)          id<BbEntity>                parent;
 
 - (BOOL)addEntityObserver:(id<BbEntity>)entity;
 
@@ -35,6 +38,12 @@
 
 @property (nonatomic,strong)        id<BbEntityView>            view;
 
++ (NSString *)viewClass;
+
+- (id<BbEntityView>)loadView;
+
+- (void)unloadView;
+
 - (BOOL)isParentOfEntity:(id<BbEntity>)entity;
 
 - (BOOL)addChildEntity:(id<BbEntity>)entity;
@@ -53,7 +62,30 @@
 
 - (NSString *)depthStringForChild:(id<BbEntity>)entity;
 
+- (NSSet *)childConnections;
+
+
 @end
+
+#pragma mark - BbConnection Protocol
+
+@protocol BbConnection <NSObject,BbEntity>
+
+@property (nonatomic,weak)                      id<BbEntity>                                                        sender;
+@property (nonatomic,weak)                      id<BbEntity>                                                        receiver;
+
+@property (nonatomic,getter=isConnected)        BOOL                                                                connected;
+@property (nonatomic,strong)                    id<BbConnectionPath>                                                path;
+
+- (BOOL)connect;
+- (BOOL)disconnect;
+
+- (id<BbConnectionPath>)loadPath;
+- (void)unloadPath;
+
+@end
+
+#pragma mark - BbObject Protocol
 
 @protocol BbObject <NSObject,BbEntity>
 
@@ -79,39 +111,23 @@
 
 @optional
 
+- (void)sendActionsForView:(id<BbObjectView>)sender;
+
 - (BOOL)objectViewShouldBeginEditing:(id<BbObjectView>)sender;
 
 - (id<BbObjectViewEditingDelegate>)editingDelegateForObjectView:(id<BbObjectView>)sender;
 
 - (void)objectView:(id<BbObjectView>)sender didBeginEditingWithDelegate:(id<BbObjectViewEditingDelegate>)editingDelegate;
 
-- (NSSet *)connectionMemberships;
-
 @end
 
-@protocol BbConnection <NSObject,BbEntity>
-
-@property (nonatomic,weak)                      id<BbEntity, BbObject, BbPatch>                                     parent;
-@property (nonatomic,weak)                      id<BbEntity>                                                        sender;
-@property (nonatomic,weak)                      id<BbEntity>                                                        receiver;
-
-@property (nonatomic,getter=isSelected)         BOOL                                                                selected;
-@property (nonatomic,getter=isConnected)        BOOL                                                                connected;
-@property (nonatomic)                           BOOL                                                                pathIsValid;
-@property (nonatomic,strong)                    id                                                                  path;
-
-- (id)loadPath;
-- (void)unloadPath;
-
-@end
-
+#pragma mark - BbPatch Protocol
 
 @protocol BbPatch <NSObject,BbEntity,BbObject>
 
 @property (nonatomic,strong)    id<BbEntityView,BbObjectView,BbPatchView>       view;
 
 @property (nonatomic,strong)    NSMutableArray                                  *objects;
-@property (nonatomic,strong)    NSMutableArray                                  *connections;
 @property (nonatomic,strong)    NSMutableArray                                  *selectors;
 
 - (id<BbPatchView>)loadView;
@@ -128,7 +144,7 @@
 
 - (void)patchView:(id<BbPatchView>)sender didAddPlaceholderObjectView:(id<BbObjectView>)objectView;
 
-- (void)patchView:(id<BbPatchView>)sender didAddChildObjectView:(id<BbObjectView>)objectView;
+- (void)patchView:(id<BbPatchView>)sender didAddChildEntityView:(id<BbObjectView>)objectView;
 
 - (void)patchView:(id<BbPatchView>)sender didAddChildConnection:(id<BbConnection>)connection;
 

@@ -8,22 +8,46 @@
 
 #import <UIKit/UIKit.h>
 #import "BbPortView.h"
-#import "BbObjectView.h"
+#import "BbCoreProtocols.h"
 #import "UIView+Layout.h"
 #import "UIView+BbPatch.h"
 
-typedef NS_ENUM(NSInteger, BbPatchViewType){
-    BbPatchViewType_Unknown         =   -1,
-    BbPatchViewType_Patch           =   0,
-    BbPatchViewType_Object          =   1,
-    BbPatchViewType_Inlet           =   2,
-    BbPatchViewType_Outlet          =   3,
-    BbPatchViewType_ActionObject    =   4,
-    BbPatchViewType_ObjectSubview   =   5,
-    BbPatchViewType_PatchOutlet     =   6,
-};
+@interface BbAbstractView : UIView <BbEntityView,BbObjectView,UITextFieldDelegate>
 
-@interface BbAbstractView : UIView <BbObjectView,UITextFieldDelegate>
+@property (nonatomic,weak)                      id<BbEntity,BbObject>           entity;
+@property (nonatomic,weak)                      id<BbObjectViewEditingDelegate> editingDelegate;
+
+@property (nonatomic,strong)                    NSHashTable                     *inletViews;
+@property (nonatomic,strong)                    NSHashTable                     *outletViews;
+
+@property (nonatomic,strong)                    NSValue                         *position;
+@property (nonatomic,strong)                    NSString                        *titleText;
+
+@property (nonatomic,strong)                    id                              textField;
+
+@property (nonatomic,getter=isEditing)          BOOL                            editing;
+@property (nonatomic,getter=isSelected)         BOOL                            selected;
+@property (nonatomic,getter=isHighlighted)      BOOL                            highlighted;
+@property (nonatomic,getter=isPlaceholder)      BOOL                            placeholder;
+
+@property (nonatomic)                           BbEntityViewType                entityViewType;
+
+- (instancetype)initWithEntity:(id<BbEntity,BbObject>)entity;
+
+- (void)addChildEntityView:(id<BbEntityView>)entityView;
+
+- (void)removeChildEntityView:(id<BbEntityView>)entityView;
+
+- (void)moveToPoint:(NSValue *)pointValue;
+
+- (void)moveToPosition:(NSValue *)positionValue;
+
+- (void)updateAppearance;
+
+- (NSArray *)positionConstraints;
+
+- (BOOL)canEdit;
+
 
 @property (nonatomic,strong)                    UIColor                         *defaultFillColor;
 @property (nonatomic,strong)                    UIColor                         *selectedFillColor;
@@ -31,101 +55,26 @@ typedef NS_ENUM(NSInteger, BbPatchViewType){
 @property (nonatomic,strong)                    UIColor                         *selectedBorderColor;
 @property (nonatomic,strong)                    UIColor                         *defaultTextColor;
 @property (nonatomic,strong)                    UIColor                         *selectedTextColor;
-@property (nonatomic,strong)                    NSArray                         *inletViews;
-@property (nonatomic,strong)                    NSArray                         *outletViews;
+@property (nonatomic,strong)                    UIColor                         *highlightedFillColor;
+@property (nonatomic,strong)                    UIColor                         *highlightedBorderColor;
+@property (nonatomic,strong)                    UIColor                         *highlightedTextColor;
 
-@property (nonatomic,weak)                      id<BbObjectViewDataSource>      dataSource;
-@property (nonatomic,weak)                      id<BbObjectViewDelegate>        delegate;
-@property (nonatomic,weak)                      id<BbObjectViewEditingDelegate> editingDelegate;
-@property (nonatomic,getter=isEditing)          BOOL                            editing;
-@property (nonatomic,getter=isSelected)         BOOL                            selected;
+@property (nonatomic)                           NSUInteger                      contentWidth;
+@property (nonatomic)                           NSUInteger                      contentHeight;
 
-
-@property (nonatomic,weak)                      UIView                          *primaryContentView;
-
-@property (nonatomic,strong)                    NSValue                         *objectViewPosition;
-@property (nonatomic)                           NSUInteger                      numIn;
-@property (nonatomic)                           NSUInteger                      numOut;
-@property (nonatomic,strong)                    NSArray                         *textFieldConstraints;
-
-@property (nonatomic)                           CGPoint                         myPosition;
-@property (nonatomic)                           CGPoint                         myOffset;
-@property (nonatomic)                           CGSize                          myContentSize;
-@property (nonatomic)                           CGFloat                         myMinimumSpacing;
-@property (nonatomic,strong)                    NSString                        *myTitleText;
 @property (nonatomic,strong)                    UIColor                         *myFillColor;
 @property (nonatomic,strong)                    UIColor                         *myBorderColor;
 @property (nonatomic,strong)                    UIColor                         *myTextColor;
-@property (nonatomic,strong)                    UILabel                         *myLabel;
-@property (nonatomic,strong)                    UITextField                     *myTextField;
+
 @property (nonatomic,strong)                    UIStackView                     *inletsStackView;
 @property (nonatomic,strong)                    UIStackView                     *outletsStackView;
+
 @property (nonatomic,strong)                    NSLayoutConstraint              *centerXConstraint;
 @property (nonatomic,strong)                    NSLayoutConstraint              *centerYConstraint;
+
 @property (nonatomic,strong)                    NSLayoutConstraint              *inletStackRightEdge;
 @property (nonatomic,strong)                    NSLayoutConstraint              *outletStackRightEdge;
 
 
-- (instancetype)initWithTitleText:(NSString *)text inlets:(NSUInteger)numInlets outlets:(NSUInteger)numOutlets;
-
-- (BOOL)canReload;
-
-- (BbViewType)viewTypeCode;
-
-- (void)setupPrimaryContentView;
-
-- (void)setupInletViews;
-
-- (void)setupOutletViews;
-
-- (void)commonInit;
-
-- (NSArray *)makeInletViews:(NSUInteger)numIn;
-
-- (NSArray *)makeOutletViews:(NSUInteger)numOut;
-
-- (void)setupLabel;
-
-- (void)setupTextField;
-
-- (void)tearDownTextField;
-
-- (NSDictionary *)myTextAttributes;
-
-+ (CGSize)sizeForText:(NSString *)text attributes:(NSDictionary *)attributes;
-
-+ (CGSize)sizeForPortViews:(NSArray *)portViews minimumSpacing:(CGFloat)minimumSpacing;
-
-- (void)calculateSpacingAndContentSize;
-
-- (void)moveToPoint:(CGPoint)point;
-
-- (void)setPosition:(CGPoint)position;
-
-- (CGPoint)getPosition;
-
-- (NSArray *)positionConstraints;
-
-- (void)reloadViewsWithDataSource:(id<BbObjectViewDataSource>)dataSource;
-
-- (void)updateAppearance;
-
-- (void)updateLayout;
-
-- (BOOL)canEdit;
-
-+ (id<BbObjectView>)createViewWithDataSource:(id<BbObjectViewDataSource>)dataSource;
-
-- (void)setTitleText:(NSString *)titleText;
-
-- (void)setPositionWithValue:(NSValue *)value;
-
-- (id<BbObjectView>)viewForInletAtIndex:(NSUInteger)index;
-
-- (id<BbObjectView>)viewForOutletAtIndex:(NSUInteger)index;
-
-- (void)setDataSource:(id<BbObjectViewDataSource>)dataSource reloadViews:(BOOL)reload;
-
-- (void)doAction:(void(^)(void))action;
 
 @end

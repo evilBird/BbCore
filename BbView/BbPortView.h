@@ -7,38 +7,27 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "BbObjectView.h"
+#import "BbCoreProtocols.h"
 #import "UIView+BbPatch.h"
 #import "UIView+Layout.h"
 
 static CGFloat kDefaultPortViewSpacing = 10;
 
-@interface BbPortView : UIView  <BbObjectView>
-
-@property (nonatomic,strong)                UIColor             *defaultFillColor;
-@property (nonatomic,strong)                UIColor             *selectedFillColor;
-@property (nonatomic,strong)                UIColor             *defaultBorderColor;
-@property (nonatomic,strong)                UIColor             *selectedBorderColor;
-@property (nonatomic)                       CGAffineTransform   selectedTransform;
-@property (nonatomic,strong)                NSValue             *objectViewPosition;
+@interface BbPortView : UIView  <BbEntityView>
 
 @property (nonatomic,getter=isSelected)     BOOL                selected;
 
-@property (nonatomic,weak)                  id<BbObjectViewDataSource>      dataSource;
+@property (nonatomic,weak)                  id<BbEntity>        entity;
+@property (nonatomic)                       BbEntityViewType    entityViewType;
 
 + (CGSize)defaultPortViewSize;
-
 
 @end
 
 @interface BbInletView : BbPortView
 
-- (BbViewType)viewTypeCode;
-
 @end
 
 @interface BbOutletView : BbPortView
-
-- (BbViewType)viewTypeCode;
 
 @end

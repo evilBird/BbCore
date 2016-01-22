@@ -43,9 +43,16 @@ static NSString *kInputElement  =   @"inputElement";
 
 - (BOOL)disconnectFromPort:(BbPort *)port;
 
+
 @end
 
 @interface BbPort (BbEntityProtocol) <BbEntity>
+
++ (NSString *)viewClass;
+
+- (id<BbEntityView>)loadView;
+
+- (void)unloadView;
 
 - (BOOL)addEntityObserver:(id<BbEntity>)entity;
 

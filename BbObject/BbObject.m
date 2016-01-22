@@ -365,36 +365,58 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     return @"";
 }
 
+- (NSSet *)childConnections
+{
+    NSMutableSet *childConnections = [NSMutableSet set];
+
+    for ( id<BbEntity> anOutlet in self.outlets ) {
+        NSSet *connections = [anOutlet childConnections];
+        if ( nil != connections ) {
+            NSSet *existing = [NSSet setWithSet:childConnections];
+            NSMutableSet *toAdd = [NSMutableSet setWithSet:connections];
+            [toAdd minusSet:existing];
+            [childConnections addObjectsFromArray:toAdd.allObjects];
+        }
+    }
+    
+    for ( id<BbEntity> anInlet in self.inlets ) {
+        NSSet *connections = [anInlet childConnections];
+        if ( nil != connections ) {
+            NSSet *existing = [NSSet setWithSet:childConnections];
+            NSMutableSet *toAdd = [NSMutableSet setWithSet:connections];
+            [toAdd minusSet:existing];
+            [childConnections addObjectsFromArray:toAdd.allObjects];
+        }
+    }
+    
+    return [NSSet setWithSet:childConnections];
+}
+
 @end
 
 #pragma mark - BbObject (BbObjectProtocol)
 
 @implementation BbObject (BbObjectProtocol)
 
-- (NSSet *)connectionMemberships
-{
-    NSArray *memberships = self.memberOfConnections.allObjects;
-    if ( nil == memberships || memberships.count == 0 ) {
-        return [NSSet set];
-    }
-    
-    return [NSSet setWithArray:memberships];
-}
-
 - (id<BbObjectView>)loadView
 {
     NSString *viewClass = [[self class] viewClass];
-    NSString *viewArguments = self.viewArguments;
-    NSArray *argumentArray = @[self,viewArguments];
-    self.view = [NSInvocation doClassMethod:viewClass selector:@"viewWithEntity:arguments:" arguments:argumentArray];
+    NSArray *argumentArray = @[self];
+    self.view = [NSInvocation doClassMethod:viewClass selector:@"viewWithEntity:" arguments:argumentArray];
     if ( nil != self.view ) {
         
         for (id<BbEntity> inlet in self.inlets ) {
-            [(id<BbObjectView>)self.view setEntity:inlet forInletViewAtIndex:[inlet indexInParentEntity]];
+            id<BbEntityView> inletView = [inlet loadView];
+            inlet.view = inletView;
+            inletView.entity = inlet;
+            [self.view addChildEntityView:inletView];
         }
         
         for (id<BbEntity> outlet in self.outlets) {
-            [(id<BbObjectView>)self.view setEntity:outlet forOutletViewAtIndex:[outlet indexInParentEntity]];
+            id<BbEntityView> outletView = [outlet loadView];
+            outlet.view = outletView;
+            outletView.entity = outlet;
+            [self.view addChildEntityView:outletView];
         }
     }
     
@@ -406,8 +428,17 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     if ( nil == self.view ) {
         return;
     }
+    for (id<BbEntity> inlet in self.inlets ) {
+        [inlet unloadView];
+    }
     
-    [NSInvocation doInstanceMethod:self.view selector:@"removeFromSuperview" arguments:nil];
+    for (id<BbEntity> outlet in self.outlets ) {
+        [outlet unloadView];
+    }
+    
+    id<BbObjectView> parentView = (id<BbObjectView>)self.parent.view;
+    [parentView removeChildEntityView:self.view];
+    
     self.view = nil;
 }
 

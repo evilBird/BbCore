@@ -14,9 +14,9 @@
 {
     BbInlet *hotInlet = [[BbInlet alloc]init];
     hotInlet.hot = YES;
-    [self addChildObject:hotInlet];
+    [self addChildEntity:hotInlet];
     BbInlet *coldInlet = [[BbInlet alloc]init];
-    [self addChildObject:coldInlet];
+    [self addChildEntity:coldInlet];
     __weak BbPrint *weakself = self;
     [hotInlet setOutputBlock:^( id value ){
         if ( [value isKindOfClass:[BbBang class]] ) {

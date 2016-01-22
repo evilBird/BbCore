@@ -8,6 +8,8 @@
 
 #import "BbConnection.h"
 #import "BbPort.h"
+#import "BbCoreProtocols.h"
+#import "BbConnectionPath.h"
 
 static NSString  *kObservedKeyPath = @"viewArguments";
 
@@ -15,24 +17,21 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
 
 @interface BbConnection ()
 
-@property (nonatomic,strong)            UIBezierPath            *myPath;
-
 @end
 
 @implementation BbConnection
 
-+ (BbConnection *)connectionWithSender:(id<BbEntity>)sender receiver:(id<BbEntity>)receiver parent:(id<BbPatch>)parent
++ (BbConnection *)connectionWithSender:(id<BbEntity>)sender receiver:(id<BbEntity>)receiver
 {
-    return [[BbConnection alloc]initWithSender:sender receiver:receiver parent:parent];
+    return [[BbConnection alloc]initWithSender:sender receiver:receiver];
 }
 
-- (instancetype)initWithSender:(id<BbEntity>)sender receiver:(id<BbEntity>)receiver parent:(id<BbPatch>)parent
+- (instancetype)initWithSender:(id<BbEntity>)sender receiver:(id<BbEntity>)receiver
 {
     self = [super init];
     if ( self ) {
         _sender = sender;
         _receiver = receiver;
-        _parent = parent;
         [self commonInit];
     }
     
@@ -46,7 +45,6 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
     self.receiverID = [self.receiver uniqueID];
     self.entityObservers = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
     self.connected = NO;
-    self.pathIsValid = NO;
 }
 
 - (BOOL)connect
@@ -66,50 +64,19 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
     }
     
     self.connected = ![(BbPort *)self.sender disconnectFromPort:(BbPort *)self.receiver];
+    self.path.valid = self.isConnected;
     return self.isConnected;
 }
 
-#pragma mark - BbConnection Protocol
-
-- (UIView *)parentView
-{
-    return (UIView *)[self.parent view];
-}
-
-- (UIView *)outletView
-{
-    return (UIView *)[self.sender view];
-}
-
-- (UIView *)outletParentView
-{
-    return (UIView *)[self.sender.parent view];
-}
-
-- (UIView *)inletView
-{
-    return (UIView *)[self.receiver view];
-}
-
-- (UIView *)inletParentView
-{
-    return (UIView *)[self.receiver.parent view];
-}
 
 - (void)updatePath
 {
-    UIView *parentView = [self parentView];
-    UIView *senderView = [self outletView];
-    UIView *senderParentView = [self outletParentView];
-    CGPoint startPoint = [parentView convertPoint:senderView.center fromView:senderParentView];
-    
-    UIView *receiverView = [self inletView];
-    UIView *receiverParentView = [self inletParentView];
-    CGPoint endPoint = [parentView convertPoint:receiverView.center fromView:receiverParentView];
-    
-    [self.myPath removeAllPoints];
-    [self.myPath moveToPoint:startPoint];
-    [self.myPath addLineToPoint:endPoint];
+    id<BbEntityView> senderView = self.sender.view;
+    id<BbEntityView> receiverView = self.receiver.view;
+    id<BbEntityView> patchView = self.sender.parent.parent.view;
+    self.path.startPoint = [(BbConnectionPath *)self.path centerPointValueForEntityView:senderView inParentView:patchView];
+    self.path.endPoint = [(BbConnectionPath *)self.path centerPointValueForEntityView:receiverView inParentView:patchView];
+    self.path.needsRedraw = YES;
 }
 
 #pragma mark - KVO
@@ -149,24 +116,23 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
 
 - (id)loadPath
 {
-    self.pathIsValid = ( [self.sender.parent addEntityObserver:self] && [self.receiver.parent addEntityObserver:self] );
+    self.path = nil;
+    BbConnectionPath *path = [BbConnectionPath new];
+    path.valid = ( [self.sender.parent addEntityObserver:self] && [self.receiver.parent addEntityObserver:self] );
     
-    if ( !self.pathIsValid ) {
+    if ( !path.isValid ) {
         return nil;
     }
-    
-    self.myPath = [UIBezierPath bezierPath];
-    self.path = self.myPath;
+    path.entity = self;
+    self.path = path;
     [self updatePath];
-    
-    return self.path;
+    return path;
 }
 
 - (void)unloadPath
 {
-    self.pathIsValid = !( [self.sender.parent removeEntityObserver:self] && [self.receiver.parent removeEntityObserver:self] );
-    [self.myPath removeAllPoints];
-    self.myPath = nil;
+    self.path.valid = !( [self.sender.parent removeEntityObserver:self] && [self.receiver.parent removeEntityObserver:self] );
+    self.path.entity = nil;
     self.path = nil;
 }
 
@@ -241,7 +207,6 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
 - (BOOL)stopObservingEntity:(id<BbEntity>)entity
 {
     [(NSObject *)entity removeObserver:self forKeyPath:kObservedKeyPath context:BbConnectionPathObservationContextXX];
-    self.pathIsValid = NO;
     return YES;
 }
 

@@ -14,10 +14,10 @@
 {
     BbInlet *inlet = [[BbInlet alloc]init];
     inlet.hot = YES;
-    [self addChildObject:inlet];
+    [self addChildEntity:inlet];
     
     __block BbOutlet *outlet = [[BbOutlet alloc]init];
-    [self addChildObject:outlet];
+    [self addChildEntity:outlet];
     
     [inlet setOutputBlock:^(id value){
         outlet.inputElement = value;

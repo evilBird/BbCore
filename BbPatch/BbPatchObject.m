@@ -40,7 +40,7 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
     
     for (BbObjectDescription *childDescription in patchDescription.childObjectDescriptions) {
         BbObject *child = [NSInvocation doClassMethod:childDescription.objectClass selector:@"objectWithDescription:" arguments:childDescription];
-        [patch addChildObject:child];
+        [patch addChildEntity:child];
         if ([child isKindOfClass:[BbPatchInlet class]]) {
             [inletAttributes addObject:[BbPatchObject attributesForPatchPort:child]];
         }else if ([child isKindOfClass:[BbPatchOutlet class]]){
@@ -50,7 +50,7 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
     
     for (BbConnectionDescription *connectionDescription in patchDescription.childConnectionDescriptions) {
         BbConnection *connection = [patch connectionWithDescription:connectionDescription];
-        [patch addChildObject:connection];
+        [patch addChildEntity:connection];
     }
     
     [self setupPortsForPatch:patch withInletAttributes:inletAttributes outletAttributes:outletAttributes];
@@ -75,7 +75,7 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
         __block BbPatchInlet *patchInlet = inletAttrs[kPortAttributeKeyPort];
         BbInlet *myInlet = [[BbInlet alloc]init];
         myInlet.hot = YES;
-        [self addChildObject:myInlet];
+        [self addChildEntity:myInlet];
         [myInlet setOutputBlock:^(id value){
             [patchInlet.inlets.firstObject setInputElement:value];
         }];
@@ -84,7 +84,7 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
     NSArray *sortedOutlets = [outletAttributes sortedArrayUsingDescriptors:@[sortByXPositionDescriptor]];
     for ( NSDictionary *outletAttrs in sortedOutlets ) {
         __block BbOutlet *myOutlet = [[BbOutlet alloc]init];
-        [self addChildObject:myOutlet];
+        [self addChildEntity:myOutlet];
         BbPatchOutlet *patchOutlet = outletAttrs[kPortAttributeKeyPort];
         [patchOutlet.outlets.firstObject setOutputBlock:^(id value){
             myOutlet.inputElement = value;

@@ -21,10 +21,10 @@
 {
     BbInlet *hotInlet = [[BbInlet alloc]init];
     hotInlet.hot = YES;
-    [self addChildObject:hotInlet];
+    [self addChildEntity:hotInlet];
     
     __block BbOutlet *mainOutlet = [[BbOutlet alloc]init];
-    [self addChildObject:mainOutlet];
+    [self addChildEntity:mainOutlet];
     
     __weak BbMessage *weakself = self;
     
@@ -32,7 +32,7 @@
     
     [hotInlet setOutputBlock:^(id value){
         if ( ![value isKindOfClass:[NSArray class]]) {
-            [weakself.view setHighlightView:YES];
+            [weakself.view setHighlighted:YES];
             mainOutlet.inputElement = [weakself defaultOutput];
         }else{
             mainOutlet.inputElement = [weakself outputForInput:value];
@@ -51,7 +51,7 @@
 {
     if ( [value.firstObject isKindOfClass:[NSString class]] && [value.firstObject isEqualToString:@"set"]) {
         if ( value.count == 1 ) {
-            self.objectArguments = nil;
+            self.creationArguments = nil;
             self.displayText = @"";
             [self.view setTitleText:self.displayText];
             [self updateDefaultOutputAndPlaceholderMapWithText:self.displayText];
@@ -59,8 +59,8 @@
         }else{
             NSMutableArray *toSet = value.mutableCopy;
             [toSet removeObjectAtIndex:0];
-            self.objectArguments = [toSet componentsJoinedByString:@" "];
-            self.displayText = self.objectArguments;
+            self.creationArguments = [toSet componentsJoinedByString:@" "];
+            self.displayText = self.creationArguments;
             [self.view setTitleText:self.displayText];
             [self updateDefaultOutputAndPlaceholderMapWithText:self.displayText];
             return nil;
@@ -94,8 +94,8 @@
     }
     
     self.placeholderMappings = nil;
-    self.objectArguments = [text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    self.myDefaultOutput = [BbObject text2Array:text];
+    self.creationArguments = [text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    self.myDefaultOutput = [text getArguments];
     
     if ( ![text containsString:@"$"] ) {
         return;
@@ -128,7 +128,7 @@
 
 - (NSArray *)defaultOutput
 {
-    if ( nil != self.objectArguments ) {
+    if ( nil != self.creationArguments ) {
         return self.myDefaultOutput;
     }
     

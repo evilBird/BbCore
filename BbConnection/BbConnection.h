@@ -11,7 +11,7 @@
 
 @interface BbConnection : NSObject
 
-@property (nonatomic,weak)                              id <BbPatch>                            parent;
+@property (nonatomic,weak)                              id <BbEntity>                           parent;
 @property (nonatomic,weak)                              id <BbEntity>                           sender;
 @property (nonatomic,weak)                              id <BbEntity>                           receiver;
 
@@ -19,16 +19,15 @@
 @property (nonatomic,strong)                            NSString                                *senderID;
 @property (nonatomic,strong)                            NSString                                *receiverID;
 
-@property (nonatomic)                                   id                                      path;
-@property (nonatomic)                                   BOOL                                    pathIsValid;
-@property (nonatomic,getter=isSelected)                 BOOL                                    selected;
+@property (nonatomic,strong)                            id <BbConnectionPath>                   path;
 @property (nonatomic,getter=isConnected)                BOOL                                    connected;
 
-- (instancetype)initWithSender:(id<BbEntity>)sender
-                      receiver:(id<BbEntity>)receiver
-                        parent:(id<BbPatch>)parent;
+@property (nonatomic,strong)                            NSHashTable                             *entityObservers;
 
-+ (BbConnection *)connectionWithSender:(id<BbEntity>)sender receiver:(id<BbEntity>)receiver parent:(id<BbPatch>)parent;
+- (instancetype)initWithSender:(id<BbEntity>)sender
+                      receiver:(id<BbEntity>)receiver;
+
++ (BbConnection *)connectionWithSender:(id<BbEntity>)sender receiver:(id<BbEntity>)receiver;
 
 - (BOOL)connect;
 - (BOOL)disconnect;

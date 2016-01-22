@@ -14,4 +14,6 @@
 
 @interface BbView : BbAbstractView
 
++ (id<BbObjectView>)viewWithEntity:(id<BbEntity,BbObject>)entity;
+
 @end

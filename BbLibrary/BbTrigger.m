@@ -20,10 +20,10 @@
 {
     BbInlet *hotInlet = [[BbInlet alloc]init];
     hotInlet.hot = YES;
-    [self addChildObject:hotInlet];
+    [self addChildEntity:hotInlet];
     for ( NSUInteger i = 0 ; i < arguments.count; i ++ ) {
         BbOutlet *outlet = [[BbOutlet alloc]init];
-        [self addChildObject:outlet];
+        [self addChildEntity:outlet];
     }
     
     NSEnumerator *outletEnumerator = self.outlets.reverseObjectEnumerator;

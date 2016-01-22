@@ -7,6 +7,7 @@
 //
 
 #import "BbPort.h"
+#import "BbRuntime.h"
 
 static void *BbPortObservationContextXX     =       &BbPortObservationContextXX;
 
@@ -53,6 +54,7 @@ static void *BbPortObservationContextXX     =       &BbPortObservationContextXX;
     return [self removeEntityObserver:port];
 }
 
+
 - (NSUInteger)hash
 {
     return [_uniqueID hash];
@@ -93,7 +95,6 @@ static void *BbPortObservationContextXX     =       &BbPortObservationContextXX;
 - (void)dealloc
 {
     [self removeAllEntityObservers];
-
     [self removeObserver:self forKeyPath:kInputElement context:BbPortObservationContextXX];
     [self removeObserver:self forKeyPath:kOutputElement context:BbPortObservationContextXX];
     
@@ -107,6 +108,35 @@ static void *BbPortObservationContextXX     =       &BbPortObservationContextXX;
 @end
 
 @implementation BbPort (BbEntityProtocol)
+
++ (NSString *)viewClass
+{
+    return nil;
+}
+
+- (id<BbEntityView>)loadView
+{
+    NSString *viewClass = [[self class] viewClass];
+    if ( nil == viewClass ) {
+        return nil;
+    }
+    id <BbEntityView> myView = [NSInvocation doClassMethod:viewClass selector:@"new" arguments:nil];
+    self.view = myView;
+    self.view.entity = self;
+    return myView;
+}
+
+- (void)unloadView
+{
+    if ( nil == self.view ) {
+        return;
+    }
+    id<BbObjectView> parentView = (id<BbObjectView>)self.parent.view;
+    [parentView removeChildEntityView:self.view];
+    
+    self.view.entity = nil;
+    self.view = nil;
+}
 
 - (BOOL)addEntityObserver:(id<BbEntity>)entity
 {
@@ -177,6 +207,4 @@ static void *BbPortObservationContextXX     =       &BbPortObservationContextXX;
 
 @end
 
-
-@end
 

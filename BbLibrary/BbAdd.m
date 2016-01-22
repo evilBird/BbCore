@@ -32,7 +32,7 @@
 - (void)setupWithArguments:(id)arguments
 {
     self.name = [[self class] symbolAlias];
-    NSArray *args = [BbHelpers string2DoubleArray:arguments];
+    NSArray *args = [(NSString *)arguments getArguments];
     if ( nil != args ) {
         [self.inlets[1]setOutputElement:args.firstObject];
     }

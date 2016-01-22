@@ -8,8 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import "BbView.h"
-
-
+#import "BbMessageView.h"
+#import "BbScrollView.h"
 
 @protocol BbPatchViewEventDelegate <NSObject>
 
@@ -23,58 +23,40 @@
 
 @class BbView;
 
-@interface BbPatchView : UIView
+@interface BbPatchView : UIView <BbEntityView,BbObjectView,BbPatchView,UIScrollViewDelegate>
 
-@property (nonatomic,weak)                  id<BbPatchViewEventDelegate>    eventDelegate;
-@property (nonatomic)                       BbObjectViewEditState           editState;
-@property (nonatomic,getter=isOpen)         BOOL                            open;
-@property (nonatomic,strong)                NSHashTable                     *childViews;
-@property (nonatomic,strong)                NSHashTable                     *connections;
-@property (nonatomic,strong)                NSMapTable                      *pathConnectionMap;
-@property (nonatomic,strong)                NSString                        *pasteBoard;
+@property (nonatomic,weak)                          id<BbEntity,BbObject,BbPatch>           entity;
 
-@property (nonatomic,weak)                  id<BbObjectViewDataSource>      dataSource;
-@property (nonatomic,weak)                  id<BbObjectViewDelegate>        delegate;
-@property (nonatomic,weak)                  id<BbObjectViewEditingDelegate> editingDelegate;
+@property (nonatomic,strong)                        NSHashTable                             *childObjectViews;
+@property (nonatomic,strong)                        NSHashTable                             *childConnectionPaths;
+@property (nonatomic,weak)                          id<BbObjectViewEditingDelegate>         editingDelegate;
 
-- (instancetype)initWithDataSource:(id<BbObjectViewDataSource>)dataSource;
-- (void)updateAppearance;
+@property (nonatomic)                               BbPatchViewEditState                    editState;
+@property (nonatomic)                               BbEntityViewType                        entityViewType;
 
-- (void)cutSelected;
-- (void)copySelected;
-- (void)abstractCopied;
+@property (nonatomic,strong)                        BbScrollView                            *scrollView;
+@property (nonatomic,weak)                          id<BbEntityView>                        selectedInlet;
+@property (nonatomic,weak)                          id<BbEntityView>                        selectedOutlet;
+@property (nonatomic,weak)                          id<BbObjectView>                        selectedObject;
 
-@end
++ (id<BbPatchView>)viewWithEntity:(id<BbEntity,BbObject,BbPatch>)entity;
 
-@interface BbPatchView (Gestures)
+- (void)addChildEntityView:(id<BbEntityView>)entityView;
 
-@end
+- (void)removeChildEntityView:(id<BbEntityView>)entityView;
 
-@interface BbPatchView (BbObjectView) <BbObjectView>
+- (void)addConnectionPath:(id<BbConnectionPath>)path;
 
+- (void)removeConnectionPath:(id<BbConnectionPath>)connection;
 
-- (void)layoutSubviews;
+- (BOOL)setEditState:(BbPatchViewEditState)state withDelegate:(id<BbPatchViewEditingDelegate>)delegate;
 
-+ (id<BbObjectView>)createViewWithDataSource:(id<BbObjectViewDataSource>)dataSource;
+- (void)cutSelectedChildEntityViews;
 
-- (void)setTitleText:(NSString *)titleText;
+- (NSArray *)copySelectedChildEntityViews;
 
-- (id<BbObjectView>)viewForInletAtIndex:(NSUInteger)index;
-
-- (id<BbObjectView>)viewForOutletAtIndex:(NSUInteger)index;
-
-- (void)removeChildObjectView:(id<BbObjectView>)view;
-
-- (void)addChildObjectView:(id<BbObjectView>)view;
-
-- (void)setSizeWithValue:(NSValue *)value;
-
-- (void)setZoomScaleWithValue:(NSValue *)value;
-
-- (void)setContentOffsetWithValue:(NSValue *)value;
-
-- (void)addConnection:(id<BbConnection>)connection;
-
-- (void)removeConnection:(id<BbConnection>)connection;
+- (void)pasteChildEntityViews:(NSArray *)childObjects;
 
 @end
+
+

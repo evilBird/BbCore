@@ -18,6 +18,8 @@
 
 #import "BbCoreUtils.h"
 
+#pragma mark - Enumerations
+
 typedef NS_ENUM(NSInteger, BbPatchViewEditState) {
     BbPatchViewEditState_Default    =   0,
     BbPatchViewEditState_Editing    =   1,
@@ -33,6 +35,8 @@ typedef NS_ENUM(NSInteger, BbEntityViewType){
     BbEntityViewType_Outlet          =   3,
     BbEntityViewType_Control         =   4
 };
+
+#pragma mark - Constants
 
 static NSString *kViewArgumentKeyViewClass      =   @"viewClass";
 static NSString *kViewArgumentKeyPosition       =   @"position";
@@ -52,32 +56,48 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 
 @protocol BbObjectView;
 
+#pragma mark - BbEntityView Protocol
+
 @protocol BbEntityView <NSObject>
 
-@property (nonatomic,weak)                      id<BbEntity>                            entity;
-@property (nonatomic,weak)                      id<BbObjectView>                        parentView;
-@property (nonatomic,getter=isSelected)         BOOL                                    selected;
-@property (nonatomic,strong)                    NSValue                                 *point;
+@property (nonatomic,weak)                      id<BbEntity>                                        entity;
+@property (nonatomic)                           BbEntityViewType                                    entityViewType;
 
-- (BbEntityViewType)entityViewType;
+@optional
+
+@property (nonatomic,weak)                      id<BbEntityView>                                    parentView;
+@property (nonatomic,getter=isSelected)         BOOL                                                selected;
+
+
+@end
+
+@protocol BbConnection;
+@protocol BbPatchView;
+
+@protocol BbConnectionPath <NSObject>
+
+@property (nonatomic,weak)                      id<BbEntity,BbConnection>                           entity;
+@property (nonatomic,getter=isSelected)         BOOL                                                selected;
+@property (nonatomic,getter=isValid)            BOOL                                                valid;
+@property (nonatomic)                           BOOL                                                needsRedraw;
+@property (nonatomic,strong)                    NSValue                                             *startPoint;
+@property (nonatomic,strong)                    NSValue                                             *endPoint;
+
+
+@property (nonatomic,readonly)                  id                                                  bezierPath;
+@property (nonatomic,readonly)                  id                                                  color;
 
 @end
 
 @protocol BbObjectViewEditingDelegate;
 
+#pragma mark - BbObjectView Protocol
+
 @protocol BbObjectView <NSObject,BbEntityView>
 
 @property (nonatomic,weak)                      id<BbEntity, BbObject>                              entity;
 
-@property (nonatomic,weak)                      id<BbEntityView,BbObjectView>                       parentView;
-
-@property (nonatomic,strong)                    NSMutableArray                                      *inletViews;
-@property (nonatomic,strong)                    NSMutableArray                                      *outletViews;
-
-@property (nonatomic,strong)                    NSValue                                             *position;
-@property (nonatomic,strong)                    NSString                                            *titleText;
-
-+ (id<BbObjectView>)viewWithEntity:(id<BbEntity,BbObject>)entity arguments:(NSString *)arguments;
++ (id<BbObjectView>)viewWithEntity:(id<BbEntity,BbObject>)entity;
 
 - (void)addChildEntityView:(id<BbEntityView>)entityView;
 
@@ -85,27 +105,37 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 
 - (void)updateAppearance;
 
+@optional
+
+- (void)insertChildEntityView:(id<BbEntityView>)entityView atIndex:(NSUInteger)index;
+
+@property (nonatomic,getter=isEditing)          BOOL                                                editing;
+@property (nonatomic,weak)                      id<BbObjectViewEditingDelegate>                     editingDelegate;
+@property (nonatomic,strong)                    id                                                  textField;
+@property (nonatomic,weak)                      id<BbEntityView,BbObjectView>                       parentView;
+@property (nonatomic,strong)                    NSHashTable                                         *inletViews;
+@property (nonatomic,strong)                    NSHashTable                                         *outletViews;
+
+@property (nonatomic,strong)                    NSValue                                             *position;
+@property (nonatomic,strong)                    NSString                                            *titleText;
+@property (nonatomic,getter=isHighlighted)      BOOL                                                highlighted;
+@property (nonatomic,getter=isPlaceholder)      BOOL                                                placeholder;
+
+- (BOOL)beginEditingWithDelegate:(id<BbObjectViewEditingDelegate>)delegate;
+
 - (void)setValue:(NSValue *)value forViewArgumentKey:(NSString *)key;
 
 - (NSValue *)getValueForViewArgumentKey:(NSString *)key;
 
-- (id<BbEntityView>)getViewForEntity:(id<BbEntity>)entity;
+- (void)moveToPoint:(NSValue *)pointValue;
 
-- (void)setEntity:(id<BbEntity>)entity forInletViewAtIndex:(NSUInteger)index;
-
-- (void)setEntity:(id<BbEntity>)entity forOutletViewAtIndex:(NSUInteger)index;
+- (void)moveToPosition:(NSValue *)positionValue;
 
 - (BOOL)canEdit;
 
-@optional
-
-@property (nonatomic,getter=isEditing)          BOOL                                    editing;
-@property (nonatomic,weak)                      id<BbObjectViewEditingDelegate>         editingDelegate;
-@property (nonatomic,strong)                    id                                      textField;
-
-- (BOOL)beginEditingWithDelegate:(id<BbObjectViewEditingDelegate>)delegate;
-
 @end
+
+#pragma mark - BbObjectViewEditingDelegate Protocol
 
 @protocol BbObjectViewEditingDelegate <NSObject>
 
@@ -117,23 +147,24 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 
 @end
 
+#pragma mark - BbPatchView Protocol
+@protocol BbPatchViewEditingDelegate;
+
 @protocol BbPatchView <NSObject,BbEntityView,BbObjectView>
 
-@property (nonatomic,weak)                      id<BbEntity,BbObject,BbPatch>                             entity;
-@property (nonatomic,strong)                      NSHashTable                           *childObjectViews;
-@property (nonatomic,strong)                      NSHashTable                           *childConnections;
-@property (nonatomic,weak)                      id<BbObjectViewEditingDelegate>          editingDelegate;
-@property (nonatomic)                             BbPatchViewEditState                  editState;
+@property (nonatomic,weak)                          id<BbEntity,BbObject,BbPatch>           entity;
+@property (nonatomic,strong)                        NSHashTable                             *childObjectViews;
+@property (nonatomic,strong)                        NSHashTable                             *childConnectionPaths;
+@property (nonatomic,weak)                          id<BbObjectViewEditingDelegate>         editingDelegate;
+@property (nonatomic)                               BbPatchViewEditState                    editState;
 
-+ (id<BbPatchView>)viewWithEntity:(id<BbEntity,BbObject,BbPatch>)entity arguments:(NSString *)arguments;
++ (id<BbPatchView>)viewWithEntity:(id<BbEntity,BbObject,BbPatch>)entity;
 
-- (void)addChildEntityView:(id<BbObjectView>)entityView;
+- (void)addConnectionPath:(id<BbConnectionPath>)path;
 
-- (void)addConnectionPath:(id)path;
+- (void)removeConnectionPath:(id<BbConnectionPath>)connection;
 
-- (void)removeConnectionPath:(id)connection;
-
-- (BOOL)setEditState:(BbPatchViewEditState)state withDelegate:(id<BbObjectViewEditingDelegate>)delegate;
+- (BOOL)setEditState:(BbPatchViewEditState)state withDelegate:(id<BbPatchViewEditingDelegate>)delegate;
 
 - (void)cutSelectedChildEntityViews;
 
@@ -142,6 +173,8 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 - (void)pasteChildEntityViews:(NSArray *)childObjects;
 
 @end
+
+#pragma mark - BbPatchViewEditingDelegate
 
 @protocol BbPatchViewEditingDelegate <NSObject>
 
@@ -157,7 +190,7 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 
 - (void)redoChangeInPatchView:(id<BbPatchView>)sender;
 
-- (void)patchView:(id<BbPatchView>)sender didAddChildObjectView:(id<BbObjectView>)objectView forDependencyWithIdentifier:(id)dependencyID;
+- (void)patchView:(id<BbPatchView>)sender didAddChildEntityView:(id<BbObjectView>)objectView forDependencyWithIdentifier:(id)dependencyID;
 
 - (void)patchView:(id<BbPatchView>)sender didRequestSupplementaryViewWithIdentifier:(id)supplementaryViewIdentifier forChildObjectView:(id<BbObjectView>)objectView;
 

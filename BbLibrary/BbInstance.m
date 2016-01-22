@@ -23,14 +23,14 @@
 {
     BbInlet *selectorInlet = [[BbInlet alloc]init];
     selectorInlet.hot = YES;
-    [self addChildObject:selectorInlet];
+    [self addChildEntity:selectorInlet];
     
     BbInlet *instanceInlet = [[BbInlet alloc]init];
     instanceInlet.hot = YES;
-    [self addChildObject:instanceInlet];
+    [self addChildEntity:instanceInlet];
     
     __block BbOutlet *mainOutlet = [[BbOutlet alloc]init];
-    [self addChildObject:mainOutlet];
+    [self addChildEntity:mainOutlet];
     
     __weak BbInstance *weakself = self;
     

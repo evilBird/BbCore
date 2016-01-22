@@ -7,44 +7,10 @@
 //
 
 #import "BbHelpers.h"
+#import "BbCoreProtocols.h"
 #import <UIKit/UIKit.h>
 
 @implementation BbHelpers
-
-+ (NSString *)createUniqueIDString
-{
-    CFUUIDRef uuid = CFUUIDCreate(NULL);
-    CFStringRef uuidString = NULL;
-    if (uuid) {
-        uuidString = CFUUIDCreateString(NULL, uuid);
-        CFRelease(uuid);
-    }
-    
-    NSString *uniqueIDString = (__bridge_transfer NSString *)uuidString;
-    return uniqueIDString;
-}
-
-+ (NSArray *)string2Array:(NSString *)string
-{
-    NSCharacterSet *whiteSpace = [NSCharacterSet whitespaceCharacterSet];
-    NSString *trimmedText = [string stringByTrimmingCharactersInSet:whiteSpace];
-    NSArray *components = [trimmedText componentsSeparatedByCharactersInSet:whiteSpace];
-    NSCharacterSet *digitsCharSet = [NSCharacterSet characterSetWithCharactersInString:@"0123456789.-+"];
-    NSCharacterSet *nonDigitsCharSet = [digitsCharSet invertedSet];
-    NSMutableArray *result = [NSMutableArray arrayWithCapacity:components.count];
-    for (NSString *aComponent in components ) {
-        NSString *trimmedComponent = [aComponent stringByTrimmingCharactersInSet:whiteSpace];
-        if ( [trimmedComponent rangeOfCharacterFromSet:nonDigitsCharSet].length > 0 ) {
-            [result addObject:trimmedComponent];
-        }else if ( [trimmedComponent rangeOfString:@"."].length > 0 ){
-            [result addObject:@([trimmedComponent doubleValue])];
-        }else{
-            [result addObject:@([trimmedComponent integerValue])];
-        }
-    }
-    
-    return [NSArray arrayWithArray:result];
-}
 
 + (NSString *)getSelectorFromArray:(NSArray *)array
 {
@@ -72,85 +38,18 @@
     return [NSArray arrayWithArray:copy];
 }
 
-+ (NSArray *)string2DoubleArray:(NSString *)string
-{
-    if ( nil == string || string.length == 0 ) {
-        return nil;
-    }
-    
-    NSArray *array = [BbHelpers string2Array:string];
-    NSMutableArray *result = [NSMutableArray arrayWithCapacity:array.count];
-    for (NSString *aString in array ) {
-        [result addObject:@([aString doubleValue])];
-    }
-    
-    return result;
-}
-
-+ (NSString *)doubleArrayToString:(NSArray *)doubleArray
-{
-    if ( nil == doubleArray || doubleArray.count == 0 ) {
-        return nil;
-    }
-    NSMutableArray *formattedNumbers = [NSMutableArray arrayWithCapacity:doubleArray.count];
-    for (NSNumber *aNumber in doubleArray) {
-        [formattedNumbers addObject:[NSString stringWithFormat:@"%.4f",aNumber.doubleValue]];
-    }
-    
-    return [formattedNumbers componentsJoinedByString:@" "];
-}
-
-+ (id)stringComponent2Object:(NSString *)string
-{
-    if ( nil == string ) {
-        return nil;
-    }
-    
-    NSString *trimmed = [string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    
-    if ( trimmed.length == 0 ) {
-        return nil;
-    }
-    
-    NSCharacterSet *decimalDigits = [NSCharacterSet characterSetWithCharactersInString:@"0123456789."];
-    NSRange range = [trimmed rangeOfCharacterFromSet:decimalDigits options:0];
-    if ( range.location == NSNotFound || range.length < trimmed.length ) {
-        return trimmed; //Return as string
-    }
-    
-    double doubleValue = [trimmed doubleValue];
-    return @(doubleValue);
-
-}
-
-+ (NSString *)position2String:(id)position
-{
-    if ( nil == position ) {
-        return @"0 0";
-    }
-    
-    if ( [position isKindOfClass:[NSValue class] ]) {
-        CGPoint point = [(NSValue *)position CGPointValue];
-        CGFloat x = point.x;
-        CGFloat y = point.y;
-        return [NSString stringWithFormat:@"%.2f %.2f",x,y];
-    }
-
-    return @"0 0";
-}
-
 + (NSValue *)positionFromViewArgs:(NSString *)viewArgs
 {
     if ( nil == viewArgs ){
         return [NSValue valueWithCGPoint:CGPointMake(0.0, 0.0)];
     }
     
-    NSArray *args = [BbHelpers string2DoubleArray:viewArgs];
-    if ( args.count != 2 ) {
+    NSArray *args = [viewArgs getArguments];
+    if ( args.count < ( kViewArgumentIndexPosition_Y + 1 ) ) {
         return [NSValue valueWithCGPoint:CGPointMake(0.0, 0.0)];
     }
     
-    return [NSValue valueWithCGPoint:CGPointMake([args.firstObject doubleValue], [args.lastObject doubleValue])];
+    return [NSValue valueWithCGPoint:CGPointMake([args[kViewArgumentIndexPosition_X] doubleValue], [args[kViewArgumentIndexPosition_Y] doubleValue])];
 }
 
 + (NSValue *)offsetFromViewArgs:(NSString *)viewArgs
@@ -159,12 +58,12 @@
         return [NSValue valueWithCGPoint:CGPointMake(0.0, 0.0)];
     }
     
-    NSArray *args = [BbHelpers string2DoubleArray:viewArgs];
-    if ( args.count < 4 ) {
+    NSArray *args = [viewArgs getArguments];
+    if ( args.count < ( kViewArgumentIndexContentOffset_Y + 1 ) ) {
         return [NSValue valueWithCGPoint:CGPointMake(0.0, 0.0)];
     }
     
-    return [NSValue valueWithCGPoint:CGPointMake([args[2] doubleValue], [args[3] doubleValue])];
+    return [NSValue valueWithCGPoint:CGPointMake([args[kViewArgumentIndexContentOffset_X] doubleValue], [args[kViewArgumentIndexContentOffset_Y] doubleValue])];
 }
 
 + (NSValue *)zoomScaleFromViewArgs:(NSString *)viewArgs
@@ -173,93 +72,72 @@
         return (NSValue *)[NSNumber numberWithDouble:1.0];
     }
     
-    NSArray *args = [BbHelpers string2DoubleArray:viewArgs];
-    if ( args.count < 5 ) {
+    NSArray *args = [viewArgs getArguments];
+    if ( args.count < ( kViewArgumentIndexZoomScale + 1 ) ) {
         return (NSValue *)[NSNumber numberWithDouble:1.0];
     }
     
-    return (NSNumber *)[NSNumber numberWithDouble:[args.lastObject doubleValue]];
+    return (NSNumber *)[NSNumber numberWithDouble:[args[kViewArgumentIndexZoomScale] doubleValue]];
 }
 
 + (NSValue *)sizeFromViewArgs:(NSString *)viewArgs
 {
     if ( nil == viewArgs ){
-        return [NSValue valueWithCGSize:CGSizeMake(0.0, 0.0)];
+        return [NSValue valueWithCGSize:CGSizeMake(2.0, 2.0)];
     }
     
-    NSArray *args = [BbHelpers string2DoubleArray:viewArgs];
-    if ( args.count < 5 ) {
-        return [NSValue valueWithCGSize:CGSizeMake(0.0, 0.0)];
+    NSArray *args = [viewArgs getArguments];
+    if ( args.count < (kViewArgumentIndexSize_Height + 1) ) {
+        return [NSValue valueWithCGSize:CGSizeMake(2.0, 2.0)];
     }
     
-    return [NSValue valueWithCGSize:CGSizeMake([args[0] doubleValue], [args[1] doubleValue])];
+    return [NSValue valueWithCGSize:CGSizeMake([args[kViewArgumentIndexSize_Width] doubleValue], [args[kViewArgumentIndexSize_Height] doubleValue])];
 }
 
 + (NSString *)updateViewArgs:(NSString *)viewArgs withPosition:(NSValue *)position
 {
-    if ( nil == viewArgs || nil == position ) {
-        return viewArgs;
-    }
-    
-    NSMutableArray *numberArray = [BbHelpers string2DoubleArray:viewArgs].mutableCopy;
-    if ( numberArray.count < 2 ) {
+    if ( nil == viewArgs || nil == position || [viewArgs numberOfArguments] < ( kViewArgumentIndexPosition_Y + 1 ) ) {
         return viewArgs;
     }
     
     CGPoint point = position.CGPointValue;
-    numberArray[0] = @(point.x);
-    numberArray[1] = @(point.y);
-    return [BbHelpers doubleArrayToString:numberArray];
+    viewArgs = [viewArgs setArgument:@(point.x) atIndex:kViewArgumentIndexPosition_X];
+    viewArgs = [viewArgs setArgument:@(point.y) atIndex:kViewArgumentIndexPosition_Y];
+    return viewArgs;
 }
 
 + (NSString *)updateViewArgs:(NSString *)viewArgs withOffset:(NSValue *)offset
 {
-    if ( nil == viewArgs || nil == offset ) {
+    if ( nil == viewArgs || nil == offset || [viewArgs numberOfArguments] < (kViewArgumentIndexContentOffset_Y + 1) ) {
         return viewArgs;
     }
-    
-    NSMutableArray *numberArray = [BbHelpers string2DoubleArray:viewArgs].mutableCopy;
-    if ( numberArray.count < 4 ) {
-        return viewArgs;
-    }
-    
     CGPoint point = offset.CGPointValue;
-    numberArray[2] = @(point.x);
-    numberArray[3] = @(point.y);
-    return [BbHelpers doubleArrayToString:numberArray];
+    viewArgs = [viewArgs setArgument:@(point.x) atIndex:kViewArgumentIndexContentOffset_X];
+    viewArgs = [viewArgs setArgument:@(point.y) atIndex:kViewArgumentIndexContentOffset_Y];
+    return viewArgs;
 }
 
 + (NSString *)updateViewArgs:(NSString *)viewArgs withZoomScale:(NSValue *)zoomScale
 {
-    if ( nil == viewArgs || nil == zoomScale ) {
+    if ( nil == viewArgs || nil == zoomScale || [viewArgs numberOfArguments] < (kViewArgumentIndexZoomScale + 1 ) ) {
         return viewArgs;
     }
-    
-    NSMutableArray *numberArray = [BbHelpers string2DoubleArray:viewArgs].mutableCopy;
-    if ( numberArray.count < 5 ) {
-        return viewArgs;
-    }
-    
+
     CGFloat zoom = [(NSNumber *)zoomScale doubleValue];
-    numberArray[4] = @(zoom);
-    return [BbHelpers doubleArrayToString:numberArray];
+    viewArgs = [viewArgs setArgument:@(zoom) atIndex:kViewArgumentIndexZoomScale];
+    return viewArgs;
 }
 
 + (NSString *)updateViewArgs:(NSString *)viewArgs withSize:(NSValue *)size
 {
-    if ( nil == viewArgs || nil == size ) {
-        return viewArgs;
-    }
-    
-    NSMutableArray *numberArray = [BbHelpers string2DoubleArray:viewArgs].mutableCopy;
-    if ( numberArray.count < 5 ) {
+    if ( nil == viewArgs || nil == size || [viewArgs numberOfArguments] < ( kViewArgumentIndexSize_Height + 1 )) {
         return viewArgs;
     }
     
     CGSize newSize = size.CGSizeValue;
-    numberArray[0] = @(newSize.width);
-    numberArray[1] = @(newSize.height);
-    return [BbHelpers doubleArrayToString:numberArray];
+    viewArgs = [viewArgs setArgument:@(newSize.width) atIndex:kViewArgumentIndexSize_Width];
+    viewArgs = [viewArgs setArgument:@(newSize.height) atIndex:kViewArgumentIndexSize_Height];
+    return viewArgs;
 }
 
 @end

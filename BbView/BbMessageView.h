@@ -10,9 +10,6 @@
 
 @interface BbMessageView : BbAbstractView
 
-@property (nonatomic,strong)                        UIColor         *highlightedFillColor;
-@property (nonatomic,strong)                        UIColor         *highlightedTextColor;
-@property (nonatomic,strong)                        UIColor         *highlightedBorderColor;
-@property (nonatomic,getter=isHighlighted)          BOOL            highlighted;
++ (id<BbObjectView>)viewWithEntity:(id<BbEntity,BbObject>)entity;
 
 @end

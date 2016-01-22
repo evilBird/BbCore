@@ -82,11 +82,11 @@
 
 - (NSString *)depthStringForChild:(id<BbEntity>)entity;
 
+- (NSSet *)childConnections;
+
 @end
 
 @interface BbObject (BbObjectProtocol) <BbObject>
-
-- (NSSet *)connectionMemberships;
 
 - (id<BbObjectView>)loadView;
 
