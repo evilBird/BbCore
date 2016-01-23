@@ -34,6 +34,7 @@
     self.name = [[self class] symbolAlias];
     NSArray *args = [(NSString *)arguments getArguments];
     if ( nil != args ) {
+        self.displayText = [NSString stringWithFormat:@"%@ %@",self.name,arguments];
         [self.inlets[1]setOutputElement:args.firstObject];
     }
 }

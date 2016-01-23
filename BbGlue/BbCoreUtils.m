@@ -42,6 +42,9 @@
 
 - (NSArray *)getArguments
 {
+    if ( self.length == 0 ) {
+        return [NSArray array];
+    }
     NSArray *components = [self getComponents];
     NSCharacterSet *digitsCharSet = [NSCharacterSet characterSetWithCharactersInString:@"0123456789.-+"];
     NSCharacterSet *nonDigitsCharSet = [digitsCharSet invertedSet];

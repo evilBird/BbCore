@@ -50,6 +50,7 @@
 - (void)setupWithArguments:(id)arguments
 {
     self.name = [[self class]symbolAlias];
+    self.displayText = [NSString stringWithFormat:@"%@ %@",self.name,arguments];
     NSArray *toTrigger = [arguments componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     [self setupPortsWithArguments:toTrigger];
 }

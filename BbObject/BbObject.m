@@ -339,6 +339,7 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     [myComponents addObject:[[self class] viewClass]];
     
     NSArray *viewArguments = [self.viewArguments getArguments];
+    
     if ( nil != viewArguments && viewArguments.count ) {
         [myComponents addObjectsFromArray:viewArguments];
     }
@@ -349,9 +350,9 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     if ( nil != creationArguments ) {
         [myComponents addObjectsFromArray:creationArguments];
     }
-    [myComponents addObject:@";\n"];
-    
-    NSString *myDescription = [myComponents getString];
+        
+    NSString *myComponentsString = [myComponents getString];
+    NSString *myDescription = [[myComponentsString trimWhitespace]stringByAppendingString:@";\n"];
     return myDescription;
 }
 
@@ -462,13 +463,16 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 
 - (BOOL)objectView:(id<BbObjectView>)sender didChangeValue:(NSValue *)value forViewArgumentKey:(NSString *)key
 {
+    if (!value) {
+        return NO;
+    }
+    
     if ( [key isEqualToString:kViewArgumentKeyPosition] ) {
-        CGPoint point = value.CGPointValue;
-        NSString *valueString = NSStringFromCGPoint(point);
+        NSString *valueString = [BbHelpers viewArgsFromPosition:value];
         self.viewArguments = valueString;
         return YES;
     }
-    return YES;
+    return NO;
 }
 
 - (BOOL)objectViewShouldBeginEditing:(id<BbObjectView>)sender

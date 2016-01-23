@@ -16,21 +16,23 @@
 
 @interface BbPatchView : UIView <BbEntityView,BbObjectView,BbPatchView,UIScrollViewDelegate>
 
-@property (nonatomic,weak)                          id<BbEntity,BbObject,BbPatch>           entity;
+@property (nonatomic,weak)                              id<BbEntity,BbObject,BbPatch>           entity;
 
-@property (nonatomic,strong)                        NSHashTable                             *childObjectViews;
-@property (nonatomic,strong)                        NSHashTable                             *childConnectionPaths;
-@property (nonatomic,weak)                          id<BbObjectViewEditingDelegate>          editingDelegate;
+@property (nonatomic,strong)                            NSHashTable                             *childObjectViews;
+@property (nonatomic,strong)                            NSHashTable                             *childConnectionPaths;
+@property (nonatomic,weak)                              id<BbPatchViewEditingDelegate>          editingDelegate;
 
-@property (nonatomic)                               BbPatchViewEditState                    editState;
-@property (nonatomic)                               BbEntityViewType                        entityViewType;
+@property (nonatomic)                                   BbPatchViewEditState                    editState;
+@property (nonatomic)                                   BbEntityViewType                        entityViewType;
 
-@property (nonatomic,strong)                        BbPatchGestureRecognizer                *gesture;
-@property (nonatomic,strong)                          BbScrollView                            *scrollView;
+@property (nonatomic,strong)                            BbPatchGestureRecognizer                *gesture;
+@property (nonatomic,strong)                            BbScrollView                            *scrollView;
 
-@property (nonatomic,weak)                          id<BbEntityView>                        selectedInlet;
-@property (nonatomic,weak)                          id<BbEntityView>                        selectedOutlet;
-@property (nonatomic,weak)                          id<BbObjectView>                        selectedObject;
+@property (nonatomic,weak)                              id<BbEntityView>                        selectedInlet;
+@property (nonatomic,weak)                              id<BbEntityView>                        selectedOutlet;
+@property (nonatomic,weak)                              id<BbObjectView>                        selectedObject;
+
+- (void)layoutWithScrollView:(BbScrollView *)scrollView;
 
 + (id<BbPatchView>)viewWithEntity:(id<BbEntity,BbObject,BbPatch>)entity;
 
@@ -42,11 +44,9 @@
 
 - (void)removeConnectionPath:(id<BbConnectionPath>)connection;
 
-- (BOOL)setEditState:(BbPatchViewEditState)state withDelegate:(id<BbPatchViewEditingDelegate>)delegate;
+- (void)cutSelected;
 
-- (void)cutSelectedChildEntityViews;
-
-- (NSArray *)copySelectedChildEntityViews;
+- (NSArray *)copySelected;
 
 - (void)pasteChildEntityViews:(NSArray *)childObjects;
 

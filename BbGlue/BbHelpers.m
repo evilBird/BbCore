@@ -38,6 +38,44 @@
     return [NSArray arrayWithArray:copy];
 }
 
++ (NSString *)viewArgsFromSize:(NSValue *)size
+{
+    if ( nil == size ) {
+        return @"2.0 2.0";
+    }
+    
+    CGSize s = size.CGSizeValue;
+    return [NSString stringWithFormat:@"%.2f %.2f",s.width,s.height];
+}
+
++ (NSString *)viewArgsFromContentOffset:(NSValue *)offset
+{
+    if ( nil == offset ) {
+        return @"0.0 0.0";
+    }
+    CGPoint off = offset.CGPointValue;
+    return [NSString stringWithFormat:@"%.3f %.3f",off.x,off.y];
+}
+
++ (NSString *)viewArgsFromZoomScale:(NSValue *)zoom
+{
+    if ( nil == zoom ) {
+        return @"0.0";
+    }
+    
+    double z = [(NSNumber *)zoom doubleValue];
+    return [NSString stringWithFormat:@"%.2f",z];
+}
+
++ (NSString *)viewArgsFromPosition:(NSValue *)position
+{
+    if ( nil == position ) {
+        return @"0.0 0.0";
+    }
+    CGPoint point = position.CGPointValue;
+    return [NSString stringWithFormat:@"%.3f %.3f",point.x,point.y];
+}
+
 + (NSValue *)positionFromViewArgs:(NSString *)viewArgs
 {
     if ( nil == viewArgs ){

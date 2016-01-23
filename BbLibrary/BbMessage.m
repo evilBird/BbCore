@@ -137,8 +137,8 @@
 
 - (void)sendActionsForView:(id<BbObjectView>)sender
 {
-    BbBang *aBang = [BbBang bang];
-    [self.inlets[0] setInputElement:aBang];
+    NSArray *args = [self.displayText getArguments];
+    [self.outlets[0] setInputElement:[self.displayText getArguments]];
 }
 
 - (NSString *)titleTextForObjectView:(id<BbObjectView>)objectView
@@ -175,7 +175,6 @@
 
 - (BOOL)objectView:(id<BbObjectView>)sender shouldEndEditingWithText:(NSString *)text
 {
-    text;
     return YES;
 }
 

@@ -82,6 +82,7 @@
 
 - (id<BbConnectionPath>)loadPath;
 - (void)unloadPath;
+- (void)updatePath;
 
 @end
 
@@ -152,6 +153,10 @@
 
 - (void)patchView:(id<BbPatchView>)sender didRemoveChildObjectView:(id<BbObjectView>)objectView;
 
+
+@end
+
+@protocol BbPatchEditingDataSource <NSObject>
 
 @end
 

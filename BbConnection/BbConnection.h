@@ -54,5 +54,7 @@
 
 - (NSString *)textDescriptionToken;
 
+- (void)updatePath;
+
 @end
 

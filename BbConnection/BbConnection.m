@@ -69,16 +69,6 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
 }
 
 
-- (void)updatePath
-{
-    id<BbEntityView> senderView = self.sender.view;
-    id<BbEntityView> receiverView = self.receiver.view;
-    id<BbEntityView> patchView = self.sender.parent.parent.view;
-    self.path.startPoint = [(BbConnectionPath *)self.path centerPointValueForEntityView:senderView inParentView:patchView];
-    self.path.endPoint = [(BbConnectionPath *)self.path centerPointValueForEntityView:receiverView inParentView:patchView];
-    self.path.needsRedraw = YES;
-}
-
 #pragma mark - KVO
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
@@ -104,6 +94,16 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
 @end
 
 @implementation BbConnection (BbEntityProtocol)
+
+- (void)updatePath
+{
+    id<BbEntityView> senderView = self.sender.view;
+    id<BbEntityView> receiverView = self.receiver.view;
+    id<BbEntityView> patchView = self.sender.parent.parent.view;
+    self.path.startPoint = [(BbConnectionPath *)self.path centerPointValueForEntityView:senderView inParentView:patchView];
+    self.path.endPoint = [(BbConnectionPath *)self.path centerPointValueForEntityView:receiverView inParentView:patchView];
+    self.path.needsRedraw = YES;
+}
 
 - (BOOL)isChildOfEntity:(id<BbEntity>)entity
 {

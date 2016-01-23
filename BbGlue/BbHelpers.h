@@ -14,6 +14,11 @@
 + (NSString *)getSelectorFromArray:(NSArray *)array;
 + (NSArray *)getArgumentsFromArray:(NSArray *)array;
 
++ (NSString *)viewArgsFromPosition:(NSValue *)position;
++ (NSString *)viewArgsFromContentOffset:(NSValue *)offset;
++ (NSString *)viewArgsFromZoomScale:(NSValue *)zoom;
++ (NSString *)viewArgsFromSize:(NSValue *)size;
+
 + (NSValue *)positionFromViewArgs:(NSString *)viewArgs;
 + (NSValue *)offsetFromViewArgs:(NSString *)viewArgs;
 + (NSValue *)zoomScaleFromViewArgs:(NSString *)viewArgs;

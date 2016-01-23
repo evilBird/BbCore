@@ -87,6 +87,8 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 @property (nonatomic,readonly)                  id                                                  bezierPath;
 @property (nonatomic,readonly)                  id                                                  color;
 
+- (void)updatePath;
+
 @end
 
 @protocol BbObjectViewEditingDelegate;
@@ -140,6 +142,7 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 #pragma mark - BbObjectViewEditingDelegate Protocol
 
 @protocol BbObjectViewEditingDelegate <NSObject>
+@optional
 
 - (NSString *)objectView:(id<BbObjectView>)sender suggestCompletionForUserText:(NSString *)userText;
 
@@ -153,11 +156,11 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 @protocol BbPatchViewEditingDelegate;
 
 @protocol BbPatchView <NSObject,BbEntityView,BbObjectView>
-
+@optional
 @property (nonatomic,weak)                          id<BbEntity,BbObject,BbPatch>           entity;
 @property (nonatomic,strong)                        NSHashTable                             *childObjectViews;
 @property (nonatomic,strong)                        NSHashTable                             *childConnectionPaths;
-@property (nonatomic,weak)                          id<BbObjectViewEditingDelegate>         editingDelegate;
+@property (nonatomic,weak)                          id<BbObjectViewEditingDelegate,BbPatchViewEditingDelegate>          editingDelegate;
 @property (nonatomic)                               BbPatchViewEditState                    editState;
 
 + (id<BbPatchView>)viewWithEntity:(id<BbEntity,BbObject,BbPatch>)entity;
@@ -166,11 +169,9 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 
 - (void)removeConnectionPath:(id<BbConnectionPath>)connection;
 
-- (BOOL)setEditState:(BbPatchViewEditState)state withDelegate:(id<BbPatchViewEditingDelegate>)delegate;
+- (void)cutSelected;
 
-- (void)cutSelectedChildEntityViews;
-
-- (NSArray *)copySelectedChildEntityViews;
+- (NSArray *)copySelected;
 
 - (void)pasteChildEntityViews:(NSArray *)childObjects;
 
@@ -178,7 +179,8 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 
 #pragma mark - BbPatchViewEditingDelegate
 
-@protocol BbPatchViewEditingDelegate <NSObject>
+@protocol BbPatchViewEditingDelegate <NSObject,BbObjectViewEditingDelegate>
+@optional
 
 - (void)patchView:(id<BbPatchView>)sender didChangeEditState:(BbPatchViewEditState)editState;
 
@@ -197,6 +199,12 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 - (void)patchView:(id<BbPatchView>)sender didRequestSupplementaryViewWithIdentifier:(id)supplementaryViewIdentifier forChildObjectView:(id<BbObjectView>)objectView;
 
 - (void)patchView:(id<BbPatchView>)sender didDismissSupplementaryView:(id<BbObjectView>)supplementaryView;
+
+
+@end
+
+@protocol BbPatchEditingDataSource <NSObject>
+
 
 
 @end

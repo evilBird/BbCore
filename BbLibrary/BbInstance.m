@@ -71,8 +71,12 @@
 
 - (void)setupWithArguments:(id)arguments
 {
+    if ( nil != arguments ) {
+        self.displayText = [NSString stringWithFormat:@"*%@",arguments];
+    }
     self.name = @"*";
     self.className = arguments;
+    
 }
 
 - (void)loadBang

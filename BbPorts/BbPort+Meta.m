@@ -7,6 +7,7 @@
 //
 
 #import "BbPort.h"
+#import "BbRuntime.h"
 
 @implementation BbPort (Meta)
 

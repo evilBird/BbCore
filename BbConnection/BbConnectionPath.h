@@ -24,4 +24,6 @@
 
 - (NSValue *)centerPointValueForEntityView:(id<BbEntityView>)view inParentView:(id<BbEntityView>)parentView;
 
+- (void)updatePath;
+
 @end

@@ -27,12 +27,12 @@
 
 + (NSString *)symbolAlias
 {
-    return @"SEL";
+    return @"Do";
 }
 
 - (void)setupWithArguments:(id)arguments
 {
-    self.name = [[self class] symbolAlias];
+    self.displayText = [[self class] symbolAlias];
 }
 
 @end

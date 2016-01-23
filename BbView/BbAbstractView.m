@@ -53,6 +53,9 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
     [self setupAppearance];
     [self setupPortviewStacks];
     [self setupTextDisplay];
+    if ( nil == self.entity ) {
+        self.placeholder = YES;
+    }
 }
 
 - (void)setupAppearance
@@ -97,7 +100,6 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
     UITextField *textField = [UITextField new];
     textField.translatesAutoresizingMaskIntoConstraints = NO;
     textField.delegate = self;
-    textField.placeholder = @"Enter text here...";
     textField.textAlignment = NSTextAlignmentCenter;
     [self addSubview:textField];
     [self addConstraint:[textField alignCenterXToSuperOffset:0.0]];
@@ -147,7 +149,6 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
     
     _position = positionValue;
     CGPoint position = [positionValue CGPointValue];
-    CGPoint point = [self position2Point:position];
     CGPoint offsets = [self position2Offset:position];
     self.centerXConstraint.constant = offsets.x;
     self.centerYConstraint.constant = offsets.y;
@@ -216,13 +217,18 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
         self.editingDelegate = [self.entity editingDelegateForObjectView:self];
         [(UITextField *)self.textField becomeFirstResponder];
     }else{
+        [(UITextField *)self.textField setText:@""];
         [(UITextField *)self.textField becomeFirstResponder];
     }
 }
 
 - (void)placeholderStatusDidChange:(BOOL)placeholder
 {
-    
+    if ( !placeholder ) {
+        [(UITextField *)self.textField setPlaceholder:@""];
+    }else{
+        [(UITextField *)self.textField setPlaceholder:@"Enter text here..."];
+    }
 }
 
 - (void)updateAppearance
@@ -262,12 +268,12 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
     CGSize portViewSize = [BbPortView defaultPortViewSize];
     
     NSUInteger actualTextHeight = (NSUInteger)(round(textSize.height));
-    NSUInteger minimumTextHeight = (NSUInteger)(round(portViewSize.height*2));
+    NSUInteger minimumTextHeight = (NSUInteger)(round(portViewSize.height*1));
     NSUInteger textHeight = ReturnGreatest(actualTextHeight, minimumTextHeight);
     self.contentHeight = (textHeight + portViewSize.height + portViewSize.height );
     
     NSUInteger actualTextWidth = (NSUInteger)(round(textSize.width));
-    NSUInteger minimumTextWidth = (NSUInteger)(round(portViewSize.width*3));
+    NSUInteger minimumTextWidth = (NSUInteger)(round(portViewSize.width*1));
     NSUInteger textWidth = ReturnGreatest(actualTextWidth, minimumTextWidth) + portViewSize.width + portViewSize.width;
     
     NSUInteger inletsWidth = (NSUInteger)(round(self.inletsStackView.frame.size.width));
@@ -387,7 +393,7 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
 
 - (BOOL)textFieldShouldClear:(UITextField *)textField
 {
-    return NO;
+    return self.isPlaceholder;
 }
 
 - (BOOL)textFieldShouldEndEditing:(UITextField *)textField

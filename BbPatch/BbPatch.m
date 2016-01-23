@@ -297,24 +297,26 @@
     NSString *viewArguments = self.viewArguments;
     
     if ( [key isEqualToString:kViewArgumentKeyContentOffset] ) {
-        CGPoint point = value.CGPointValue;
-        viewArguments = [viewArguments setArgument:@(point.x) atIndex:kViewArgumentIndexContentOffset_X];
-        viewArguments = [viewArguments setArgument:@(point.y) atIndex:kViewArgumentIndexContentOffset_Y];
+        NSString *offsetString = [BbHelpers viewArgsFromContentOffset:value];
+        NSArray *args = [offsetString getArguments];
+        viewArguments = [viewArguments setArgument:args[0] atIndex:kViewArgumentIndexContentOffset_X];
+        viewArguments = [viewArguments setArgument:args[1] atIndex:kViewArgumentIndexContentOffset_Y];
         self.viewArguments = viewArguments;
         return YES;
     }
     
     if ( [key isEqualToString:kViewArgumentKeySize] ) {
-        CGSize size = value.CGSizeValue;
-        viewArguments = [viewArguments setArgument:@(size.width) atIndex:kViewArgumentIndexSize_Width];
-        viewArguments = [viewArguments setArgument:@(size.height) atIndex:kViewArgumentIndexSize_Height];
+        NSString *sizeString = [BbHelpers viewArgsFromSize:value];
+        NSArray *args = [sizeString getArguments];
+        viewArguments = [viewArguments setArgument:args[0] atIndex:kViewArgumentIndexSize_Width];
+        viewArguments = [viewArguments setArgument:args[1] atIndex:kViewArgumentIndexSize_Height];
         self.viewArguments = viewArguments;
         return YES;
     }
     
     if ( [key isEqualToString:kViewArgumentKeyZoomScale] ) {
-        CGFloat zoom = [(NSNumber *)value doubleValue];
-        viewArguments = [viewArguments setArgument:@(zoom) atIndex:kViewArgumentIndexZoomScale];
+        NSString *zoomString = [BbHelpers viewArgsFromZoomScale:value];
+        viewArguments = [viewArguments setArgument:zoomString atIndex:kViewArgumentIndexZoomScale];
         self.viewArguments = viewArguments;
         return YES;
     }
@@ -438,7 +440,8 @@
 
 - (void)patchView:(id<BbPatchView>)sender didAddPlaceholderObjectView:(id<BbObjectView>)objectView
 {
-    [objectView beginEditingWithDelegate:self];
+    objectView.editingDelegate = self;
+    objectView.editing = YES;
 }
 
 - (void)patchView:(id<BbPatchView>)sender didAddChildEntityView:(id<BbObjectView>)objectView
@@ -450,7 +453,12 @@
 
 - (void)patchView:(id<BbPatchView>)sender didAddChildConnection:(id<BbConnection>)connection {}
 
-- (void)patchView:(id<BbPatchView>)sender didRemoveChildConnection:(id<BbConnection>)connection {}
+- (void)patchView:(id<BbPatchView>)sender didRemoveChildConnection:(id<BbConnection>)connection {
+
+    id<BbEntity> sendingEntity = connection.sender;
+    BOOL ok = [sendingEntity removeChildEntity:connection];
+    NSAssert(ok, @"ERROR REMOVING CONNECTION");
+}
 
 - (void)patchView:(id<BbPatchView>)sender didRemoveChildObjectView:(id<BbObjectView>)objectView
 {
@@ -468,7 +476,6 @@
     if ( nil == self.symbolTable ) {
         self.symbolTable = [BbSymbolTable new];
     }
-    
     
     NSArray *textComponents = [userText componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     NSArray *searchResults = [self.symbolTable BbText:self searchKeywordsForText:textComponents.firstObject];
@@ -491,7 +498,16 @@
     
     id<BbObject> oldObject = sender.entity;
     id<BbObject> newObject = [self createObjectIfNeededForView:sender withUserText:userText];
-    [self.view updateAppearance];
+    if ( nil == oldObject && nil != newObject ) {
+        [self addChildEntity:newObject];
+        id <BbObjectView> newView = [newObject loadView];
+        [self.view addChildEntityView:newView];
+        [newView moveToPosition:sender.position];
+        [self.view removeChildEntityView:sender];
+        newView.placeholder = NO;
+        [self.view updateAppearance];
+    }
+    
 }
 
 - (id<BbObject>)createObjectIfNeededForView:(id<BbObjectView>)view withUserText:(NSString *)userText
@@ -518,7 +534,7 @@
     NSString *viewClass = [NSInvocation doClassMethod:symbol selector:@"viewClass" arguments:nil];
     [viewArgArray addObject:viewClass];
     NSValue *position = [view position];
-    NSString *positionString = NSStringFromCGPoint([position CGPointValue]);
+    NSString *positionString = [BbHelpers viewArgsFromPosition:position];
     [viewArgArray addObjectsFromArray:[positionString getArguments]];
     NSString *viewArguments = [viewArgArray getString];
     id objectDescription = [BbObjectDescription objectDescriptionWithArgs:creationArguments viewArgs:viewArguments];

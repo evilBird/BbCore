@@ -24,21 +24,27 @@
     BbInlet *classNameInlet = self.inlets[1];
     classNameInlet.hot = YES;
     __block BbOutlet *mainOutlet = self.outlets[0];
-    [selectorInlet setInputBlock:[BbPort allowTypesInputBlock:@[[NSString class],[NSArray class]]]];
-    [classNameInlet setInputBlock:[BbPort allowTypesInputBlock:@[[NSString class],[NSArray class]]]];
-    
+    //[selectorInlet setInputBlock:[BbPort allowTypesInputBlock:@[[NSString class],[NSArray class]]]];
+    //[classNameInlet setInputBlock:[BbPort allowTypesInputBlock:@[[NSString class],[NSArray class]]]];
+    __block id returnVal = nil;
     __weak BbClass *weakself = self;
     [selectorInlet setOutputBlock:^ (id value ){
+        if (![value isKindOfClass:[NSString class]] && ![value isKindOfClass:[NSArray class]] ) {
+            NSAssert(1==3, @"INPUT ERROR IN PORT");
+        }
         if ( nil != weakself.className ){
             NSString *selector = nil;
             NSArray *args = nil;
+        
+            
             if ( [value isKindOfClass:[NSString class]] ) {
                 selector = value;
             }else if ([ value isKindOfClass:[NSArray class]]){
                 selector = [BbHelpers getSelectorFromArray:value];
                 args = [BbHelpers getArgumentsFromArray:value];
             }
-            mainOutlet.inputElement = [NSInvocation doClassMethod:weakself.className selector:selector arguments:args];
+            returnVal = [NSInvocation doClassMethod:weakself.className selector:selector arguments:args];
+            mainOutlet.inputElement = returnVal;
         }
     }];
     
@@ -65,6 +71,8 @@
 {
     self.name = @"Class";
     self.className = arguments;
+    [self.inlets[1]setInputElement:self.className];
+    self.displayText = [NSString stringWithFormat:@"%@ %@",self.name,arguments];
 }
 
 @end

@@ -50,6 +50,8 @@
 
 - (void)commonInit;
 
+- (void)setupTextDisplay;
+
 @property (nonatomic,strong)                    UIColor                         *defaultFillColor;
 @property (nonatomic,strong)                    UIColor                         *selectedFillColor;
 @property (nonatomic,strong)                    UIColor                         *defaultBorderColor;

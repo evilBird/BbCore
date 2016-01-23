@@ -73,7 +73,7 @@
         return NO;
     }
     if ( [entity isKindOfClass:[BbConnection class]] ) {
-        if ( [(BbConnection *)entity disconnect] ) {
+        if ( ![(BbConnection *)entity disconnect] ) {
             [self.strongConnections removeObject:entity];
             entity.parent = nil;
             [[(BbConnection *)entity receiver] removeChildEntity:entity];

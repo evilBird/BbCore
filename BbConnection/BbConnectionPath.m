@@ -60,6 +60,11 @@
     return self.defaultColor;
 }
 
+- (void)updatePath
+{
+    [self.entity updatePath];
+}
+
 - (NSValue *)centerPointValueForEntityView:(id<BbEntityView>)view inParentView:(id<BbEntityView>)parentView
 {
     UIView *portView = (UIView *)view;

@@ -10,6 +10,12 @@
 
 @implementation BbPatchInletView
 
+- (void)setupTextDisplay
+{
+    [super setupTextDisplay];
+    [(UITextField *)self.textField setPlaceholder:nil];
+}
+
 - (BOOL)canEdit
 {
     return NO;
