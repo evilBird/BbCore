@@ -7,6 +7,7 @@
 //
 
 #import "BbPatch.h"
+#import "BbParseText.h"
 
 @implementation BbPatch
 
@@ -89,6 +90,9 @@
     }
     
     if ( [entity isKindOfClass:[BbObject class]] ){
+        if ( nil == self.objects ) {
+            self.objects = [NSMutableArray array];
+        }
         [self.objects addObject:entity];
         entity.parent = self;
         return YES;
@@ -210,6 +214,7 @@
         }
     }
     NSSet *connections = [self childConnections];
+    
     if ( nil != connections ) {
         for (id<BbEntity> aConnection in connections.allObjects ) {
             NSString *depthString = [self depthStringForChild:aConnection];
@@ -345,6 +350,37 @@
 
 
 @implementation BbPatch (BbPatchProtocol)
+
+- (BbPatchDescription *)patchDescription
+{
+    BbPatchDescription *patchDescription = [BbPatchDescription patchDescriptionWithArgs:self.creationArguments viewArgs:self.viewArguments];
+    return patchDescription;
+}
+
+- (void)pasteCopiedWithText:(NSString *)text
+{
+    NSDictionary *descriptions = [BbParseText parseCopiedText:text];
+    NSArray *objectDescriptions = descriptions[kCopiedObjectDescriptionsKey];
+    NSMutableArray *copiedObjects = [NSMutableArray array];
+    for (BbObjectDescription *objectDescription in objectDescriptions ) {
+        BbObject *object = [BbObject objectWithDescription:objectDescription dataSource:self.dataSource];
+        [copiedObjects addObject:object];
+        NSAssert(nil!=object, @"ERROR CREATING OBJECT FROM DESCRIPTION");
+        [self addChildEntity:object];
+        id<BbObjectView> view = [object loadView];
+        view.selected = YES;
+        [self.view addChildEntityView:view];
+    }
+                            
+    NSArray *connectionDescriptions = descriptions[kCopiedConnectionDescriptionsKey];
+    for (BbConnectionDescription *connectionDescription in connectionDescriptions ) {
+        BbConnection *connection = [BbPatch connectionWithDecription:connectionDescription amongstCopiedObjects:copiedObjects];
+        [connection.sender addChildEntity:connection];
+        id<BbConnectionPath> path = [connection loadPath];
+        path.selected = YES;
+        [self.view addConnectionPath:path];
+    }
+}
 
 - (void)doSelectors
 {
@@ -538,7 +574,7 @@
     [viewArgArray addObjectsFromArray:[positionString getArguments]];
     NSString *viewArguments = [viewArgArray getString];
     id objectDescription = [BbObjectDescription objectDescriptionWithArgs:creationArguments viewArgs:viewArguments];
-    BbObject *object = [NSClassFromString(symbol) objectWithDescription:objectDescription];
+    BbObject *object = [NSClassFromString(symbol) objectWithDescription:objectDescription dataSource:self.dataSource];
     return (id<BbObject>)object;
 }
 

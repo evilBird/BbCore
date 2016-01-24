@@ -8,6 +8,7 @@
 
 #import "BbObject.h"
 #import "BbTextDescription.h"
+#import "BbParseText.h"
 
 static void     *BbObjectContextXX      =       &BbObjectContextXX;
 
@@ -74,7 +75,13 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 
 + (BbObject *)objectWithDescription:(BbObjectDescription *)description
 {
+    return [BbObject objectWithDescription:description dataSource:nil];
+}
+
++ (BbObject *)objectWithDescription:(BbObjectDescription *)description dataSource:(id<BbObjectDataSource>)dataSource
+{
     BbObject *object = (BbObject *)[NSInvocation doClassMethod:description.objectClass selector:@"alloc" arguments:nil];
+    object.dataSource = dataSource;
     [NSInvocation doInstanceMethod:object selector:@"initWithArguments:" arguments:description.objectArguments];
     object.viewArguments = description.viewArguments;
     return object;
@@ -399,6 +406,15 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 
 @implementation BbObject (BbObjectProtocol)
 
+- (BbObjectDescription *)objectDescription
+{
+    NSString *textDescription = [self textDescription];
+    NSString *creationArgs = [BbParseText objectArgumentsFromString:textDescription];
+    NSString *viewArguments = [BbParseText childViewArgumentsFromString:textDescription];
+    BbObjectDescription *description = [BbObjectDescription objectDescriptionWithArgs:creationArgs viewArgs:viewArguments];
+    return description;
+}
+
 - (id<BbObjectView>)loadView
 {
     NSString *viewClass = [[self class] viewClass];
@@ -466,9 +482,12 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     if (!value) {
         return NO;
     }
-    
-    if ( [key isEqualToString:kViewArgumentKeyPosition] ) {
-        NSString *valueString = [BbHelpers viewArgsFromPosition:value];
+    NSValue *myValue = value;
+    if ( [key isEqualToString:kViewArgumentKeyPosition] && nil != myValue ) {
+        NSString *valueString = [BbHelpers viewArgsFromPosition:myValue];
+        if ( nil == valueString ) {
+            return NO;
+        }
         self.viewArguments = valueString;
         return YES;
     }

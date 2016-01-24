@@ -124,6 +124,7 @@
 
 - (void)objectView:(id<BbObjectView>)sender didBeginEditingWithDelegate:(id<BbObjectViewEditingDelegate>)editingDelegate;
 
+
 @end
 
 #pragma mark - BbPatch Protocol
@@ -156,7 +157,10 @@
 
 @end
 
-@protocol BbPatchEditingDataSource <NSObject>
+@protocol BbObjectDataSource <NSObject>
+
+- (NSString *)object:(id<BbObject>)object textForPatchName:(NSString *)patchName;
+- (id)canvasForObject:(id<BbObject>)object;
 
 @end
 

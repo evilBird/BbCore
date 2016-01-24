@@ -52,6 +52,17 @@ static NSTimeInterval kCountAsRepeatMaxDuration = 0.2;
     return sum;
 }
 
+- (CGPoint)locationOfLastTouch:(NSSet<UITouch*> *)touches
+{
+    NSUInteger numTouches = touches.allObjects.count;
+    if ( numTouches < 1 ) {
+        return CGPointZero;
+    }
+    
+    NSUInteger lastTouchIndex = numTouches-1;
+    return [self locationOfTouch:lastTouchIndex inView:self.view];
+}
+
 - (void)stopTracking
 {
     self.tracking = NO;
@@ -72,7 +83,8 @@ static NSTimeInterval kCountAsRepeatMaxDuration = 0.2;
     }
     
     self.duration = 0.0;
-    self.location = [self locationOfTouches:touches];
+    self.location = [self locationOfLastTouch:touches];
+    self.position = [self locationToPosition:self.location];
     self.previousLocation = self.location;
     self.movement = 0.0;
     self.numberOfTouches = touches.allObjects.count;
@@ -88,7 +100,8 @@ static NSTimeInterval kCountAsRepeatMaxDuration = 0.2;
 {
     self.tracking = YES;
     self.duration = [[NSDate date] timeIntervalSinceDate:self.firstTouchDate];
-    self.location = [self locationOfTouches:touches];
+    self.location = [self locationOfLastTouch:touches];
+    self.position = [self locationToPosition:self.location];
     self.movement += fabs(CGPointGetDistance(self.location, self.previousLocation));
     self.numberOfTouches = touches.allObjects.count;
     id hitView = [self.view hitTest:self.location withEvent:event];
@@ -106,7 +119,8 @@ static NSTimeInterval kCountAsRepeatMaxDuration = 0.2;
 {
     self.tracking = NO;
     self.duration = [[NSDate date] timeIntervalSinceDate:self.firstTouchDate];
-    self.location = [self locationOfTouches:touches];
+    self.location = [self locationOfLastTouch:touches];
+    self.position = [self locationToPosition:self.location];
     self.numberOfTouches = touches.allObjects.count;
     id hitView = [self.view hitTest:self.location withEvent:event];
     self.currentView = [self getObjectViewFromHitView:hitView];
@@ -117,9 +131,22 @@ static NSTimeInterval kCountAsRepeatMaxDuration = 0.2;
 - (void)setLocation:(CGPoint)location
 {
     _previousLocation = _location;
-    _previousPosition = _position;
     _location = location;
-    _position = CGPointGetOffset(location, self.view.center);
+}
+
+- (CGPoint)locationToPosition:(CGPoint)location
+{
+    CGRect bounds = self.view.bounds;
+    CGPoint center = CGPointMake((CGRectGetMidX(bounds)), (CGRectGetMidY(bounds)));
+    CGPoint offset = CGPointMake((location.x-center.x), (location.y-center.y));
+    CGPoint position = CGPointMake((offset.x/center.x), (offset.y/center.y));
+    return position;
+}
+
+- (void)setPosition:(CGPoint)position
+{
+    _previousPosition = _position;
+    _position = position;
 }
 
 - (CGPoint)deltaLocation

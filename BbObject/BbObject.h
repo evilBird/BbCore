@@ -21,6 +21,7 @@
 
 @property (nonatomic,weak)                  id <BbEntity,BbObject>                          parent;
 @property (nonatomic,strong)                id <BbEntityView,BbObjectView>                  view;
+@property (nonatomic,weak)                  id <BbObjectDataSource>                         dataSource;
 
 @property (nonatomic,strong)                NSMutableArray                                  *inlets;
 @property (nonatomic,strong)                NSMutableArray                                  *outlets;
@@ -34,6 +35,7 @@
 @property (nonatomic,strong)                NSHashTable                                     *entityObservers;
 @property (nonatomic,strong)                NSString                                        *name;
 
+
 - (instancetype)initWithArguments:(NSString *)arguments;
 
 - (void)commonInit;
@@ -46,7 +48,8 @@
 
 + (NSString *)symbolAlias;
 
-+ (BbObject *)objectWithDescription:(BbObjectDescription *)description;
+//+ (BbObject *)objectWithDescription:(BbObjectDescription *)description;
++ (BbObject *)objectWithDescription:(BbObjectDescription *)description dataSource:(id<BbObjectDataSource>)dataSource;
 
 @end
 

@@ -10,6 +10,8 @@
 #import "BbPort.h"
 #import "BbCoreProtocols.h"
 #import "BbConnectionPath.h"
+#import "BbTextDescription.h"
+#import "BbParseText.h"
 
 static NSString  *kObservedKeyPath = @"viewArguments";
 
@@ -94,6 +96,14 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
 @end
 
 @implementation BbConnection (BbEntityProtocol)
+
+- (BbConnectionDescription *)connectionDescription
+{
+    NSString *textDescription = [self textDescription];
+    NSString *arguments = [BbParseText connectionArgumentsFromString:textDescription];
+    BbConnectionDescription *connectionDescription = [BbConnectionDescription connectionDescriptionWithArgs:arguments];
+    return connectionDescription;
+}
 
 - (void)updatePath
 {

@@ -45,8 +45,14 @@ static CGFloat              kMaxMovement          = 20.0;
 {
     BbPatchViewEditState prevState = _editState;
     _editState = editState;
+    [self.editingDelegate patchView:self didChangeEditState:editState];
     if ( editState != prevState ) {
-        [self.editingDelegate patchView:self didChangeEditState:editState];
+        if ( editState == BbPatchViewEditState_Default ) {
+            NSArray *toDeselect = [self getSelectedObjects];
+            for (id<BbObjectView> anObjectView in toDeselect ) {
+                anObjectView.selected = NO;
+            }
+        }
     }
 }
 
@@ -90,7 +96,11 @@ static CGFloat              kMaxMovement          = 20.0;
     [self.scrollView addSubview:self];
     self.scrollView.contentSize = mySize;
     NSValue *offset = [BbHelpers offsetFromViewArgs:viewArguments];
-    self.scrollView.contentOffset = offset.CGPointValue;
+    CGPoint o = offset.CGPointValue;
+    CGPoint scaledOffset;
+    scaledOffset.x = (myFrame.size.width * o.x);
+    scaledOffset.y = (myFrame.size.height * o.y);
+    self.scrollView.contentOffset = scaledOffset;
     NSValue *zoom = [BbHelpers zoomScaleFromViewArgs:viewArguments];
     self.scrollView.delegate = self;
     self.scrollView.zoomScale = [(NSNumber *)zoom doubleValue];
@@ -113,12 +123,6 @@ static CGFloat              kMaxMovement          = 20.0;
 #pragma mark - PatchView Editing
 - (void)cutSelected
 {
-    NSArray *selectedConnections = [self getSelectedConnections];
-    for ( id <BbConnectionPath> aPath in selectedConnections ) {
-        [self removeConnectionPath:aPath];
-        [self.entity patchView:self didRemoveChildConnection:aPath.entity];
-    }
-    
     NSArray *selectedObjects = [self getSelectedObjects];
     for (id<BbObjectView> anObjectView in selectedObjects ) {
         [self removeChildEntityView:anObjectView];
@@ -128,12 +132,7 @@ static CGFloat              kMaxMovement          = 20.0;
 
 - (NSArray *)copySelected
 {
-    return nil;
-}
-
-- (void)pasteChildEntityViews:(NSArray *)childObjects
-{
-    
+    return [self getSelectedObjects];
 }
 
 #pragma mark - Gestures
@@ -234,11 +233,25 @@ static CGFloat              kMaxMovement          = 20.0;
                 case BbPatchViewEditState_Selected:
                 case BbPatchViewEditState_Copied:
                 {
+                    NSUInteger numSelected = [self getSelectedObjects].count;
+                    NSUInteger prevNum = numSelected;
                     if ( gesture.currentView.isSelected ) {
+                        
                         [gesture.currentView setSelected:NO];
+                        numSelected--;
+                        
                     }else{
+                        
                         [gesture.currentView setSelected:YES];
+                        numSelected++;
                     }
+                    
+                    if ( numSelected && !prevNum ) {
+                        self.editState = BbPatchViewEditState_Selected;
+                    }else if ( prevNum && !numSelected ){
+                        self.editState = BbPatchViewEditState_Editing;
+                    }
+                    
                 }
                     break;
                     
@@ -284,6 +297,23 @@ static CGFloat              kMaxMovement          = 20.0;
 
 }
 
+- (void)moveSelectedObjectViewsWithDelta:(CGPoint)delta
+{
+    NSArray *selectedObjectViews = [self getSelectedObjects];
+    if ( !selectedObjectViews.count ) {
+        return;
+    }
+    for (id<BbObjectView> objectView in selectedObjectViews ) {
+        CGPoint position = objectView.position.CGPointValue;
+        CGPoint posPoint = [(UIView *)objectView position2Point:position];
+        posPoint.x+=delta.x;
+        posPoint.y+=delta.y;
+        [objectView moveToPoint:[NSValue valueWithCGPoint:posPoint]];
+    }
+    
+    [self updateAppearance];
+}
+
 - (void)handleGestureMoved:(BbPatchGestureRecognizer *)gesture
 {
     switch (gesture.currentViewType) {
@@ -320,13 +350,15 @@ static CGFloat              kMaxMovement          = 20.0;
                 case BbEntityViewType_Object:
                 {
                     switch ( self.editState ) {
-                        case BbPatchViewEditState_Editing:
                         case BbPatchViewEditState_Selected:
                         case BbPatchViewEditState_Copied:
-
+                        {
+                            [self moveSelectedObjectViewsWithDelta:gesture.deltaLocation];
+                        }
                             break;
                             
-                        default:
+                        case BbPatchViewEditState_Default:
+                        case BbPatchViewEditState_Editing:
                         {
                             if ( nil == self.selectedObject ) {
                                 [gesture stopTracking];
@@ -334,15 +366,14 @@ static CGFloat              kMaxMovement          = 20.0;
                             }else{
                                 CGPoint position = gesture.firstView.position.CGPointValue;
                                 CGPoint posPoint = [(UIView *)gesture.firstView position2Point:position];
-                                CGPoint point = [(UIView *)gesture.firstView center];
-                                point.x+=gesture.deltaLocation.x;
-                                point.y+=gesture.deltaLocation.y;
                                 posPoint.x+=gesture.deltaLocation.x;
                                 posPoint.y+=gesture.deltaLocation.y;
                                 [gesture.firstView moveToPoint:[NSValue valueWithCGPoint:posPoint]];
                                 [self updateAppearance];
                             }
                         }
+                            break;
+                        default:
                             break;
                     }
                 }
@@ -413,31 +444,19 @@ static CGFloat              kMaxMovement          = 20.0;
                 case BbPatchViewEditState_Selected:
                 case BbPatchViewEditState_Copied:
                 {
-                    BOOL updateSelected = NO;
+                    id<BbConnectionPath> toRemove = nil;
+                    
                     for (id<BbConnectionPath> aPath in self.childConnectionPaths.allObjects ) {
                         UIBezierPath *path = [aPath bezierPath];
                         if ( [self bezierPath:path containsPoint:gesture.location] ) {
-                            if ( aPath.isSelected ) {
-                                [aPath setSelected:NO];
-                            }else{
-                                [aPath setSelected:YES];
-                            }
-                            updateSelected = YES;
-                            [self updateAppearance];
+                            toRemove = aPath;
+                            break;
                         }
                     }
                     
-                    if ( updateSelected ) {
-                        NSArray *selectedConnections = [self getSelectedConnections];
-                        if ( nil != selectedConnections && selectedConnections.count ) {
-                            if ( self.editState == BbPatchViewEditState_Editing ) {
-                                self.editState = BbPatchViewEditState_Selected;
-                            }
-                        }else{
-                            if ( self.editState == BbPatchViewEditState_Selected ) {
-                                self.editState = BbPatchViewEditState_Default;
-                            }
-                        }
+                    if ( nil != toRemove ) {
+                        [self removeConnectionPath:toRemove];
+                        [self.entity patchView:self didRemoveChildConnection:toRemove.entity];
                     }
                     
                 }
@@ -448,9 +467,12 @@ static CGFloat              kMaxMovement          = 20.0;
                     if ( gesture.repeatCount && gesture.movement < kMaxMovement ) {
                         // add box
                         id <BbObjectView> placeholder = [BbView viewWithEntity:nil];
+                        NSValue *position = [NSValue valueWithCGPoint:gesture.position];
+                        placeholder.position = position;
                         [self addChildEntityView:placeholder];
-                        [placeholder moveToPoint:[NSValue valueWithCGPoint:gesture.location]];
                         [self.entity patchView:self didAddPlaceholderObjectView:placeholder];
+                        
+                        NSLog(@"\nzoom = %.3f...location = (%.2f, %.2f)...position = (%.3f, %.3f)\n",self.scrollView.zoomScale,gesture.location.x,gesture.location.y,gesture.position.x,gesture.position.y);
                     }
                 }
                     break;
@@ -517,6 +539,24 @@ static CGFloat              kMaxMovement          = 20.0;
     [self updateAppearance];
 }
 
+- (CGPoint)gestureLocToPosition:(CGPoint)loc
+{
+    CGRect bounds = self.bounds;
+    CGPoint center = CGPointMake(CGRectGetMidX(bounds),CGRectGetMidY(bounds));
+    CGPoint offset = CGPointMake((loc.x-center.x), (loc.y-center.y));
+    CGPoint position = CGPointMake((offset.x/center.x), (offset.y/center.y));
+    return position;
+}
+
+- (CGPoint)myPosition2Point:(CGPoint)position
+{
+    CGRect bounds = self.bounds;
+    CGPoint center = CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds));
+    CGPoint offset = CGPointMake( (position.x * center.x ),( position.y * center.y ) );
+    CGPoint point  = CGPointMake( (center.x + offset.x) , (center.y + offset.y));
+    return point;
+}
+
 #pragma mark - UIGestureRecognizerDelegate
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
@@ -576,13 +616,6 @@ static CGFloat              kMaxMovement          = 20.0;
     return [children filteredArrayUsingPredicate:pred];
 }
 
-- (NSArray *)getSelectedConnections
-{
-    NSArray *connections = self.childConnectionPaths.allObjects;
-    NSPredicate *pred = [NSPredicate predicateWithFormat:@"%K == 1",@"selected"];
-    return [connections filteredArrayUsingPredicate:pred];
-}
-
 #pragma mark - ChildViews
 
 - (void)addChildEntityView:(id<BbEntityView>)entityView
@@ -594,8 +627,10 @@ static CGFloat              kMaxMovement          = 20.0;
     [self.childObjectViews addObject:entityView];
     [self addSubview:(UIView *)entityView];
     NSArray *constraints = [(id<BbObjectView>)entityView positionConstraints];
+    
     if ( nil != constraints ) {
         [self addConstraints:constraints];
+        [self layoutIfNeeded];
     }
 }
 
@@ -665,7 +700,7 @@ static CGFloat              kMaxMovement          = 20.0;
     if ( self.childConnectionPaths.allObjects ) {
         
         for (id<BbConnectionPath> aPath in self.childConnectionPaths.allObjects ) {
-            
+            [aPath updatePath];
             UIBezierPath *bezierPath = [aPath bezierPath];
             [bezierPath setLineWidth:6];
             if ( aPath.isSelected ) {
@@ -691,13 +726,25 @@ static CGFloat              kMaxMovement          = 20.0;
     [self updateAppearance];
 }
 
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
+{
+    if ( !decelerate ) {
+        CGRect bounds = self.bounds;
+        CGPoint offset = scrollView.contentOffset;
+        CGPoint myOffset;
+        myOffset.x = (offset.x/CGRectGetWidth(bounds));
+        myOffset.y = (offset.y/CGRectGetHeight(bounds));
+        [self.entity objectView:self didChangeValue:[NSValue valueWithCGPoint:myOffset] forViewArgumentKey:kViewArgumentKeyContentOffset];
+    }
+}
+
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
 {
-    CGSize mySize = scrollView.contentSize;
-    CGPoint myCenter = CGPointMake(mySize.width/2, mySize.height/2);
+    CGRect bounds = self.bounds;
+    CGPoint offset = scrollView.contentOffset;
     CGPoint myOffset;
-    myOffset.x = (scrollView.contentOffset.x-myCenter.x)/(mySize.width/2);
-    myOffset.y = (scrollView.contentOffset.y-myCenter.y)/(mySize.height/2);
+    myOffset.x = (offset.x/CGRectGetWidth(bounds));
+    myOffset.y = (offset.y/CGRectGetHeight(bounds));
     [self.entity objectView:self didChangeValue:[NSValue valueWithCGPoint:myOffset] forViewArgumentKey:kViewArgumentKeyContentOffset];
 }
 

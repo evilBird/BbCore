@@ -20,8 +20,6 @@
 
 @property (nonatomic,strong)                NSMutableArray                                      *selectors;
 @property (nonatomic,strong)                NSMutableArray                                      *objects;
-//@property (nonatomic,strong)                NSMutableArray                                      *connections;
-
 @property (nonatomic,strong)                BbSymbolTable<BbTextCompletionDataSource>           *symbolTable;
 
 @end
@@ -73,6 +71,8 @@
 
 @interface BbPatch (BbPatchProtocol) <BbPatch>
 
+- (BbPatchDescription *)patchDescription;
+
 - (NSArray *)loadChildViews;
 
 - (NSArray *)loadChildConnectionPaths;
@@ -80,6 +80,8 @@
 - (void)unloadChildViews;
 
 - (void)unloadChildConnectionPaths;
+
+- (void)pasteCopiedWithText:(NSString *)text;
 
 - (void)patchView:(id<BbPatchView>)sender didConnectOutletView:(id<BbEntityView>)outletView toInletView:(id<BbEntityView>)inletView;
 
@@ -105,8 +107,10 @@
 
 @interface BbPatch (Meta)
 
-+ (BbPatch *)objectWithDescription:(BbPatchDescription *)description;
++ (BbPatch *)objectWithDescription:(BbPatchDescription *)description dataSource:(id<BbObjectDataSource>)dataSource;
 
 - (BbConnection *)connectionWithDescription:(BbConnectionDescription *)description;
+
++ (BbConnection *)connectionWithDecription:(BbConnectionDescription *)description amongstCopiedObjects:(NSArray *)objects;
 
 @end

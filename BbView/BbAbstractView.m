@@ -53,8 +53,15 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
     [self setupAppearance];
     [self setupPortviewStacks];
     [self setupTextDisplay];
-    if ( nil == self.entity ) {
-        self.placeholder = YES;
+    
+    if ( nil != self.entity ) {
+        NSString *viewArgs = self.entity.viewArguments;
+        _position = [BbHelpers positionFromViewArgs:viewArgs];
+        _titleText = self.entity.displayText;
+        _placeholder = NO;
+    }else{
+        _titleText = @"";
+        _placeholder = YES;
     }
 }
 
@@ -109,23 +116,21 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
 
 - (void)setupPositionConstraints
 {
-    self.centerXConstraint = [self alignCenterXToSuperOffset:0];
-    self.centerYConstraint = [self alignCenterYToSuperOffset:0];
+    NSValue *myPos = self.position;
+    if ( nil == myPos ) {
+        myPos = [NSValue valueWithCGPoint:CGPointZero];
+    }
+    CGPoint offsets = [self position2Offset:myPos.CGPointValue];
+    self.centerXConstraint = [self alignCenterXToSuperOffset:offsets.x];
+    self.centerYConstraint = [self alignCenterYToSuperOffset:offsets.y];
+    CGPoint pos = myPos.CGPointValue;
+    NSLog(@"\nsetup position constraints with position = (%.3f, %.3f), offsets = (%.2f, %.2f)",pos.x,pos.y,offsets.x,offsets.y);
+
 }
 
 - (void)didMoveToSuperview
 {
     [super didMoveToSuperview];
-    [self setupPositionConstraints];
-    if ( nil != self.entity ) {
-        NSString *viewArgs = self.entity.viewArguments;
-        _position = [BbHelpers positionFromViewArgs:viewArgs];
-        [self moveToPosition:_position];
-        _titleText = self.entity.displayText;
-    }else{
-        _titleText = @"Enter Text Here . . . ";
-    }
-    
     [self updateAppearance];
 }
 
@@ -167,7 +172,7 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
 - (NSArray *)positionConstraints
 {
     if ( nil == self.centerXConstraint || nil == self.centerYConstraint ) {
-        return nil;
+        [self setupPositionConstraints];
     }
     
     return @[self.centerXConstraint,self.centerYConstraint];
@@ -212,12 +217,15 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
 - (void)editingStateDidChange:(BOOL)editing
 {
     if (!editing) {
+        [(UITextField *)self.textField setAttributedPlaceholder:nil];
         [self.editingDelegate objectView:self didEndEditingWithUserText:self.titleText];
-    }else if ( nil != self.entity ){
-        self.editingDelegate = [self.entity editingDelegateForObjectView:self];
-        [(UITextField *)self.textField becomeFirstResponder];
-    }else{
+    }else if ( self.isPlaceholder ){
+        
         [(UITextField *)self.textField setText:@""];
+        [(UITextField *)self.textField becomeFirstResponder];
+        
+    }else{
+        self.editingDelegate = [self.entity editingDelegateForObjectView:self];
         [(UITextField *)self.textField becomeFirstResponder];
     }
 }
@@ -225,10 +233,24 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
 - (void)placeholderStatusDidChange:(BOOL)placeholder
 {
     if ( !placeholder ) {
-        [(UITextField *)self.textField setPlaceholder:@""];
+        //[(UITextField *)self.textField setPlaceholder:nil];
+        //[(UITextField *)self.textField setAttributedPlaceholder:nil];
     }else{
-        [(UITextField *)self.textField setPlaceholder:@"Enter text here..."];
+        [(UITextField *)self.textField setText:@""];
     }
+}
+
+- (NSAttributedString *)getAttributedPlaceholder:(NSString *)placeholder
+{
+    if ( nil == placeholder || placeholder.length == 0 ) {
+        placeholder = @"Enter text...";
+    }
+    
+    UITextField *textField = (UITextField *)self.textField;
+    NSMutableDictionary *mutableAttributes = textField.defaultTextAttributes.mutableCopy;
+    [mutableAttributes setObject:self.selectedTextColor forKey:NSForegroundColorAttributeName];
+    NSAttributedString *attributedPlaceholder = [[NSAttributedString alloc]initWithString:placeholder attributes:mutableAttributes];
+    return attributedPlaceholder;
 }
 
 - (void)updateAppearance
@@ -292,6 +314,7 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
 - (CGSize)textSize
 {
     UITextField *textField = (UITextField *)self.textField;
+    
     NSString *text = textField.text;
     
     if ( nil == text ) {
@@ -420,7 +443,10 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
     UITextField *textField = sender;
     self.titleText = textField.text;
     NSString *suggestedCompletion = [self.editingDelegate objectView:self suggestCompletionForUserText:textField.text];
-    NSLog(@"suggested completion: %@",suggestedCompletion);
+    if ( nil != suggestedCompletion ) {
+        //textField.placeholder = suggestedCompletion;
+    }
+    //NSLog(@"suggested completion: %@",suggestedCompletion);
     [self updateAppearance];
 }
 

@@ -32,8 +32,18 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
     if ( nil == arguments ) {
         return;
     }
-    
-    BbPatchDescription *patchDescription = [BbParseText parseText:arguments];
+    self.displayText = arguments;
+    NSArray *args = [arguments getArguments];
+    NSString *patchName = [BbHelpers getSelectorFromArray:args];
+    NSArray *patchArgs = [BbHelpers getArgumentsFromArray:args];
+    NSString *text = [self.dataSource object:self textForPatchName:patchName];
+    NSAssert(nil!=text,@"ERROR LOADING PATCH:%@",arguments);
+    [self setupWithText:text];
+}
+
+- (void)setupWithText:(NSString *)text
+{
+    BbPatchDescription *patchDescription = [BbParseText parseText:text];
     BbPatch *patch = [[BbPatch alloc]initWithArguments:nil];
     NSMutableArray *inletAttributes = [NSMutableArray array];
     NSMutableArray *outletAttributes = [NSMutableArray array];
@@ -50,7 +60,7 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
     
     for (BbConnectionDescription *connectionDescription in patchDescription.childConnectionDescriptions) {
         BbConnection *connection = [patch connectionWithDescription:connectionDescription];
-        [patch addChildEntity:connection];
+        [connection.sender addChildEntity:connection];
     }
     
     [self setupPortsForPatch:patch withInletAttributes:inletAttributes outletAttributes:outletAttributes];
@@ -95,6 +105,11 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
 + (NSString *)symbolAlias
 {
     return @"patch object";
+}
+
++ (NSString *)viewClass
+{
+    return @"BbView";
 }
 
 + (BOOL)test

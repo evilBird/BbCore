@@ -48,8 +48,6 @@
 
 - (NSArray *)copySelected;
 
-- (void)pasteChildEntityViews:(NSArray *)childObjects;
-
 @end
 
 

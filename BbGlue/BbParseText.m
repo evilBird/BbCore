@@ -102,7 +102,8 @@ static NSString     *kSelectorToken     =       @"S";
 
 + (NSString *)objectArgumentsFromString:(NSString *)string
 {
-    NSString *pattern = @"(?<=\\d\\s)Bb(\\w*\\s?)*[^;]";
+    //NSString *pattern = @"(?<=\\d\\s)Bb(\\w*\\s?)*[^;]";
+    NSString *pattern = @"(?<=\\d\\s)Bb([\\w|\\d|$]*\\s?)*[^;]";
     return [BbParseText matchPattern:pattern inString:string];
 }
 
@@ -177,6 +178,7 @@ static NSString     *kSelectorToken     =       @"S";
     NSString *myObjectArgs = [BbParseText objectArgumentsFromString:myText];
     BbPatchDescription *patchDescription = [BbPatchDescription patchDescriptionWithArgs:myObjectArgs viewArgs:myViewArgs];
     patchDescription.depth = self.myDepth;
+    
     while ( self.myTextLocation < self.myText.length ) {
         NSString *myText = [self.myText substringFromIndex:self.myTextLocation];
         NSArray *components = [myText componentsSeparatedByString:self.mySeparator];
@@ -213,5 +215,48 @@ static NSString     *kSelectorToken     =       @"S";
     return patchDescription;
 }
 
++ (NSDictionary *)parseCopiedText:(NSString *)text
+{
+    BbParseText *parser = [[BbParseText alloc]initWithText:text];
+    return [parser parseCopied];
+}
+
+- (NSDictionary *)parseCopied
+{
+    NSMutableArray *objectDescriptions = [NSMutableArray array];
+    NSMutableArray *connectionDescriptions = [NSMutableArray array];
+    
+    while ( self.myTextLocation < self.myText.length ) {
+        NSString *myText = [self.myText substringFromIndex:self.myTextLocation];
+        NSArray *components = [myText componentsSeparatedByString:self.mySeparator];
+        NSString *aComponent = components.firstObject;
+        NSUInteger numCharsToAdvance = 0;
+        if ( [BbParseText isChild:aComponent] ) {
+            if ( [BbParseText isConnection:aComponent] ) {
+                NSString *args = [BbParseText connectionArgumentsFromString:aComponent];
+                BbConnectionDescription *connectionDescription = [BbConnectionDescription connectionDescriptionWithArgs:args];
+                [connectionDescriptions addObject:connectionDescription];
+            }else{
+                NSString *objectArgs = [BbParseText objectArgumentsFromString:aComponent];
+                NSString *viewArgs = [BbParseText childViewArgumentsFromString:aComponent];
+                BbObjectDescription *objectDescription = [BbObjectDescription objectDescriptionWithArgs:objectArgs viewArgs:viewArgs];
+                [objectDescriptions addObject:objectDescription];
+            }
+            numCharsToAdvance = aComponent.length;
+            
+        }else {
+            
+            NSLog(@"INVALID SELECTOR AT LOCATION: %@ COMPONENT: %@",@(self.myTextLocation),aComponent);
+        }
+        
+        self.myTextLocation += (numCharsToAdvance + self.mySeparator.length);
+    }
+    
+    NSMutableDictionary *results = [NSMutableDictionary dictionary];
+    results[kCopiedObjectDescriptionsKey] = objectDescriptions;
+    results[kCopiedConnectionDescriptionsKey] = connectionDescriptions;
+    
+    return results;
+}
 
 @end
