@@ -46,6 +46,8 @@
 
 - (NSArray *)positionConstraints;
 
+- (void)positionDidChange:(NSValue *)position;
+
 - (BOOL)canEdit;
 
 - (void)commonInit;

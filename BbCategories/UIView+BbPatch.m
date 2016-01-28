@@ -86,7 +86,6 @@ CGFloat CGPointGetDistance(CGPoint point, CGPoint referencePoint)
     if ( CGRectIsEmpty(bounds) ) {
         return CGPointZero;
     }
-    
     CGPoint offset;
     offset.x = position.x * (CGRectGetWidth(bounds)/2.0);
     offset.y = position.y * (CGRectGetHeight(bounds)/2.0);

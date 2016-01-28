@@ -12,8 +12,6 @@
 @interface BbInstance ()
 
 @property (nonatomic,strong)        id          myInstance;
-@property (nonatomic,strong)        NSString    *className;
-
 
 @end
 
@@ -37,15 +35,20 @@
     [selectorInlet setOutputBlock:^ (id value ){
         
         if ( [value isKindOfClass:[BbBang class]] ) {
+            
             NSMutableArray *outputArray = [NSMutableArray array];
             [outputArray addObject:kSELF];
             [outputArray addObject:_myInstance];
             mainOutlet.inputElement = outputArray;
+            
         }else if ( nil != weakself.myInstance ){
+            
             NSString *selector = [BbHelpers getSelectorFromArray:value];
             NSArray *args = [BbHelpers getArgumentsFromArray:value];
             id output = [NSInvocation doInstanceMethod:weakself.myInstance selector:selector arguments:args];
+            
             if ( nil != output ) {
+                
                 NSMutableArray *outputArray = [NSMutableArray array];
                 [outputArray addObject:selector];
                 [outputArray addObject:output];
@@ -73,18 +76,13 @@
 {
     if ( nil != arguments ) {
         self.displayText = [NSString stringWithFormat:@"*%@",arguments];
+    }else{
+        self.displayText = @"*instance";
     }
-    self.name = @"*";
-    self.className = arguments;
+    
+    self.name = @"*i";
     
 }
 
-- (void)loadBang
-{
-    if ( nil != self.className ) {
-        id anInstance = [NSInvocation doClassMethod:self.className selector:@"new" arguments:nil];
-        [self.inlets[1] setInputElement:anInstance];
-    }
-}
 
 @end

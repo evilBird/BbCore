@@ -478,6 +478,7 @@
 {
     objectView.editingDelegate = self;
     objectView.editing = YES;
+    [objectView moveToPosition:objectView.position];
 }
 
 - (void)patchView:(id<BbPatchView>)sender didAddChildEntityView:(id<BbObjectView>)objectView
@@ -492,6 +493,7 @@
 - (void)patchView:(id<BbPatchView>)sender didRemoveChildConnection:(id<BbConnection>)connection {
 
     id<BbEntity> sendingEntity = connection.sender;
+    [connection unloadPath];
     BOOL ok = [sendingEntity removeChildEntity:connection];
     NSAssert(ok, @"ERROR REMOVING CONNECTION");
 }

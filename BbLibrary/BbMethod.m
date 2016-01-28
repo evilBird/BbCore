@@ -8,20 +8,32 @@
 
 #import "BbMethod.h"
 
+@interface BbMethod ()
+
+@property (nonatomic,strong)        id  myTarget;
+
+@end
+
 @implementation BbMethod
 
 - (void)setupPorts
 {
     [super setupPorts];
-    BbInlet *targetInlet = self.inlets[0];
-    BbInlet *argsInlet = self.inlets[1];
+    BbInlet *argsInlet = self.inlets[0];
+    BbInlet *targetInlet = self.inlets[1];
+    targetInlet.hot = YES;
+    __block id myTarget = nil;
+    [targetInlet setOutputBlock:^(id value){
+        myTarget = value;
+    }];
+    
     [argsInlet setInputBlock:[BbPort allowTypeInputBlock:[NSArray class]]];
     __block BbOutlet *mainOutlet = self.outlets[0];
-    [targetInlet setOutputBlock:^(id value){
-        NSArray *args = argsInlet.outputElement;
+    [argsInlet setOutputBlock:^(id value){
+        NSArray *args = value;
         NSString *selector = [BbHelpers getSelectorFromArray:args];
         NSArray *selectorArgs = [BbHelpers getArgumentsFromArray:args];
-        mainOutlet.outputElement = [NSInvocation doInstanceMethod:value selector:selector arguments:selectorArgs];
+        mainOutlet.outputElement = [NSInvocation doInstanceMethod:myTarget selector:selector arguments:selectorArgs];
     }];
 }
 

@@ -10,6 +10,7 @@
 #import "BbPortView.h"
 #import "BbCoreProtocols.h"
 #import "UIView+BbPatch.h"
+#import "BbPlaceholderView.h"
 
 static NSTimeInterval       kLongPressMinDuration = 0.5;
 static CGFloat              kMaxMovement          = 20.0;
@@ -17,6 +18,8 @@ static CGFloat              kMaxMovement          = 20.0;
 @interface BbPatchView () <UIGestureRecognizerDelegate,UIScrollViewDelegate>
 
 @property (nonatomic,strong)        UIBezierPath                        *activePath;
+@property (nonatomic,strong)        NSHashTable                         *childEntityViewQueue;
+@property (nonatomic,strong)        NSHashTable                         *childConnectionQueue;
 
 @end
 
@@ -46,12 +49,10 @@ static CGFloat              kMaxMovement          = 20.0;
     BbPatchViewEditState prevState = _editState;
     _editState = editState;
     [self.editingDelegate patchView:self didChangeEditState:editState];
-    if ( editState != prevState ) {
-        if ( editState == BbPatchViewEditState_Default ) {
-            NSArray *toDeselect = [self getSelectedObjects];
-            for (id<BbObjectView> anObjectView in toDeselect ) {
-                anObjectView.selected = NO;
-            }
+    if ( editState == BbPatchViewEditState_Default ) {
+        NSArray *toDeselect = [self getSelectedObjects];
+        for (id<BbObjectView> anObjectView in toDeselect ) {
+            anObjectView.selected = NO;
         }
     }
 }
@@ -66,6 +67,8 @@ static CGFloat              kMaxMovement          = 20.0;
     [self addGestureRecognizer:self.gesture];
     self.childObjectViews = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
     self.childConnectionPaths = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
+    self.childEntityViewQueue = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
+    self.childConnectionQueue = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
     self.entityViewType = BbEntityViewType_Patch;
 }
 
@@ -109,6 +112,29 @@ static CGFloat              kMaxMovement          = 20.0;
 
 - (void)updateChildViewAppearance
 {
+    if (CGRectIsEmpty(self.bounds)) {
+        return;
+    }
+    
+    if ( self.childEntityViewQueue.allObjects.count ) {
+        for (id<BbObjectView> objectView in self.childEntityViewQueue.allObjects ) {
+            [self addChildEntityView:objectView];
+            [objectView updateAppearance];
+        }
+    }
+    
+    [self.childEntityViewQueue removeAllObjects];
+    
+    if (self.childConnectionQueue.allObjects.count ){
+        for (id<BbConnectionPath> path in self.childConnectionQueue.allObjects ) {
+            [self addConnectionPath:path];
+            [path updatePath];
+        }
+    }
+    
+    [self.childConnectionQueue removeAllObjects];
+    
+    /*
     for (id<BbObjectView> aChildView  in self.childObjectViews.allObjects ) {
         [aChildView moveToPosition:aChildView.position];
     }
@@ -116,7 +142,7 @@ static CGFloat              kMaxMovement          = 20.0;
     for (id<BbConnectionPath> aPath in self.childConnectionPaths ) {
         [aPath updatePath];
     }
-    
+    */
     [self updateAppearance];
 }
 
@@ -304,13 +330,18 @@ static CGFloat              kMaxMovement          = 20.0;
         return;
     }
     for (id<BbObjectView> objectView in selectedObjectViews ) {
-        CGPoint position = objectView.position.CGPointValue;
-        CGPoint posPoint = [(UIView *)objectView position2Point:position];
-        posPoint.x+=delta.x;
-        posPoint.y+=delta.y;
-        [objectView moveToPoint:[NSValue valueWithCGPoint:posPoint]];
+        BbAbstractView *view = (BbAbstractView *)objectView;
+        CGPoint position = view.position.CGPointValue;
+        CGPoint point = [self myPosition2Point:position];
+        point.x+=delta.x;
+        point.y+=delta.y;
+        CGPoint offsets = [self point2ConstraintOffsets:point];
+        view.centerXConstraint.constant = offsets.x;
+        view.centerYConstraint.constant = offsets.y;
+        [self setNeedsLayout];
+        CGPoint newPosition = [self myPoint2Position:point];
+        [view positionDidChange:[NSValue valueWithCGPoint:newPosition]];
     }
-    
     [self updateAppearance];
 }
 
@@ -353,6 +384,7 @@ static CGFloat              kMaxMovement          = 20.0;
                         case BbPatchViewEditState_Selected:
                         case BbPatchViewEditState_Copied:
                         {
+                            [self.scrollView touchesShouldCancel];
                             [self moveSelectedObjectViewsWithDelta:gesture.deltaLocation];
                         }
                             break;
@@ -364,11 +396,17 @@ static CGFloat              kMaxMovement          = 20.0;
                                 [gesture stopTracking];
                                 return;
                             }else{
-                                CGPoint position = gesture.firstView.position.CGPointValue;
-                                CGPoint posPoint = [(UIView *)gesture.firstView position2Point:position];
-                                posPoint.x+=gesture.deltaLocation.x;
-                                posPoint.y+=gesture.deltaLocation.y;
-                                [gesture.firstView moveToPoint:[NSValue valueWithCGPoint:posPoint]];
+                                BbAbstractView *view = (BbAbstractView *)gesture.firstView;
+                                CGPoint position = view.position.CGPointValue;
+                                CGPoint point = [self myPosition2Point:position];
+                                point.x+=gesture.deltaLocation.x;
+                                point.y+=gesture.deltaLocation.y;
+                                CGPoint offsets = [self point2ConstraintOffsets:point];
+                                CGPoint newPosition = [self myPoint2Position:point];
+                                view.centerXConstraint.constant = offsets.x;
+                                view.centerYConstraint.constant = offsets.y;
+                                [self setNeedsLayout];
+                                [view positionDidChange:[NSValue valueWithCGPoint:newPosition]];
                                 [self updateAppearance];
                             }
                         }
@@ -466,13 +504,9 @@ static CGFloat              kMaxMovement          = 20.0;
                 {
                     if ( gesture.repeatCount && gesture.movement < kMaxMovement ) {
                         // add box
-                        id <BbObjectView> placeholder = [BbView viewWithEntity:nil];
-                        NSValue *position = [NSValue valueWithCGPoint:gesture.position];
-                        placeholder.position = position;
+                        id <BbObjectView> placeholder = [[BbPlaceholderView alloc]initWithPosition:[NSValue valueWithCGPoint:gesture.position]];
                         [self addChildEntityView:placeholder];
                         [self.entity patchView:self didAddPlaceholderObjectView:placeholder];
-                        
-                        NSLog(@"\nzoom = %.3f...location = (%.2f, %.2f)...position = (%.3f, %.3f)\n",self.scrollView.zoomScale,gesture.location.x,gesture.location.y,gesture.position.x,gesture.position.y);
                     }
                 }
                     break;
@@ -539,24 +573,6 @@ static CGFloat              kMaxMovement          = 20.0;
     [self updateAppearance];
 }
 
-- (CGPoint)gestureLocToPosition:(CGPoint)loc
-{
-    CGRect bounds = self.bounds;
-    CGPoint center = CGPointMake(CGRectGetMidX(bounds),CGRectGetMidY(bounds));
-    CGPoint offset = CGPointMake((loc.x-center.x), (loc.y-center.y));
-    CGPoint position = CGPointMake((offset.x/center.x), (offset.y/center.y));
-    return position;
-}
-
-- (CGPoint)myPosition2Point:(CGPoint)position
-{
-    CGRect bounds = self.bounds;
-    CGPoint center = CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds));
-    CGPoint offset = CGPointMake( (position.x * center.x ),( position.y * center.y ) );
-    CGPoint point  = CGPointMake( (center.x + offset.x) , (center.y + offset.y));
-    return point;
-}
-
 #pragma mark - UIGestureRecognizerDelegate
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
@@ -618,20 +634,56 @@ static CGFloat              kMaxMovement          = 20.0;
 
 #pragma mark - ChildViews
 
+- (CGPoint)point2ConstraintOffsets:(CGPoint)point
+{
+    CGRect bounds = self.bounds;
+    CGPoint center = CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds));
+    CGFloat xoffset = round(point.x-center.x);
+    CGFloat yoffset = round(point.y-center.y);
+    return CGPointMake(xoffset, yoffset);
+}
+
+- (CGPoint)myPoint2Position:(CGPoint)point
+{
+    CGRect bounds = self.bounds;
+    CGPoint center = CGPointMake(CGRectGetMidX(bounds),CGRectGetMidY(bounds));
+    CGPoint offset = CGPointMake((point.x-center.x), (point.y-center.y));
+    CGPoint position = CGPointMake((offset.x/center.x), (offset.y/center.y));
+    return position;
+}
+
+- (CGPoint)myPosition2Point:(CGPoint)position
+{
+    CGRect bounds = self.bounds;
+    CGPoint center = CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds));
+    CGPoint offset = CGPointMake( (position.x * center.x ),( position.y * center.y ) );
+    CGPoint point  = CGPointMake( (center.x + offset.x) , (center.y + offset.y));
+    return point;
+}
+
 - (void)addChildEntityView:(id<BbEntityView>)entityView
 {
     if ( nil == entityView || [self.childObjectViews containsObject:entityView] ) {
         return;
     }
     
+    if ( CGRectIsEmpty(self.bounds) ) {
+        [self.childEntityViewQueue addObject:entityView];
+        return;
+    }
+    
+    
     [self.childObjectViews addObject:entityView];
     [self addSubview:(UIView *)entityView];
-    NSArray *constraints = [(id<BbObjectView>)entityView positionConstraints];
-    
-    if ( nil != constraints ) {
-        [self addConstraints:constraints];
-        [self layoutIfNeeded];
-    }
+    BbAbstractView *view = (BbAbstractView *)entityView;
+    CGPoint pos = view.position.CGPointValue;
+    CGPoint pt = [self myPosition2Point:pos];
+    CGPoint offsets = [self point2ConstraintOffsets:pt];
+    view.centerXConstraint = [view alignCenterXToSuperOffset:offsets.x];
+    view.centerYConstraint = [view alignCenterYToSuperOffset:offsets.y];
+    [self addConstraint:view.centerXConstraint];
+    [self addConstraint:view.centerYConstraint];
+    [self setNeedsLayout];
 }
 
 - (void)removeChildEntityView:(id<BbEntityView>)entityView
@@ -640,9 +692,12 @@ static CGFloat              kMaxMovement          = 20.0;
         return;
     }
     [self.childObjectViews removeObject:entityView];
-    NSArray *constraints = [(id<BbObjectView>)entityView positionConstraints];
-    if ( nil != constraints ) {
-        [self removeConstraints:constraints];
+    BbAbstractView *view = (BbAbstractView *)entityView;
+    if ( view.centerXConstraint && [self.constraints containsObject:view.centerXConstraint] ) {
+        [self removeConstraint:view.centerXConstraint];
+    }
+    if ( view.centerYConstraint && [self.constraints containsObject:view.centerYConstraint] ) {
+        [self removeConstraint:view.centerYConstraint];
     }
     [(UIView *)entityView removeFromSuperview];
     
@@ -655,6 +710,12 @@ static CGFloat              kMaxMovement          = 20.0;
     if ( [self.childConnectionPaths containsObject:path] ) {
         return;
     }
+    
+    if ( CGRectIsEmpty(self.bounds) ) {
+        [self.childConnectionQueue addObject:path];
+        return;
+    }
+    
     [self.childConnectionPaths addObject:path];
     [self updateAppearance];
 }

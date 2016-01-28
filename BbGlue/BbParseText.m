@@ -103,7 +103,7 @@ static NSString     *kSelectorToken     =       @"S";
 + (NSString *)objectArgumentsFromString:(NSString *)string
 {
     //NSString *pattern = @"(?<=\\d\\s)Bb(\\w*\\s?)*[^;]";
-    NSString *pattern = @"(?<=\\d\\s)Bb([\\w|\\d|$]*\\s?)*[^;]";
+    NSString *pattern = @"(?<=\\d\\s)Bb([\\w|\\d|$|:]*\\s?)*[^;]";
     return [BbParseText matchPattern:pattern inString:string];
 }
 

@@ -26,12 +26,14 @@
     
     __weak BbProxy *weakself = self;
     [clientInlet setOutputBlock:^( id value ){
-        if ( [value isKindOfClass:[NSArray class]] && [(NSArray*)value count] > 2 ) {
+        if ( [value isKindOfClass:[NSArray class]] && [(NSArray*)value count] == 3 ) {
             NSString *selector = [(NSArray*)value objectAtIndex:0];
-            if ( [[selector lowercaseString] isEqualToString:@"set"] ) {
-                NSString *property = [(NSArray*)value objectAtIndex:1];
-                id client = [(NSArray*)value objectAtIndex:2];
-                [weakself setupProxyForProperty:property withClient:client];
+            if ( [[selector lowercaseString] isEqualToString:@"setClient:property:"] ) {
+        
+                id client = [(NSArray*)value objectAtIndex:1];
+                NSString *property = [(NSArray*)value objectAtIndex:2];
+                [weakself setClient:client property:property];
+                
             }
         }
     }];
@@ -59,6 +61,35 @@
     }else{
         self.displayText = arguments;
     }
+}
+
+- (void)setClient:(id)client property:(NSString *)property
+{
+    NSAssert(nil!=client, @"ERROR: CLIENT INSTANCE IS NIL");
+    if ( nil == property ) {
+        return;
+    }
+    
+    if ( nil != self.clientTable && [self.clientTable containsObject:client] ) {
+        return;
+    }
+    
+    self.displayText = property;
+    self.creationArguments = property;
+    [self.view setTitleText:self.displayText];
+    
+    self.delegateInstance = nil;
+    self.returnValueTable = nil;
+    self.clientTable = nil;
+    
+    
+    self.clientTable = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
+    [self.clientTable addObject:client];
+    self.returnValueTable = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsCopyIn valueOptions:NSPointerFunctionsCopyIn];
+    self.delegateInstance  = [[BbRuntimeProtocolAdopter alloc]initWithClientClass:NSStringFromClass([client class])
+                                                                   clientProperty:property
+                                                                            proxy:self];
+    [client setObject:self forKey:property];
 }
 
 - (void)setupProxyForProperty:(NSString *)property withClient:(id)client

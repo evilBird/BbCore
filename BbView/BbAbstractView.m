@@ -116,6 +116,7 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
 
 - (void)setupPositionConstraints
 {
+    /*
     NSValue *myPos = self.position;
     if ( nil == myPos ) {
         myPos = [NSValue valueWithCGPoint:CGPointZero];
@@ -125,6 +126,7 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
     self.centerYConstraint = [self alignCenterYToSuperOffset:offsets.y];
     CGPoint pos = myPos.CGPointValue;
     NSLog(@"\nsetup position constraints with position = (%.3f, %.3f), offsets = (%.2f, %.2f)",pos.x,pos.y,offsets.x,offsets.y);
+     */
 
 }
 
@@ -136,18 +138,29 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
 
 - (void)moveToPoint:(NSValue *)pointValue
 {
+    /*
     if ( nil == self.superview ) {
         return;
     }
     
     CGPoint point = pointValue.CGPointValue;
     CGPoint position = [self point2Position:point];
-    [self moveToPosition:[NSValue valueWithCGPoint:position]];
+    _position = [NSValue valueWithCGPoint:position];
+    //[self moveToPosition:[NSValue valueWithCGPoint:position]];
     [self.entity objectView:self didChangeValue:[NSValue valueWithCGPoint:position] forViewArgumentKey:kViewArgumentKeyPosition];
+     */
+}
+
+- (void)positionDidChange:(NSValue *)position
+{
+    self.position = position;
+    [self.entity objectView:self didChangeValue:position forViewArgumentKey:kViewArgumentKeyPosition];
+
 }
 
 - (void)moveToPosition:(NSValue *)positionValue
 {
+    /*
     if ( nil == self.superview || CGRectIsEmpty(self.superview.bounds)) {
         return;
     }
@@ -158,6 +171,7 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
     self.centerXConstraint.constant = offsets.x;
     self.centerYConstraint.constant = offsets.y;
     [self.superview layoutIfNeeded];
+     */
 }
 
 - (BOOL)canEdit
@@ -171,11 +185,13 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
 
 - (NSArray *)positionConstraints
 {
+    /*
     if ( nil == self.centerXConstraint || nil == self.centerYConstraint ) {
         [self setupPositionConstraints];
     }
     
     return @[self.centerXConstraint,self.centerYConstraint];
+     */
 }
 
 - (void)setEditing:(BOOL)editing

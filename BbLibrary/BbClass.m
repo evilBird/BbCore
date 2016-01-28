@@ -24,8 +24,6 @@
     BbInlet *classNameInlet = self.inlets[1];
     classNameInlet.hot = YES;
     __block BbOutlet *mainOutlet = self.outlets[0];
-    //[selectorInlet setInputBlock:[BbPort allowTypesInputBlock:@[[NSString class],[NSArray class]]]];
-    //[classNameInlet setInputBlock:[BbPort allowTypesInputBlock:@[[NSString class],[NSArray class]]]];
     __block id returnVal = nil;
     __weak BbClass *weakself = self;
     [selectorInlet setOutputBlock:^ (id value ){
@@ -35,7 +33,6 @@
         if ( nil != weakself.className ){
             NSString *selector = nil;
             NSArray *args = nil;
-        
             
             if ( [value isKindOfClass:[NSString class]] ) {
                 selector = value;
