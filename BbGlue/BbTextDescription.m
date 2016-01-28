@@ -165,3 +165,9 @@
 }
 
 @end
+
+@implementation BbAbstractionDescription
+
+
+
+@end

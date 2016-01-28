@@ -48,3 +48,8 @@
 - (void)addSelectorDescription:(NSString *)selectorArgs;
 
 @end
+
+@interface BbAbstractionDescription : BbPatchDescription
+
+
+@end

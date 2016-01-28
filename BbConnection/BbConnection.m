@@ -66,7 +66,7 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
     }
     
     self.connected = ![(BbPort *)self.sender disconnectFromPort:(BbPort *)self.receiver];
-    self.path.valid = self.isConnected;
+    [self unloadPath];
     return self.isConnected;
 }
 
@@ -141,6 +141,9 @@ static void*     BbConnectionPathObservationContextXX       =       &BbConnectio
 
 - (void)unloadPath
 {
+    if ( nil == self.path ) {
+        return;
+    }
     self.path.valid = !( [self.sender.parent removeEntityObserver:self] && [self.receiver.parent removeEntityObserver:self] );
     self.path.entity = nil;
     self.path = nil;

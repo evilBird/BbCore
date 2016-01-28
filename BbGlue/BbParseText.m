@@ -80,6 +80,18 @@ static NSString     *kSelectorToken     =       @"S";
     return ( nil != matches );
 }
 
++ (BOOL)isAbstraction:(NSString *)string
+{
+    BOOL isParent = [BbParseText isParent:string];
+    if ( !isParent ) {
+        return NO;
+    }
+    
+    NSString *pattern = @"#N BbPatchView";
+    NSString *matches = [BbParseText matchPattern:pattern inString:string];
+    return ( nil == matches );
+}
+
 + (BOOL)isChild:(NSString *)string
 {
     NSString *pattern = @"#X";
