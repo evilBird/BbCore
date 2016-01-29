@@ -162,6 +162,7 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 @property (nonatomic,strong)                        NSHashTable                             *childConnectionPaths;
 @property (nonatomic,weak)                          id<BbObjectViewEditingDelegate,BbPatchViewEditingDelegate>          editingDelegate;
 @property (nonatomic)                               BbPatchViewEditState                    editState;
+@property (nonatomic,weak)                          id<BbObjectView>                        editingObjectView;
 
 + (id<BbPatchView>)viewWithEntity:(id<BbEntity,BbObject,BbPatch>)entity;
 
@@ -184,6 +185,8 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 
 - (void)patchView:(id<BbPatchView>)sender didChangeEditState:(BbPatchViewEditState)editState;
 
+- (void)patchView:(id<BbPatchView>)sender didEditValue:(NSValue *)value forViewArgumentKey:(NSString *)key;
+
 - (void)patchView:(id<BbPatchView>)sender didEdit:(id)editObject;
 
 - (BOOL)patchViewCanUndo:(id<BbPatchView>)sender;
@@ -199,7 +202,6 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 - (void)patchView:(id<BbPatchView>)sender didRequestSupplementaryViewWithIdentifier:(id)supplementaryViewIdentifier forChildObjectView:(id<BbObjectView>)objectView;
 
 - (void)patchView:(id<BbPatchView>)sender didDismissSupplementaryView:(id<BbObjectView>)supplementaryView;
-
 
 @end
 

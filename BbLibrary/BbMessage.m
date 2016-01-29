@@ -27,15 +27,16 @@
     [self addChildEntity:mainOutlet];
     
     __weak BbMessage *weakself = self;
-    
     [hotInlet setInputBlock:[BbPort allowTypesInputBlock:@[[NSArray class],[BbBang class]]]];
     
     [hotInlet setOutputBlock:^(id value){
         if ( ![value isKindOfClass:[NSArray class]]) {
             [weakself.view setHighlighted:YES];
-            mainOutlet.inputElement = [weakself defaultOutput];
+            id defaultOutput = [weakself defaultOutput];
+            mainOutlet.inputElement = defaultOutput;
         }else{
-            mainOutlet.inputElement = [weakself outputForInput:value];
+            id output = [weakself outputForInput:value];
+            mainOutlet.inputElement = output;
         }
     }];
 }
@@ -81,6 +82,8 @@
         if ( sendOnDone ) {
             return [NSArray arrayWithArray:substitutedArray];
         }
+    }else{
+        return [self defaultOutput];
     }
     
     return nil;
@@ -137,8 +140,8 @@
 
 - (void)sendActionsForView:(id<BbObjectView>)sender
 {
-    NSArray *args = [self.displayText getArguments];
-    [self.outlets[0] setInputElement:[self.displayText getArguments]];
+    [self.inlets[0] setInputElement:[self.displayText getArguments]];
+    [self.view setHighlighted:YES];
 }
 
 - (NSString *)titleTextForObjectView:(id<BbObjectView>)objectView

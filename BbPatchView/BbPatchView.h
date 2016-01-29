@@ -26,13 +26,13 @@
 @property (nonatomic)                                   BbEntityViewType                        entityViewType;
 
 @property (nonatomic,strong)                            BbPatchGestureRecognizer                *gesture;
-@property (nonatomic,strong)                            BbScrollView                            *scrollView;
+@property (nonatomic,weak)                              BbScrollView                            *scrollView;
 
-@property (nonatomic,weak)                              id<BbEntityView>                        selectedInlet;
-@property (nonatomic,weak)                              id<BbEntityView>                        selectedOutlet;
-@property (nonatomic,weak)                              id<BbObjectView>                        selectedObject;
+@property (nonatomic,weak)                              id<BbEntityView>                        activeInlet;
+@property (nonatomic,weak)                              id<BbEntityView>                        activeOutlet;
+@property (nonatomic,weak)                              id<BbObjectView>                        activeObject;
+@property (nonatomic,weak)                              id<BbObjectView>                        editingObjectView;
 
-- (void)layoutWithScrollView:(BbScrollView *)scrollView;
 
 + (id<BbPatchView>)viewWithEntity:(id<BbEntity,BbObject,BbPatch>)entity;
 

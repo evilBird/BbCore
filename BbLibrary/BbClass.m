@@ -26,10 +26,18 @@
     __block BbOutlet *mainOutlet = self.outlets[0];
     __block id returnVal = nil;
     __weak BbClass *weakself = self;
+    
+    [selectorInlet setInputBlock:^(id value){
+        return value;
+    }];
+    
     [selectorInlet setOutputBlock:^ (id value ){
+        
         if (![value isKindOfClass:[NSString class]] && ![value isKindOfClass:[NSArray class]] ) {
-            NSAssert(1==3, @"INPUT ERROR IN PORT");
+            //NSAssert(1==3, @"INPUT ERROR IN PORT");
+            return;
         }
+        
         if ( nil != weakself.className ){
             NSString *selector = nil;
             NSArray *args = nil;

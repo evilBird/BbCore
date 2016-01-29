@@ -8,6 +8,7 @@
 
 #import "BbPatch.h"
 #import "BbParseText.h"
+#import "BbAbstraction.h"
 
 @implementation BbPatch
 
@@ -339,10 +340,11 @@
     return [super editingDelegateForObjectView:sender];
 }
 
-- (void)objectView:(id<BbObjectView>)sender didBeginEditingWithDelegate:(id<BbObjectViewEditingDelegate>)editingDelegate {}
+- (void)objectView:(id<BbObjectView>)sender didBeginEditingWithDelegate:(id<BbObjectViewEditingDelegate>)editingDelegate {
+    
+}
 
 - (void)objectView:(id<BbObjectView>)sender didEndEditingWithUserText:(NSString *)userText {
-    
     
 }
 
@@ -380,6 +382,15 @@
         path.selected = YES;
         [self.view addConnectionPath:path];
     }
+}
+
+
+- (void)abstractCopiedWithText:(NSString *)text
+{
+    NSString *abstractionDescription = [BbAbstraction emptyAbstractionDescription];
+    NSString *description = [NSString stringWithFormat:@"%@%@",abstractionDescription,text];
+    BbAbstractionDescription *desc = [BbAbstractionDescription new];
+    desc.objectClass = @"BbAbstraction";
 }
 
 - (void)doSelectors
@@ -478,6 +489,7 @@
 {
     objectView.editingDelegate = self;
     objectView.editing = YES;
+    self.view.editingObjectView = objectView;
     [objectView moveToPosition:objectView.position];
 }
 
@@ -501,8 +513,10 @@
 - (void)patchView:(id<BbPatchView>)sender didRemoveChildObjectView:(id<BbObjectView>)objectView
 {
     id <BbObject> object = objectView.entity;
-    BOOL ok = [self removeChildEntity:object];
-    NSAssert(ok,@"ERROR REMOVING CHILD ENTITY");
+    if (object) {
+        BOOL ok = [self removeChildEntity:object];
+        NSAssert(ok,@"ERROR REMOVING CHILD ENTITY");
+    }
 }
 
 @end
@@ -533,7 +547,7 @@
 
 - (void)objectView:(id<BbObjectView>)sender didEndEditingWithUserText:(NSString *)userText
 {
-    
+    self.view.editingObjectView = nil;
     id<BbObject> oldObject = sender.entity;
     id<BbObject> newObject = [self createObjectIfNeededForView:sender withUserText:userText];
     if ( nil == oldObject && nil != newObject ) {

@@ -63,6 +63,31 @@
 
 @end
 
+@implementation BbAbstractionDescription
+
++ (BbAbstractionDescription *)abstractionDescriptionWithArgs:(NSString *)objectArgs viewArgs:(NSString *)viewArgs
+{
+    BbAbstractionDescription *description = [BbAbstractionDescription new];
+    description.objectClass = @"BbAbstraction";
+    description.objectArguments = objectArgs;
+    NSMutableArray *viewArgArray = [viewArgs componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].mutableCopy;
+    description.viewClass = viewArgArray.firstObject;
+    [viewArgArray removeObjectAtIndex:0];
+    description.viewArguments = [viewArgArray componentsJoinedByString:@" "];
+    return description;
+}
+
+- (void)addSelectorDescription:(NSString *)selectorArgs
+{
+    if ( nil == self.selectorDescriptions ) {
+        self.selectorDescriptions = [NSMutableArray array];
+    }
+    
+    [self.selectorDescriptions addObject:selectorArgs];
+}
+
+@end
+
 
 @implementation BbPatchDescription
 
@@ -163,11 +188,5 @@
     
     [self.selectorDescriptions addObject:selectorArgs];
 }
-
-@end
-
-@implementation BbAbstractionDescription
-
-
 
 @end

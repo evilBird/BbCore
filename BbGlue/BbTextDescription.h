@@ -33,6 +33,15 @@
 
 @end
 
+@interface BbAbstractionDescription : BbObjectDescription
+
+@property (nonatomic,strong)    NSMutableArray  *selectorDescriptions;
+
++ (BbAbstractionDescription *)abstractionDescriptionWithArgs:(NSString *)objectArgs viewArgs:(NSString *)viewArgs;
+- (void)addSelectorDescription:(NSString *)selectorArgs;
+
+@end
+
 @interface BbPatchDescription : BbObjectDescription
 
 @property (nonatomic)           NSUInteger              depth;
@@ -46,10 +55,5 @@
 - (void)addChildPatchDescription:(BbPatchDescription *)patchDescription;
 - (void)addChildConnectionDescriptionWithArgs:(NSString *)connectionArgs;
 - (void)addSelectorDescription:(NSString *)selectorArgs;
-
-@end
-
-@interface BbAbstractionDescription : BbPatchDescription
-
 
 @end

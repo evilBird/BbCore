@@ -1,74 +1,91 @@
 //
-//  BbPatchObject.m
+//  BbAbstraction.m
 //  Pods
 //
-//  Created by Travis Henspeter on 1/16/16.
+//  Created by Travis Henspeter on 1/27/16.
 //
 //
 
+#import "BbAbstraction.h"
 #import "BbPatchObject.h"
 #import "BbPatch.h"
-#import "BbTextDescription.h"
 #import "BbParseText.h"
-#import "BbRuntime.h"
-
+#import "BbTextDescription.h"
 
 static NSString *kPortAttributeKeyPort      =       @"port";
 static NSString *kPortAttributeKeyXPosition =       @"x";
 
-@interface BbPatchObject ()
+@interface BbAbstraction ()
 
-@property (nonatomic,strong)        BbPatch                         *patch;
-@property (nonatomic, strong)       BbPatchDescription              *patchDescription;
+@property (nonatomic,strong)    BbPatch                 *patch;
 
 @end
 
-@implementation BbPatchObject
+@implementation BbAbstraction
+
++ (NSString *)viewClass
+{
+    return @"BbView";
+}
+
++ (NSString *)symbolAlias
+{
+    return @"abstraction";
+}
+
++ (NSString *)textDescriptionToken
+{
+    return @"#N";
+}
+
++ (NSString *)emptyAbstractionDescription
+{
+    return [NSString stringWithFormat:@"#N BbView 0.0 0.0 BbAbstraction;\n"];
+}
 
 - (void)setupPorts {}
 
 - (void)setupWithArguments:(id)arguments
 {
-    if ( nil == arguments ) {
-        return;
+    NSMutableArray *components = [(NSString *)arguments componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]].mutableCopy;
+    NSString *myArgs = components.firstObject;
+    self.displayText = myArgs;
+    [components removeObjectAtIndex:0];
+    NSMutableArray *temp = [NSMutableArray arrayWithCapacity:components.count];
+    for (NSString *aComponent in components ) {
+        [temp addObject:[aComponent trimWhitespace]];
     }
-    self.displayText = arguments;
-    NSArray *args = [arguments getArguments];
-    NSString *patchName = [BbHelpers getSelectorFromArray:args];
-    NSArray *patchArgs = [BbHelpers getArgumentsFromArray:args];
-    NSString *text = [self.dataSource object:self textForPatchName:patchName];
-    [self setupWithText:text];
+    NSString *remainingArgs = [temp componentsJoinedByString:@"\n"];
+    NSDictionary *copied = [BbParseText parseCopiedText:remainingArgs];
+    [self setupWithChildDescriptions:copied];
 }
 
-- (void)setupWithText:(NSString *)text
+- (void)setupWithChildDescriptions:(NSDictionary *)descriptions
 {
-    if ( nil == text) {
-        return;
-    }
-    
-    BbPatchDescription *patchDescription = [BbParseText parseText:text];
     BbPatch *patch = [[BbPatch alloc]initWithArguments:nil];
     NSMutableArray *inletAttributes = [NSMutableArray array];
     NSMutableArray *outletAttributes = [NSMutableArray array];
-    
-    for (BbObjectDescription *childDescription in patchDescription.childObjectDescriptions) {
+    NSMutableArray *objectDescriptions = descriptions[kCopiedObjectDescriptionsKey];
+    for (BbObjectDescription *childDescription in objectDescriptions ) {
         BbObject *child = [NSInvocation doClassMethod:childDescription.objectClass selector:@"objectWithDescription:" arguments:childDescription];
         [patch addChildEntity:child];
         if ([child isKindOfClass:[BbPatchInlet class]]) {
-            [inletAttributes addObject:[BbPatchObject attributesForPatchPort:child]];
+            [inletAttributes addObject:[BbAbstraction attributesForPatchPort:child]];
         }else if ([child isKindOfClass:[BbPatchOutlet class]]){
-            [outletAttributes addObject:[BbPatchObject attributesForPatchPort:child]];
+            [outletAttributes addObject:[BbAbstraction attributesForPatchPort:child]];
         }
     }
     
-    for (BbConnectionDescription *connectionDescription in patchDescription.childConnectionDescriptions) {
+    NSMutableArray *connectionsDescriptions = descriptions[kCopiedConnectionDescriptionsKey];
+    for (BbConnectionDescription *connectionDescription in connectionsDescriptions ) {
         BbConnection *connection = [patch connectionWithDescription:connectionDescription];
         [connection.sender addChildEntity:connection];
     }
     
     [self setupPortsForPatch:patch withInletAttributes:inletAttributes outletAttributes:outletAttributes];
-    self.patchDescription = patchDescription;
     self.patch = patch;
+    self.patch.selectors = descriptions[kCopiedSelectorDescriptionsKey];
+    
 }
 
 + (NSDictionary *)attributesForPatchPort:(BbObject *)port
@@ -105,27 +122,5 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
     }
 }
 
-+ (NSString *)symbolAlias
-{
-    return @"patch object";
-}
-
-+ (NSString *)viewClass
-{
-    return @"BbView";
-}
-
-+ (BOOL)test
-{
-    NSString *arguments = @"#N BbPatchView 1.0 1.0 0.0 0.0 1.0 BbPatch TEST;\n\t#X BbPatchInletView 0.0 -0.2 BbPatchInlet;\n\t#X BbPatchOutletView 0.0 0.2 BbPatchOutlet;\n\t#X BbConnection 0 0 1 0;\n#S loadView;\n";
-    BbPatchObject *patchObject = [[BbPatchObject alloc]initWithArguments:arguments];
-    BOOL inletsOk = patchObject.inlets.count == 1;
-    BOOL outletsOk = patchObject.outlets.count == 1;
-    NSString *passthruMessage = @"Message";
-    [patchObject.inlets[0] setInputElement:passthruMessage];
-    id output = [patchObject.outlets[0] outputElement];
-    BOOL passThruOK = ( nil != output && [output isEqualToString:passthruMessage] );
-    return ( inletsOk && outletsOk && passThruOK );
-}
 
 @end

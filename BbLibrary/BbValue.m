@@ -41,6 +41,8 @@
 {
     if ( nil == arguments ) {
         self.displayText = @"value";
+    }else{
+        self.displayText = [NSString stringWithFormat:@"value %@",arguments];
     }
 }
 

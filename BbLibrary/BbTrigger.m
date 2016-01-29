@@ -30,9 +30,10 @@
     NSEnumerator *argumentEnumerator = arguments.reverseObjectEnumerator;
     [hotInlet setOutputBlock:^(id value){
         NSUInteger count = arguments.count;
-        while ( -- count ) {
+        NSEnumerator *argEnumerator = arguments.reverseObjectEnumerator;
+        while ( count -- ) {
             BbOutlet *outlet = [outletEnumerator nextObject];
-            NSString *arg = [argumentEnumerator nextObject];
+            NSString *arg = [argEnumerator nextObject];
             if ( [arg isEqualToString:@"b"] ) {
                 outlet.inputElement = [BbBang bang];
             }else{

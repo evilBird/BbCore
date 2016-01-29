@@ -162,6 +162,12 @@ static NSString     *kSelectorToken     =       @"S";
     return [parser parse];
 }
 
++ (NSDictionary *)parseCopiedText:(NSString *)text
+{
+    BbParseText *parser = [[BbParseText alloc]initWithText:text];
+    return [parser parseCopied];
+}
+
 - (instancetype)initWithText:(NSString *)text
 {
     self = [super init];
@@ -207,13 +213,23 @@ static NSString     *kSelectorToken     =       @"S";
             numCharsToAdvance = aComponent.length;
             
         }else if ( [BbParseText isParent:aComponent] ){
-            NSUInteger depth = [BbParseText countOccurencesOfSubstring:@"\t" beforeSubstring:@"#" inString:aComponent];
-            NSUInteger length = [BbParseText lengthOfDepth:depth inString:myText separator:self.mySeparator];
-            NSString *substring2 = [myText substringToIndex:length];
-            BbPatchDescription *childPatchDescription = [BbParseText parseText:substring2];
-            [patchDescription addChildPatchDescription:childPatchDescription];
-            numCharsToAdvance = length;
-        }else if ( [BbParseText isSelector:aComponent] ){
+                NSUInteger depth = [BbParseText countOccurencesOfSubstring:@"\t" beforeSubstring:@"#" inString:aComponent];
+                NSUInteger length = [BbParseText lengthOfDepth:depth inString:myText separator:self.mySeparator];
+                NSString *substring2 = [myText substringToIndex:length];
+                if ( [BbParseText isAbstraction:aComponent]) {
+                    NSString *viewArgs = [BbParseText childViewArgumentsFromString:aComponent];
+                    NSRange range = [substring2 rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet]];
+                    range.location++;
+                    NSString *objArgs = [substring2 stringByReplacingCharactersInRange:range withString:@""];
+                    NSString *args = [objArgs trimWhitespace];
+                    BbAbstractionDescription *desc = [BbAbstractionDescription abstractionDescriptionWithArgs:args viewArgs:viewArgs];
+                    [patchDescription.childObjectDescriptions addObject:desc];
+                }else{
+                    BbPatchDescription *desc = [BbParseText parseText:substring2];
+                    [patchDescription addChildPatchDescription:desc];
+                }
+                numCharsToAdvance = length;
+            }else if ( [BbParseText isSelector:aComponent] ){
             NSString *selectorArgs = [BbParseText selectorFromString:aComponent];
             [patchDescription addSelectorDescription:selectorArgs];
             numCharsToAdvance = aComponent.length;
@@ -227,16 +243,12 @@ static NSString     *kSelectorToken     =       @"S";
     return patchDescription;
 }
 
-+ (NSDictionary *)parseCopiedText:(NSString *)text
-{
-    BbParseText *parser = [[BbParseText alloc]initWithText:text];
-    return [parser parseCopied];
-}
 
 - (NSDictionary *)parseCopied
 {
     NSMutableArray *objectDescriptions = [NSMutableArray array];
     NSMutableArray *connectionDescriptions = [NSMutableArray array];
+    NSMutableArray *selectorDescriptions = [NSMutableArray array];
     
     while ( self.myTextLocation < self.myText.length ) {
         NSString *myText = [self.myText substringFromIndex:self.myTextLocation];
@@ -256,7 +268,28 @@ static NSString     *kSelectorToken     =       @"S";
             }
             numCharsToAdvance = aComponent.length;
             
-        }else {
+        }else if ( [BbParseText isParent:aComponent] ){
+            NSUInteger depth = [BbParseText countOccurencesOfSubstring:@"\t" beforeSubstring:@"#" inString:aComponent];
+            NSUInteger length = [BbParseText lengthOfDepth:depth inString:myText separator:self.mySeparator];
+            NSString *substring2 = [myText substringToIndex:length];
+            if ( [BbParseText isAbstraction:aComponent]) {
+                NSString *viewArgs = [BbParseText childViewArgumentsFromString:aComponent];
+                NSRange range = [substring2 rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet]];
+                range.location++;
+                NSString *objArgs = [substring2 stringByReplacingCharactersInRange:range withString:@""];
+                NSString *args = [objArgs trimWhitespace];
+                BbAbstractionDescription *desc = [BbAbstractionDescription abstractionDescriptionWithArgs:args viewArgs:viewArgs];
+                [objectDescriptions addObject:desc];
+            }else{
+                BbPatchDescription *desc = [BbParseText parseText:substring2];
+                [objectDescriptions addObject:desc];
+            }
+            numCharsToAdvance = length;
+        }else if ( [BbParseText isSelector:aComponent] ){
+            NSString *selectorArgs = [BbParseText selectorFromString:aComponent];
+            [selectorDescriptions addObject:selectorArgs];
+            numCharsToAdvance = aComponent.length;
+        }else{
             
             NSLog(@"INVALID SELECTOR AT LOCATION: %@ COMPONENT: %@",@(self.myTextLocation),aComponent);
         }
@@ -267,6 +300,7 @@ static NSString     *kSelectorToken     =       @"S";
     NSMutableDictionary *results = [NSMutableDictionary dictionary];
     results[kCopiedObjectDescriptionsKey] = objectDescriptions;
     results[kCopiedConnectionDescriptionsKey] = connectionDescriptions;
+    results[kCopiedSelectorDescriptionsKey] = selectorDescriptions;
     
     return results;
 }

@@ -83,6 +83,8 @@
 
 - (void)pasteCopiedWithText:(NSString *)text;
 
+- (void)abstractCopiedWithText:(NSString *)text;
+
 - (void)patchView:(id<BbPatchView>)sender didConnectOutletView:(id<BbEntityView>)outletView toInletView:(id<BbEntityView>)inletView;
 
 - (void)patchView:(id<BbPatchView>)sender didAddPlaceholderObjectView:(id<BbObjectView>)objectView;
