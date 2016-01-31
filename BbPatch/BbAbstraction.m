@@ -38,9 +38,28 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
     return @"#N";
 }
 
+- (id<BbPatchView>)open
+{
+    if (self.patch) {
+        if (self.patch.view) {
+            return self.patch.view;
+        }else{
+            return [self.patch loadView];
+        }
+    }
+    return nil;
+}
+
+- (void)close
+{
+    if (self.patch) {
+        [self.patch unloadView];
+    }
+}
+
 + (NSString *)emptyAbstractionDescription
 {
-    return [NSString stringWithFormat:@"#N BbView 0.0 0.0 BbAbstraction;\n"];
+    return [NSString stringWithFormat:@"#N BbView 0.0 0.0 BbAbstraction abstract;\n"];
 }
 
 - (void)setupPorts {}
@@ -49,14 +68,12 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
 {
     NSMutableArray *components = [(NSString *)arguments componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]].mutableCopy;
     NSString *myArgs = components.firstObject;
-    self.displayText = myArgs;
+    NSString *objArgs = [BbParseText objectArgumentsFromString:myArgs];
+    self.displayText = [[objArgs stringByReplacingOccurrencesOfString:@"BbAbstraction" withString:@""]trimWhitespace];
+    
     [components removeObjectAtIndex:0];
-    NSMutableArray *temp = [NSMutableArray arrayWithCapacity:components.count];
-    for (NSString *aComponent in components ) {
-        [temp addObject:[aComponent trimWhitespace]];
-    }
-    NSString *remainingArgs = [temp componentsJoinedByString:@"\n"];
-    NSDictionary *copied = [BbParseText parseCopiedText:remainingArgs];
+    NSString *theirArgs = [components componentsJoinedByString:@"\n"];
+    NSDictionary *copied = [BbParseText parseCopiedText:theirArgs];
     [self setupWithChildDescriptions:copied];
 }
 
@@ -66,9 +83,15 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
     NSMutableArray *inletAttributes = [NSMutableArray array];
     NSMutableArray *outletAttributes = [NSMutableArray array];
     NSMutableArray *objectDescriptions = descriptions[kCopiedObjectDescriptionsKey];
+    double sumOfPosX = 0.0;
+    double sumOfPosY = 0.0;
+    
     for (BbObjectDescription *childDescription in objectDescriptions ) {
         BbObject *child = [NSInvocation doClassMethod:childDescription.objectClass selector:@"objectWithDescription:" arguments:childDescription];
         [patch addChildEntity:child];
+        NSArray *pos = [child.viewArguments getArguments];
+        sumOfPosX += ([(NSNumber *)pos.firstObject doubleValue]);
+        sumOfPosY += ([(NSNumber *)pos.lastObject doubleValue]);
         if ([child isKindOfClass:[BbPatchInlet class]]) {
             [inletAttributes addObject:[BbAbstraction attributesForPatchPort:child]];
         }else if ([child isKindOfClass:[BbPatchOutlet class]]){
@@ -86,6 +109,9 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
     self.patch = patch;
     self.patch.selectors = descriptions[kCopiedSelectorDescriptionsKey];
     
+    double posX = sumOfPosX/(double)objectDescriptions.count;
+    double posY = sumOfPosY/(double)objectDescriptions.count;
+    self.viewArguments = [NSString stringWithFormat:@"%.3f %.3f",posX,posY];
 }
 
 + (NSDictionary *)attributesForPatchPort:(BbObject *)port
@@ -123,4 +149,70 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
 }
 
 
+- (id<BbObjectViewEditingDelegate>)editingDelegateForObjectView:(id<BbObjectView>)sender
+{
+    return (id<BbObjectViewEditingDelegate>)self;
+}
+
+- (NSString *)objectView:(id<BbObjectView>)sender suggestCompletionForUserText:(NSString *)userText
+{
+    return @"";
+}
+
+- (BOOL)canEdit
+{
+    return YES;
+}
+
+- (BOOL)canOpen
+{
+    return YES;
+}
+
+- (void)objectView:(id<BbObjectView>)sender userEnteredText:(NSString *)text
+{
+    self.displayText = text;
+}
+
+- (BOOL)objectView:(id<BbObjectView>)sender shouldEndEditingWithText:(NSString *)text
+{
+    return YES;
+}
+
+- (void)objectView:(id<BbObjectView>)sender didEndEditingWithUserText:(NSString *)userText
+{
+    self.displayText = [userText trimWhitespace];
+}
+
+- (NSSet *)childConnections
+{
+    NSSet *childConnections = [super childConnections];
+    
+    return childConnections;
+}
+
+- (NSString *)textDescription
+{
+    NSString *depthString = [self.parent depthStringForChild:self];
+    NSArray *viewArgs = [self.viewArguments getArguments];
+    NSString *myDescription = [NSString stringWithFormat:@"%@#N BbView %@ %@ BbAbstraction %@;",depthString,viewArgs.firstObject,viewArgs.lastObject,self.displayText];
+    NSString *myPatchDescription = [self.patch textDescription];
+    NSMutableArray *myComponents = [myPatchDescription componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]].mutableCopy;
+    NSMutableArray *myFormattedComponents = [NSMutableArray array];
+    
+    for (NSString *aComponent in myComponents) {
+        //if ([aComponent containsString:@"#S"]) {
+        //    [myFormattedComponents addObject:[depthString stringByAppendingFormat:@"\t%@",aComponent]];
+        //}else{
+            [myFormattedComponents addObject:[depthString stringByAppendingString:aComponent]];
+    //    }
+    }
+    
+    
+    [myFormattedComponents replaceObjectAtIndex:0 withObject:myDescription];
+    [myFormattedComponents removeObjectAtIndex:myFormattedComponents.count-1];
+    NSString *myDesc = [[myFormattedComponents componentsJoinedByString:@"\n"]stringByAppendingString:@"\n"];
+    
+    return myDesc;
+}
 @end

@@ -105,8 +105,6 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 
 - (void)removeChildEntityView:(id<BbEntityView>)entityView;
 
-- (NSArray *)positionConstraints;
-
 - (void)updateAppearance;
 
 @optional
@@ -131,17 +129,16 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 
 - (NSValue *)getValueForViewArgumentKey:(NSString *)key;
 
-- (void)moveToPoint:(NSValue *)pointValue;
-
-- (void)moveToPosition:(NSValue *)positionValue;
-
 - (BOOL)canEdit;
+
+- (BOOL)canOpen;
 
 @end
 
 #pragma mark - BbObjectViewEditingDelegate Protocol
 
 @protocol BbObjectViewEditingDelegate <NSObject>
+
 @optional
 
 - (NSString *)objectView:(id<BbObjectView>)sender suggestCompletionForUserText:(NSString *)userText;
@@ -153,6 +150,7 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 @end
 
 #pragma mark - BbPatchView Protocol
+
 @protocol BbPatchViewEditingDelegate;
 
 @protocol BbPatchView <NSObject,BbEntityView,BbObjectView>
@@ -181,6 +179,7 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 #pragma mark - BbPatchViewEditingDelegate
 
 @protocol BbPatchViewEditingDelegate <NSObject,BbObjectViewEditingDelegate>
+
 @optional
 
 - (void)patchView:(id<BbPatchView>)sender didChangeEditState:(BbPatchViewEditState)editState;
@@ -188,6 +187,8 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 - (void)patchView:(id<BbPatchView>)sender didEditValue:(NSValue *)value forViewArgumentKey:(NSString *)key;
 
 - (void)patchView:(id<BbPatchView>)sender didEdit:(id)editObject;
+
+- (void)patchView:(id<BbPatchView>)sender didOpenPatchView:(id<BbPatchView>)patchView;
 
 - (BOOL)patchViewCanUndo:(id<BbPatchView>)sender;
 

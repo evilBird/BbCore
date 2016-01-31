@@ -108,47 +108,17 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
     textField.translatesAutoresizingMaskIntoConstraints = NO;
     textField.delegate = self;
     textField.textAlignment = NSTextAlignmentCenter;
+    textField.font = [UIFont fontWithName:@"Courier" size:[UIFont systemFontSize]];
     [self addSubview:textField];
     [self addConstraint:[textField alignCenterXToSuperOffset:0.0]];
     [self addConstraint:[textField alignCenterYToSuperOffset:0.0]];
     self.textField = textField;
 }
 
-- (void)setupPositionConstraints
-{
-    /*
-    NSValue *myPos = self.position;
-    if ( nil == myPos ) {
-        myPos = [NSValue valueWithCGPoint:CGPointZero];
-    }
-    CGPoint offsets = [self position2Offset:myPos.CGPointValue];
-    self.centerXConstraint = [self alignCenterXToSuperOffset:offsets.x];
-    self.centerYConstraint = [self alignCenterYToSuperOffset:offsets.y];
-    CGPoint pos = myPos.CGPointValue;
-    NSLog(@"\nsetup position constraints with position = (%.3f, %.3f), offsets = (%.2f, %.2f)",pos.x,pos.y,offsets.x,offsets.y);
-     */
-
-}
-
 - (void)didMoveToSuperview
 {
     [super didMoveToSuperview];
     [self updateAppearance];
-}
-
-- (void)moveToPoint:(NSValue *)pointValue
-{
-    /*
-    if ( nil == self.superview ) {
-        return;
-    }
-    
-    CGPoint point = pointValue.CGPointValue;
-    CGPoint position = [self point2Position:point];
-    _position = [NSValue valueWithCGPoint:position];
-    //[self moveToPosition:[NSValue valueWithCGPoint:position]];
-    [self.entity objectView:self didChangeValue:[NSValue valueWithCGPoint:position] forViewArgumentKey:kViewArgumentKeyPosition];
-     */
 }
 
 - (void)positionDidChange:(NSValue *)position
@@ -158,40 +128,25 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
 
 }
 
-- (void)moveToPosition:(NSValue *)positionValue
-{
-    /*
-    if ( nil == self.superview || CGRectIsEmpty(self.superview.bounds)) {
-        return;
-    }
-    
-    _position = positionValue;
-    CGPoint position = [positionValue CGPointValue];
-    CGPoint offsets = [self position2Offset:position];
-    self.centerXConstraint.constant = offsets.x;
-    self.centerYConstraint.constant = offsets.y;
-    [self.superview layoutIfNeeded];
-     */
-}
-
 - (BOOL)canEdit
 {
     if ( self.isPlaceholder ) {
         return YES;
     }
     
-    return YES;
-}
-
-- (NSArray *)positionConstraints
-{
-    /*
-    if ( nil == self.centerXConstraint || nil == self.centerYConstraint ) {
-        [self setupPositionConstraints];
+    if ( self.entity ) {
+        return [self.entity canEdit];
     }
     
-    return @[self.centerXConstraint,self.centerYConstraint];
-     */
+    return NO;
+}
+
+- (BOOL)canOpen
+{
+    if ( self.entity ) {
+        return [self.entity canOpen];
+    }
+    return NO;
 }
 
 - (void)setEditing:(BOOL)editing
@@ -221,15 +176,6 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
     }
 }
 
-- (void)setPlaceholder:(BOOL)placeholder
-{
-    BOOL wasPlaceholder = _placeholder;
-    if ( _placeholder != wasPlaceholder ) {
-        [self placeholderStatusDidChange:placeholder];
-    }
-}
-
-
 - (void)editingStateDidChange:(BOOL)editing
 {
     if (!editing) {
@@ -243,16 +189,6 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
     }else{
         self.editingDelegate = [self.entity editingDelegateForObjectView:self];
         [(UITextField *)self.textField becomeFirstResponder];
-    }
-}
-
-- (void)placeholderStatusDidChange:(BOOL)placeholder
-{
-    if ( !placeholder ) {
-        //[(UITextField *)self.textField setPlaceholder:nil];
-        //[(UITextField *)self.textField setAttributedPlaceholder:nil];
-    }else{
-        [(UITextField *)self.textField setText:@""];
     }
 }
 
@@ -338,13 +274,16 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
     }
     
     NSDictionary *textAttributes = nil;
-    
+    NSMutableDictionary *mutableTextAttributes = nil;
+    UIFont *textFieldFont = textField.font;
     if ( textField.isEditing ) {
-        textAttributes = textField.typingAttributes;
+        textAttributes = mutableTextAttributes;
     }else{
-        textAttributes = textField.defaultTextAttributes;
+        mutableTextAttributes = textField.defaultTextAttributes.mutableCopy;
     }
     
+    [mutableTextAttributes setObject:textFieldFont forKey:NSFontAttributeName];
+    textAttributes = textField.defaultTextAttributes;
     return [text sizeWithAttributes:textAttributes];
 }
 
@@ -459,10 +398,6 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
     UITextField *textField = sender;
     self.titleText = textField.text;
     NSString *suggestedCompletion = [self.editingDelegate objectView:self suggestCompletionForUserText:textField.text];
-    if ( nil != suggestedCompletion ) {
-        //textField.placeholder = suggestedCompletion;
-    }
-    //NSLog(@"suggested completion: %@",suggestedCompletion);
     [self updateAppearance];
 }
 

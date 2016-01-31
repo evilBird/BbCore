@@ -22,6 +22,9 @@
 @property (nonatomic,strong)                NSMutableArray                                      *objects;
 @property (nonatomic,strong)                BbSymbolTable<BbTextCompletionDataSource>           *symbolTable;
 
+- (void)loadBang;
+- (void)closeBang;
+
 @end
 
 @interface BbPatch (BbEntityProtocol) <BbEntity>

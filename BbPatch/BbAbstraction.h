@@ -12,4 +12,7 @@
 
 + (NSString *)emptyAbstractionDescription;
 
+- (id<BbPatchView>)open;
+- (void)close;
+
 @end

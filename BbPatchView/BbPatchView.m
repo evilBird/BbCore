@@ -11,7 +11,7 @@
 #import "BbCoreProtocols.h"
 #import "UIView+BbPatch.h"
 #import "BbPlaceholderView.h"
-
+#import "BbRuntime.h"
 static NSTimeInterval       kLongPressMinDuration = 0.5;
 static CGFloat              kMaxMovement          = 5.0;
 
@@ -79,7 +79,10 @@ static CGFloat              kMaxMovement          = 5.0;
     CGFloat height = frame.size.height;
     CGPoint contentOffset = self.scrollView.contentOffset;
     contentOffset.y += height;
-    self.keyboardOffset = height;
+    if (contentOffset.y > self.bounds.size.height) {
+        contentOffset.y = self.bounds.size.height;
+    }
+    
     [self.scrollView setContentOffset:contentOffset animated:YES];
 
 }
@@ -91,6 +94,9 @@ static CGFloat              kMaxMovement          = 5.0;
     CGFloat height = frame.size.height;
     CGPoint contentOffset = self.scrollView.contentOffset;
     contentOffset.y -= height;
+    if ( contentOffset.y < 0 ) {
+        contentOffset.y = 0;
+    }
     [self.scrollView setContentOffset:contentOffset animated:YES];
 }
 
@@ -278,6 +284,17 @@ static CGFloat              kMaxMovement          = 5.0;
             if ( self.editState > BbPatchViewEditState_Default ) {
                 gesture.currentView.selected = !(gesture.currentView.isSelected);
                 [self updateEditState];
+            }else{
+                BOOL repeat = (gesture.repeatCount > 0);
+                BOOL movementOK = (gesture.movement < kMaxMovement);
+                BOOL canOpen = ([gesture.currentView canOpen]);
+                if (repeat && movementOK && canOpen) {
+                    id <BbObject>  object = (id<BbObject>)[gesture.currentView entity];
+                    id <BbPatchView> patchView = [NSInvocation doInstanceMethod:object selector:@"open" arguments:nil];
+                    if (patchView) {
+                        [self.editingDelegate patchView:self didOpenPatchView:patchView];
+                    }
+                }
             }
         }
             break;

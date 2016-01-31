@@ -25,10 +25,10 @@
         BbOutlet *outlet = [[BbOutlet alloc]init];
         [self addChildEntity:outlet];
     }
-    
+    __block id hotValue;
     NSEnumerator *outletEnumerator = self.outlets.reverseObjectEnumerator;
-    NSEnumerator *argumentEnumerator = arguments.reverseObjectEnumerator;
     [hotInlet setOutputBlock:^(id value){
+        hotValue = value;
         NSUInteger count = arguments.count;
         NSEnumerator *argEnumerator = arguments.reverseObjectEnumerator;
         while ( count -- ) {
@@ -37,7 +37,7 @@
             if ( [arg isEqualToString:@"b"] ) {
                 outlet.inputElement = [BbBang bang];
             }else{
-                outlet.inputElement = value;
+                outlet.inputElement = hotValue;
             }
         }
     }];

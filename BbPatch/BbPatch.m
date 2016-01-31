@@ -23,6 +23,23 @@
 
 - (void)setupWithArguments:(id)arguments {}
 
+- (void)loadBang
+{
+    if (!self.parent) {
+        [[NSNotificationCenter defaultCenter]postNotificationName:kLoadBangNotification object:nil];
+    }
+}
+
+- (void)closeBang
+{
+    NSString *notificationName = [NSString stringWithFormat:@"%@-%@",self.uniqueID,kCloseBangNotification];
+    [[NSNotificationCenter defaultCenter]postNotificationName:notificationName object:nil];
+    
+    if ( !self.parent ) {
+        [[NSNotificationCenter defaultCenter]postNotificationName:kCloseBangNotification object:nil];
+    }
+}
+
 + (NSString *)viewClass
 {
     return @"BbPatchView";
@@ -30,6 +47,7 @@
 
 - (void)dealloc
 {
+    [self closeBang];
     [self removeAllEntityObservers];
     
     for (id<BbEntity> anInlet in self.inlets.mutableCopy ) {
@@ -193,8 +211,8 @@
         depthString = @"";
     }
     
-    if ( nil == self.selectors ) {
-        [selectorText appendFormat:@"%@#S loadChildViews;\n",depthString];
+    if ( !self.selectors.count ) {
+        [selectorText appendFormat:@"%@#S loadBang;\n",depthString];
     }else{
         for (NSString *aSelectorDescription in self.selectors ) {
             [selectorText appendFormat:@"%@#S %@;\n",depthString,aSelectorDescription];
@@ -387,10 +405,14 @@
 
 - (void)abstractCopiedWithText:(NSString *)text
 {
-    NSString *abstractionDescription = [BbAbstraction emptyAbstractionDescription];
-    NSString *description = [NSString stringWithFormat:@"%@%@",abstractionDescription,text];
-    BbAbstractionDescription *desc = [BbAbstractionDescription new];
-    desc.objectClass = @"BbAbstraction";
+    NSString *emptyDescription = [BbAbstraction emptyAbstractionDescription];
+    NSString *args = [NSString stringWithFormat:@"%@%@",emptyDescription,text];
+    BbAbstraction *abstraction = [[BbAbstraction alloc]initWithArguments:args];
+    [self addChildEntity:abstraction];
+    id <BbObjectView> view = [abstraction loadView];
+    [self.view cutSelected];
+    [self.view addChildEntityView:view];
+    self.view.editState = BbPatchViewEditState_Editing;
 }
 
 - (void)doSelectors
@@ -490,7 +512,6 @@
     objectView.editingDelegate = self;
     objectView.editing = YES;
     self.view.editingObjectView = objectView;
-    [objectView moveToPosition:objectView.position];
 }
 
 - (void)patchView:(id<BbPatchView>)sender didAddChildEntityView:(id<BbObjectView>)objectView
@@ -554,7 +575,6 @@
         [self addChildEntity:newObject];
         id <BbObjectView> newView = [newObject loadView];
         [self.view addChildEntityView:newView];
-        [newView moveToPosition:sender.position];
         [self.view removeChildEntityView:sender];
         newView.placeholder = NO;
         [self.view updateAppearance];

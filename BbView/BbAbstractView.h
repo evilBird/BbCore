@@ -38,17 +38,13 @@
 
 - (void)removeChildEntityView:(id<BbEntityView>)entityView;
 
-- (void)moveToPoint:(NSValue *)pointValue;
-
-- (void)moveToPosition:(NSValue *)positionValue;
-
 - (void)updateAppearance;
-
-- (NSArray *)positionConstraints;
 
 - (void)positionDidChange:(NSValue *)position;
 
 - (BOOL)canEdit;
+
+- (BOOL)canOpen;
 
 - (void)commonInit;
 

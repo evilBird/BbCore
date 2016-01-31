@@ -28,8 +28,7 @@
     [clientInlet setOutputBlock:^( id value ){
         if ( [value isKindOfClass:[NSArray class]] && [(NSArray*)value count] == 3 ) {
             NSString *selector = [(NSArray*)value objectAtIndex:0];
-            if ( [[selector lowercaseString] isEqualToString:@"setClient:property:"] ) {
-        
+            if ( [[selector lowercaseString] isEqualToString:@"setclient:property:"] ) {
                 id client = [(NSArray*)value objectAtIndex:1];
                 NSString *property = [(NSArray*)value objectAtIndex:2];
                 [weakself setClient:client property:property];
@@ -56,16 +55,16 @@
 
 - (void)setupWithArguments:(id)arguments
 {
+    self.name = @"proxy";
     if ( nil == arguments ) {
         self.displayText = @"proxy";
     }else{
-        self.displayText = arguments;
+        self.displayText = [NSString stringWithFormat:@"%@ %@",self.name,arguments];
     }
 }
 
 - (void)setClient:(id)client property:(NSString *)property
 {
-    NSAssert(nil!=client, @"ERROR: CLIENT INSTANCE IS NIL");
     if ( nil == property ) {
         return;
     }
@@ -89,36 +88,10 @@
     self.delegateInstance  = [[BbRuntimeProtocolAdopter alloc]initWithClientClass:NSStringFromClass([client class])
                                                                    clientProperty:property
                                                                             proxy:self];
-    [client setObject:self forKey:property];
-}
-
-- (void)setupProxyForProperty:(NSString *)property withClient:(id)client
-{
-    NSAssert(nil!=client, @"ERROR: CLIENT INSTANCE IS NIL");
-    if ( nil == property ) {
-        return;
-    }
     
-    if ( nil != self.clientTable && [self.clientTable containsObject:client] ) {
-        return;
-    }
-    
-    self.displayText = property;
-    self.creationArguments = property;
-    [self.view setTitleText:self.displayText];
-    
-    self.delegateInstance = nil;
-    self.returnValueTable = nil;
-    self.clientTable = nil;
-    
-    
-    self.clientTable = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
-    [self.clientTable addObject:client];
-    self.returnValueTable = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsCopyIn valueOptions:NSPointerFunctionsCopyIn];
-    self.delegateInstance  = [[BbRuntimeProtocolAdopter alloc]initWithClientClass:NSStringFromClass([client class])
-                                                                   clientProperty:property
-                                                                            proxy:self];
-    [client setObject:self forKey:property];
+    NSString *selectorName = [@"set" stringByAppendingString:[[property capitalizedString]stringByAppendingString:@":"]];
+    [NSInvocation doInstanceMethod:client selector:selectorName arguments:@[_delegateInstance]];
+    //[client setValue:self forKey:property];
 }
 
 - (id)protocolAdopter:(id)sender
@@ -137,6 +110,10 @@
     }
     
     [self.outlets.firstObject setInputElement:[NSArray arrayWithArray:toSend]];
+    if ([returnType isEqualToString:@"v"]) {
+        return nil;
+    }
+    
     NSArray *returnValueKeys = [self.returnValueTable dictionaryRepresentation].allKeys;
     NSSet *returnValueSet = [NSSet setWithArray:returnValueKeys];
     

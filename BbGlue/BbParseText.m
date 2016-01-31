@@ -223,7 +223,7 @@ static NSString     *kSelectorToken     =       @"S";
                     NSString *objArgs = [substring2 stringByReplacingCharactersInRange:range withString:@""];
                     NSString *args = [objArgs trimWhitespace];
                     BbAbstractionDescription *desc = [BbAbstractionDescription abstractionDescriptionWithArgs:args viewArgs:viewArgs];
-                    [patchDescription.childObjectDescriptions addObject:desc];
+                    [patchDescription addChildPatchDescription:(BbPatchDescription*)desc];
                 }else{
                     BbPatchDescription *desc = [BbParseText parseText:substring2];
                     [patchDescription addChildPatchDescription:desc];

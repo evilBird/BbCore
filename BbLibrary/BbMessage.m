@@ -169,6 +169,11 @@
     return @"";
 }
 
+- (BOOL)canEdit
+{
+    return YES;
+}
+
 - (void)objectView:(id<BbObjectView>)sender userEnteredText:(NSString *)text
 {
     self.displayText = text;
@@ -183,10 +188,9 @@
 
 - (void)objectView:(id<BbObjectView>)sender didEndEditingWithUserText:(NSString *)userText
 {
-    self.creationArguments = userText;
-    self.displayText = userText;
-    [self updateDefaultOutputAndPlaceholderMapWithText:userText];
-    
+    self.creationArguments = [userText trimWhitespace];
+    self.displayText = self.creationArguments;
+    [self updateDefaultOutputAndPlaceholderMapWithText:self.creationArguments];
 }
 
 @end

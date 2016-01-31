@@ -6,11 +6,9 @@
 //  Copyright (c) 2014 birdSound LLC. All rights reserved.
 //
 
-#import "BbObject+Compatibility.h"
-static NSString *kLoadBangNotification = @"com.bb.LoadBang";
+#import "BbObject.h"
 
 @interface BbLoadBang : BbObject
 
-- (void)parentPatchFinishedLoading;
 
 @end

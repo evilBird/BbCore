@@ -14,6 +14,11 @@
 #import "BbCoreProtocols.h"
 #import "BbCoreUtils.h"
 
+static   NSString    *kLoadBangNotification          =       @"com.birdSound.bb.core.loadBang";
+static   NSString    *kCloseBangNotification         =       @"com.birdSound.bb.core.closeBang";
+static   NSString    *kBbSendObjectNotification      =       @"com.birdSound.bb.core.send";
+static   NSString    *kBbReceiveObjectNotification   =       @"com.birdSound.bb.core.receive";
+
 @class BbObjectDescription;
 @class BbConnectionDescription;
 
@@ -48,12 +53,13 @@
 
 + (NSString *)symbolAlias;
 
-//+ (BbObject *)objectWithDescription:(BbObjectDescription *)description;
 + (BbObject *)objectWithDescription:(BbObjectDescription *)description dataSource:(id<BbObjectDataSource>)dataSource;
 
 @end
 
 @interface BbObject (BbEntityProtocol) <BbEntity>
+
+- (NSArray *)getArgumentsFromText:(NSString *)text;
 
 - (BOOL)addEntityObserver:(id<BbEntity>)entity;
 
@@ -90,6 +96,10 @@
 @end
 
 @interface BbObject (BbObjectProtocol) <BbObject>
+
+- (BOOL)canEdit;
+
+- (BOOL)canOpen;
 
 - (id<BbObjectView>)loadView;
 

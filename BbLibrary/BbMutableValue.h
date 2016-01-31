@@ -10,6 +10,5 @@
 
 @interface BbMutableValue : BbObject
 
-@property (nonatomic,strong)    BbOutlet           *memberOutlet;
 
 @end

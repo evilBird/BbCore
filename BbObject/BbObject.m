@@ -24,10 +24,10 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 {
     self = [super init];
     if ( self ) {
-        _creationArguments = arguments;
+        _creationArguments = [arguments trimWhitespace];
         [self commonInit];
         [self setupPorts];
-        [self setupWithArguments:arguments];
+        [self setupWithArguments:_creationArguments];
     }
     
     return self;
@@ -400,6 +400,42 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     return [NSSet setWithSet:childConnections];
 }
 
+- (NSArray *)getArgumentsFromText:(NSString *)text
+{
+    NSString *parentArgText = [self.parent creationArguments];
+    NSMutableArray *myArgs = [text getArguments].mutableCopy;
+    
+    if ( !myArgs || ![text containsString:@"$"] || !parentArgText ) {
+        return myArgs;
+    }
+    
+    NSMutableArray *parentArgs = [self.parent getArgumentsFromText:parentArgText].mutableCopy;
+    NSCharacterSet *whiteSpaceCharSet = [NSCharacterSet whitespaceCharacterSet];
+    NSArray *textComponents = [text componentsSeparatedByCharactersInSet:whiteSpaceCharSet];
+    NSCharacterSet *integerCharSet = [NSCharacterSet characterSetWithCharactersInString:@"0123456789"];
+    NSCharacterSet *nonIntegerCharSet = [integerCharSet invertedSet];
+    NSUInteger myIndex = 0;
+    
+    for (NSString *aComponent in textComponents.mutableCopy ) {
+        NSString *trimmedComponent = [aComponent stringByTrimmingCharactersInSet:whiteSpaceCharSet];
+        if ( [trimmedComponent hasPrefix:@"$"] && trimmedComponent.length > 1 ) {
+            NSString *digits = [trimmedComponent substringFromIndex:1];
+            if ( [digits rangeOfCharacterFromSet:nonIntegerCharSet].length == 0) {
+                NSUInteger theirIndex = [digits integerValue];
+                if ( theirIndex > 0 ) {
+                    theirIndex--;
+                    if ( theirIndex < parentArgs.count && myIndex < myArgs.count ) {
+                        [myArgs replaceObjectAtIndex:myIndex withObject:parentArgs[theirIndex]];
+                    }
+                }
+            }
+        }
+        myIndex++;
+    }
+    
+    return [NSArray arrayWithArray:myArgs];
+}
+
 @end
 
 #pragma mark - BbObject (BbObjectProtocol)
@@ -497,6 +533,16 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 - (BOOL)objectViewShouldBeginEditing:(id<BbObjectView>)sender
 {
     return YES;
+}
+
+- (BOOL)canEdit
+{
+    return NO;
+}
+
+- (BOOL)canOpen
+{
+    return NO;
 }
 
 - (id<BbObjectViewEditingDelegate>)editingDelegateForObjectView:(id<BbObjectView>)sender

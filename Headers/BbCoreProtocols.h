@@ -17,7 +17,9 @@
 @protocol BbEntity <NSObject>
 
 @property (nonatomic,strong)        NSString                    *uniqueID;
+
 @property (nonatomic,strong)        NSHashTable                 *entityObservers;
+
 @property (nonatomic,weak)          id<BbEntity>                parent;
 
 - (BOOL)addEntityObserver:(id<BbEntity>)entity;
@@ -60,10 +62,13 @@
 
 - (NSString *)textDescriptionToken;
 
+- (NSString *)creationArguments;
+
+- (NSArray *)getArgumentsFromText:(NSString *)text;
+
 - (NSString *)depthStringForChild:(id<BbEntity>)entity;
 
 - (NSSet *)childConnections;
-
 
 @end
 
@@ -72,16 +77,21 @@
 @protocol BbConnection <NSObject,BbEntity>
 
 @property (nonatomic,weak)                      id<BbEntity>                                                        sender;
+
 @property (nonatomic,weak)                      id<BbEntity>                                                        receiver;
 
 @property (nonatomic,getter=isConnected)        BOOL                                                                connected;
+
 @property (nonatomic,strong)                    id<BbConnectionPath>                                                path;
 
 - (BOOL)connect;
+
 - (BOOL)disconnect;
 
 - (id<BbConnectionPath>)loadPath;
+
 - (void)unloadPath;
+
 - (void)updatePath;
 
 @end
@@ -91,18 +101,26 @@
 @protocol BbObject <NSObject,BbEntity>
 
 @property (nonatomic,strong)    id<BbEntityView,BbObjectView>           view;
+
 @property (nonatomic,weak)      id<BbEntity,BbObject,BbPatch>           parent;
 
 @property (nonatomic,strong)    NSString                                *creationArguments;
+
 @property (nonatomic,strong)    NSString                                *viewArguments;
 
 @property (nonatomic,strong)    NSMutableArray                          *inlets;
+
 @property (nonatomic,strong)    NSMutableArray                          *outlets;
 
 @property (nonatomic,strong)    NSString                                *displayText;
+
 @property (nonatomic,strong)    NSString                                *userText;
 
 + (NSString *)symbolAlias;
+
+- (BOOL)canOpen;
+
+- (BOOL)canEdit;
 
 - (id<BbObjectView>)loadView;
 
@@ -134,6 +152,7 @@
 @property (nonatomic,strong)    id<BbEntityView,BbObjectView,BbPatchView>       view;
 
 @property (nonatomic,strong)    NSMutableArray                                  *objects;
+
 @property (nonatomic,strong)    NSMutableArray                                  *selectors;
 
 - (id<BbPatchView>)loadView;
@@ -160,6 +179,7 @@
 @protocol BbObjectDataSource <NSObject>
 
 - (NSString *)object:(id<BbObject>)object textForPatchName:(NSString *)patchName;
+
 - (id)canvasForObject:(id<BbObject>)object;
 
 @end
