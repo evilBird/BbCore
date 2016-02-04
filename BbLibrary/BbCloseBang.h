@@ -10,4 +10,6 @@
 
 @interface BbCloseBang : BbObject
 
+- (void)closeBang;
+
 @end

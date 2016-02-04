@@ -12,6 +12,9 @@
 #import "UIView+Layout.h"
 #import "UIView+BbPatch.h"
 
+NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2);
+
+
 @interface BbAbstractView : UIView <BbEntityView,BbObjectView,UITextFieldDelegate>
 
 @property (nonatomic,weak)                      id<BbEntity,BbObject>           entity;

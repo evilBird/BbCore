@@ -193,25 +193,13 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
 
 - (NSString *)textDescription
 {
-    NSString *depthString = [self.parent depthStringForChild:self];
     NSArray *viewArgs = [self.viewArguments getArguments];
-    NSString *myDescription = [NSString stringWithFormat:@"%@#N BbView %@ %@ BbAbstraction %@;",depthString,viewArgs.firstObject,viewArgs.lastObject,self.displayText];
+    NSString *myDescription = [NSString stringWithFormat:@"#N BbView %@ %@ BbAbstraction %@;",viewArgs.firstObject,viewArgs.lastObject,self.displayText];
+    self.patch.parent = self.parent;
     NSString *myPatchDescription = [self.patch textDescription];
     NSMutableArray *myComponents = [myPatchDescription componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]].mutableCopy;
-    NSMutableArray *myFormattedComponents = [NSMutableArray array];
-    
-    for (NSString *aComponent in myComponents) {
-        //if ([aComponent containsString:@"#S"]) {
-        //    [myFormattedComponents addObject:[depthString stringByAppendingFormat:@"\t%@",aComponent]];
-        //}else{
-            [myFormattedComponents addObject:[depthString stringByAppendingString:aComponent]];
-    //    }
-    }
-    
-    
-    [myFormattedComponents replaceObjectAtIndex:0 withObject:myDescription];
-    [myFormattedComponents removeObjectAtIndex:myFormattedComponents.count-1];
-    NSString *myDesc = [[myFormattedComponents componentsJoinedByString:@"\n"]stringByAppendingString:@"\n"];
+    [myComponents replaceObjectAtIndex:0 withObject:myDescription];
+    NSString *myDesc = [myComponents componentsJoinedByString:@"\n"];//stringByAppendingString:@"\n"];
     
     return myDesc;
 }

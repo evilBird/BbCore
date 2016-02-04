@@ -16,6 +16,8 @@
 
 @implementation BbReceive
 
+@synthesize parent = parent_;
+
 - (void)setupPorts
 {
     BbOutlet *mainOutlet = [[BbOutlet alloc]init];
@@ -28,41 +30,28 @@
     [[self.outlets firstObject]setInputElement:value];
 }
 
-- (void)commonInit
+- (void)setParent:(id<BbEntity,BbObject>)parent
 {
-    [super commonInit];
-    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(loadBang) name:kLoadBangNotification object:nil];
+    parent_ = parent;
+    [self subscribeToNotificationsWithParentID:[parent uniqueID]];
 }
 
-- (void)loadBang
+- (void)subscribeToNotificationsWithParentID:(NSString *)parentID
 {
-    [[NSNotificationCenter defaultCenter]removeObserver:self name:kLoadBangNotification object:nil];
-    
-    if (!self.parent) {
-        return;
+    NSString *parentIdProxy = @"$0";
+    NSString *notificationName = self.creationArguments;
+    NSRange proxyRange = [notificationName rangeOfString:parentIdProxy];
+    if ( [notificationName hasPrefix:parentIdProxy] ) {
+        NSString *textCopy = notificationName.copy;
+        notificationName = [textCopy stringByReplacingCharactersInRange:proxyRange withString:parentID];
     }
     
-    NSString *parentID = [self.parent uniqueID];
-    NSString *closeBangNotificationName = [NSString stringWithFormat:@"%@-%@",parentID,kCloseBangNotification];
-    
-    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(closeBang) name:closeBangNotificationName object:nil];
-    if (!self.myNotificationName) {
-        NSString *text = self.creationArguments;
-        NSRange parentIdRange = [(NSString *)text rangeOfString:@"$0"];
-        self.myNotificationName = [text stringByReplacingCharactersInRange:parentIdRange withString:parentID];
-        [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(receiveNotification:) name:self.myNotificationName object:nil];
-    }
+    self.myNotificationName = notificationName;
+    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(receiveNotification:) name:self.myNotificationName object:nil];
 }
 
-- (void)closeBang
+- (void)cleanup
 {
-    if (!self.parent) {
-        return;
-    }
-    NSString *parentID = [self.parent uniqueID];
-    NSString *closeBangNotificationName = [NSString stringWithFormat:@"%@-%@",parentID,kCloseBangNotification];
-    [[NSNotificationCenter defaultCenter]removeObserver:self name:closeBangNotificationName object:nil];
-    
     if (self.myNotificationName) {
         [[NSNotificationCenter defaultCenter]removeObserver:self name:self.myNotificationName object:nil];
     }
@@ -76,15 +65,9 @@
 - (void)setupWithArguments:(id)arguments
 {
     self.name = @"r";
-    NSString *text = arguments;
-    
-    if (![text hasPrefix:@"$0"]) {
-        self.myNotificationName = nil;
-    }else{
-        self.myNotificationName = text;
-    }
-    
     self.displayText = [NSString stringWithFormat:@"%@ %@",self.name,arguments];
 }
+
+
 
 @end

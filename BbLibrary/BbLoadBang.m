@@ -22,12 +22,6 @@
     self.displayText = self.name;
 }
 
-- (void)receiveNotification:(NSNotification *)notification
-{
-    id value = notification.object;
-    [[self.outlets firstObject]setInputElement:value];
-}
-
 - (void)loadBang
 {
     [[self.outlets firstObject]setInputElement:[BbBang bang]];
@@ -37,4 +31,6 @@
 {
     return @"loadbang";
 }
+
+
 @end

@@ -10,5 +10,6 @@
 
 @interface BbLoadBang : BbObject
 
+- (void)loadBang;
 
 @end

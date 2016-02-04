@@ -19,14 +19,17 @@
     __block BbOutlet *outlet = [[BbOutlet alloc]init];
     [self addChildEntity:outlet];
     
+    __weak BbBangObject *weakself = self;
     [hotInlet setOutputBlock:^(id value){
+        [weakself.view setHighlighted:YES];
         outlet.inputElement = [BbBang bang];
     }];
 }
 
 - (void)setupWithArguments:(id)arguments
 {
-    self.displayText = nil;
+    self.displayText = @"";
+    self.name = @"bang";
 }
 
 + (NSString *)symbolAlias
@@ -37,6 +40,21 @@
 + (NSString *)viewClass
 {
     return @"BbBangView";
+}
+
+- (void)sendActionsForView:(id<BbObjectView>)sender
+{
+    [self.inlets[0] setInputElement:[BbBang bang]];
+}
+
+- (BOOL)canEdit
+{
+    return NO;
+}
+
+- (BOOL)canOpen
+{
+    return NO;
 }
 
 @end

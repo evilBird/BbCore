@@ -49,6 +49,8 @@ static   NSString    *kBbReceiveObjectNotification   =       @"com.birdSound.bb.
 
 - (void)setupWithArguments:(id)arguments;
 
+- (void)cleanup;
+
 + (NSString *)viewClass;
 
 + (NSString *)symbolAlias;

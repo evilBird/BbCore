@@ -20,6 +20,7 @@
 + (BbPatch *)objectWithDescription:(BbPatchDescription *)description dataSource:(id<BbObjectDataSource>)dataSource
 {
     BbPatch *patch = (BbPatch *)[NSInvocation doClassMethod:description.objectClass selector:@"alloc" arguments:nil];
+    [NSInvocation doInstanceMethod:patch selector:@"initWithArguments:" arguments:nil];
     patch.dataSource = dataSource;
     patch.viewArguments = description.viewArguments;
     patch.selectors = description.selectorDescriptions;
@@ -40,6 +41,7 @@
         }
     }
     
+    [patch doSelectors];
     return patch;
 }
 

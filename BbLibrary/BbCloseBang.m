@@ -10,40 +10,26 @@
 
 @implementation BbCloseBang
 
-- (void)receiveNotification:(NSNotification *)notification
+- (void)setupPorts
 {
-    id value = notification.object;
-    [[self.outlets firstObject]setInputElement:value];
+    BbOutlet *mainOutlet = [[BbOutlet alloc]init];
+    [self addChildEntity:mainOutlet];
 }
 
-- (void)commonInit
+- (void)setupWithArguments:(id)arguments
 {
-    [super commonInit];
-    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(loadBang) name:kLoadBangNotification object:nil];
+    self.name = @"CloseBang";
+    self.displayText = self.name;
 }
 
-- (void)loadBang
++ (NSString *)symbolAlias
 {
-    [[NSNotificationCenter defaultCenter]removeObserver:self name:kLoadBangNotification object:nil];
-    
-    if (!self.parent) {
-        return;
-    }
-    
-    NSString *parentID = [self.parent uniqueID];
-    NSString *closeBangNotificationName = [NSString stringWithFormat:@"%@-%@",parentID,kCloseBangNotification];
-    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(receiveNotification:) name:closeBangNotificationName object:nil];
+    return @"closebang";
 }
 
 - (void)closeBang
 {
-    if (!self.parent) {
-        return;
-    }
-    
-    NSString *parentID = [self.parent uniqueID];
-    NSString *closeBangNotificationName = [NSString stringWithFormat:@"%@-%@",parentID,kCloseBangNotification];
-    [[NSNotificationCenter defaultCenter]removeObserver:self name:closeBangNotificationName object:nil];
+    [self.outlets.firstObject setInputElement:[BbBang bang]];
 }
 
 @end

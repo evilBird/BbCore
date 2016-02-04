@@ -113,7 +113,10 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
     
     _outlets = nil;
     
+    [self cleanup];
 }
+
+- (void)cleanup {}
 
 @end
 

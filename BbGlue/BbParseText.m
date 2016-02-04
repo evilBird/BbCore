@@ -196,7 +196,7 @@ static NSString     *kSelectorToken     =       @"S";
     NSString *myObjectArgs = [BbParseText objectArgumentsFromString:myText];
     BbPatchDescription *patchDescription = [BbPatchDescription patchDescriptionWithArgs:myObjectArgs viewArgs:myViewArgs];
     patchDescription.depth = self.myDepth;
-    
+    //NSUInteger lineNumber
     while ( self.myTextLocation < self.myText.length ) {
         NSString *myText = [self.myText substringFromIndex:self.myTextLocation];
         NSArray *components = [myText componentsSeparatedByString:self.mySeparator];
@@ -213,23 +213,52 @@ static NSString     *kSelectorToken     =       @"S";
             numCharsToAdvance = aComponent.length;
             
         }else if ( [BbParseText isParent:aComponent] ){
+            
+            if ( [BbParseText isAbstraction:aComponent]) {
+                
+                NSString *remainingText = [self.myText substringFromIndex:self.myTextLocation];
+                NSArray *remainingComponents = [remainingText componentsSeparatedByString:self.mySeparator];
+                NSString *myComponent = nil;
+                NSUInteger myDepth = 0;
+                NSRange myRange;
+                myRange.location = self.myTextLocation;
+                myRange.length = 0;
+                NSUInteger spacerLength = self.mySeparator.length;
+
+                for (NSUInteger i = 0; i < remainingComponents.count; i++) {
+                    NSString *component = remainingComponents[i];
+                    NSUInteger componentLength = component.length+spacerLength;
+                    NSUInteger componentDepth = [BbParseText countOccurencesOfSubstring:@"\t" beforeSubstring:@"#" inString:component];
+                    myRange.length+=componentLength;
+                    numCharsToAdvance+=componentLength;
+                    
+                    if (i == 0) {
+                        myComponent = component;
+                        myDepth = componentDepth;
+                    }else{
+                        if (componentDepth == myDepth) {
+                            break;
+                        }
+                    }
+                }
+                
+                NSString *abstractionText = [self.myText substringWithRange:myRange];
+                NSString *viewArgs = [BbParseText childViewArgumentsFromString:myComponent];
+                BbAbstractionDescription *desc = [BbAbstractionDescription abstractionDescriptionWithArgs:abstractionText viewArgs:viewArgs];
+                [patchDescription addChildPatchDescription:(BbPatchDescription*)desc];
+                
+            }else{
+                
                 NSUInteger depth = [BbParseText countOccurencesOfSubstring:@"\t" beforeSubstring:@"#" inString:aComponent];
                 NSUInteger length = [BbParseText lengthOfDepth:depth inString:myText separator:self.mySeparator];
                 NSString *substring2 = [myText substringToIndex:length];
-                if ( [BbParseText isAbstraction:aComponent]) {
-                    NSString *viewArgs = [BbParseText childViewArgumentsFromString:aComponent];
-                    NSRange range = [substring2 rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet]];
-                    range.location++;
-                    NSString *objArgs = [substring2 stringByReplacingCharactersInRange:range withString:@""];
-                    NSString *args = [objArgs trimWhitespace];
-                    BbAbstractionDescription *desc = [BbAbstractionDescription abstractionDescriptionWithArgs:args viewArgs:viewArgs];
-                    [patchDescription addChildPatchDescription:(BbPatchDescription*)desc];
-                }else{
-                    BbPatchDescription *desc = [BbParseText parseText:substring2];
-                    [patchDescription addChildPatchDescription:desc];
-                }
+                BbPatchDescription *desc = [BbParseText parseText:substring2];
+                [patchDescription addChildPatchDescription:desc];
                 numCharsToAdvance = length;
-            }else if ( [BbParseText isSelector:aComponent] ){
+
+            }
+            //numCharsToAdvance = length;
+        }else if ( [BbParseText isSelector:aComponent] ){
             NSString *selectorArgs = [BbParseText selectorFromString:aComponent];
             [patchDescription addSelectorDescription:selectorArgs];
             numCharsToAdvance = aComponent.length;

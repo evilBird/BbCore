@@ -45,4 +45,12 @@
     self.displayText = @"canvas";
 }
 
+- (void)cleanup
+{
+    UIView *canvas = [self.dataSource canvasForObject:self];
+    for (UIView *aSubview in canvas.subviews) {
+        [aSubview removeFromSuperview];
+    }
+}
+
 @end

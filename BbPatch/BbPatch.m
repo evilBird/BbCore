@@ -9,6 +9,8 @@
 #import "BbPatch.h"
 #import "BbParseText.h"
 #import "BbAbstraction.h"
+#import "BbLoadBang.h"
+#import "BbCloseBang.h"
 
 @implementation BbPatch
 
@@ -23,21 +25,46 @@
 
 - (void)setupWithArguments:(id)arguments {}
 
+- (void)doSelectors
+{
+    [self doPendingSelectors:self.selectors];
+}
+
+- (void)doPendingSelectors:(NSArray *)selectors
+{
+    if ( nil == selectors || selectors.count == 0 ) {
+        return;
+    }
+    NSMutableArray *selectorsCopy = selectors.mutableCopy;
+    NSString *mySelector = selectorsCopy.firstObject;
+    if ( [self respondsToSelector:NSSelectorFromString(mySelector)]) {
+        [self performSelector:NSSelectorFromString(mySelector)];
+    }
+    
+    [selectorsCopy removeObjectAtIndex:0];
+    [self doPendingSelectors:selectorsCopy];
+}
+
+
 - (void)loadBang
 {
-    if (!self.parent) {
-        [[NSNotificationCenter defaultCenter]postNotificationName:kLoadBangNotification object:nil];
+    if (self.loadBangObjects.allObjects.count) {
+        for (BbLoadBang *loadBang in self.loadBangObjects.allObjects) {
+            [loadBang loadBang];
+        }
     }
+    self.loadBangObjects = nil;
 }
 
 - (void)closeBang
 {
-    NSString *notificationName = [NSString stringWithFormat:@"%@-%@",self.uniqueID,kCloseBangNotification];
-    [[NSNotificationCenter defaultCenter]postNotificationName:notificationName object:nil];
-    
-    if ( !self.parent ) {
-        [[NSNotificationCenter defaultCenter]postNotificationName:kCloseBangNotification object:nil];
+    if (self.closeBangObjects.allObjects.count) {
+        for (BbCloseBang *closeBang in self.closeBangObjects.allObjects) {
+            [closeBang closeBang];
+        }
     }
+    
+    self.closeBangObjects = nil;
 }
 
 + (NSString *)viewClass
@@ -114,6 +141,18 @@
         }
         [self.objects addObject:entity];
         entity.parent = self;
+        if ( [entity isKindOfClass:[BbLoadBang class]]) {
+            if (nil == self.loadBangObjects) {
+                self.loadBangObjects = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
+            }
+            
+            [self.loadBangObjects addObject:entity];
+        }else if ( [entity isKindOfClass:[BbCloseBang class]]){
+            if (nil==self.closeBangObjects) {
+                self.closeBangObjects = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
+            }
+            [self.closeBangObjects addObject:entity];
+        }
         return YES;
     }
     
@@ -232,8 +271,8 @@
             [mutableString appendFormat:@"%@%@",depthString,[anObject textDescription]];
         }
     }
-    NSSet *connections = [self childConnections];
     
+    NSSet *connections = [self childConnections];
     if ( nil != connections ) {
         for (id<BbEntity> aConnection in connections.allObjects ) {
             NSString *depthString = [self depthStringForChild:aConnection];
@@ -413,26 +452,6 @@
     [self.view cutSelected];
     [self.view addChildEntityView:view];
     self.view.editState = BbPatchViewEditState_Editing;
-}
-
-- (void)doSelectors
-{
-    [self doPendingSelectors:self.selectors];
-}
-
-- (void)doPendingSelectors:(NSArray *)selectors
-{
-    if ( nil == selectors || selectors.count == 0 ) {
-        return;
-    }
-    NSMutableArray *selectorsCopy = selectors.mutableCopy;
-    NSString *mySelector = selectorsCopy.firstObject;
-    if ( [self respondsToSelector:NSSelectorFromString(mySelector)]) {
-        [self performSelector:NSSelectorFromString(mySelector)];
-    }
-    
-    [selectorsCopy removeObjectAtIndex:0];
-    [self doPendingSelectors:selectorsCopy];
 }
 
 - (NSArray *)loadChildViews

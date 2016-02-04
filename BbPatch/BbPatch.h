@@ -20,8 +20,11 @@
 
 @property (nonatomic,strong)                NSMutableArray                                      *selectors;
 @property (nonatomic,strong)                NSMutableArray                                      *objects;
+@property (nonatomic,strong)                NSHashTable                                         *loadBangObjects;
+@property (nonatomic,strong)                NSHashTable                                         *closeBangObjects;
 @property (nonatomic,strong)                BbSymbolTable<BbTextCompletionDataSource>           *symbolTable;
 
+- (void)doSelectors;
 - (void)loadBang;
 - (void)closeBang;
 
