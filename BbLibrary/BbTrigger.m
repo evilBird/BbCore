@@ -26,18 +26,24 @@
         [self addChildEntity:outlet];
     }
     __block id hotValue;
-    NSEnumerator *outletEnumerator = self.outlets.reverseObjectEnumerator;
+    __block id outputValue;
+    //NSEnumerator *outletEnumerator = self.outlets.reverseObjectEnumerator;
+    NSArray *myArguments = arguments;
+    
+    __weak BbTrigger *weakself = self;
+    
     [hotInlet setOutputBlock:^(id value){
         hotValue = value;
-        NSUInteger count = arguments.count;
-        NSEnumerator *argEnumerator = arguments.reverseObjectEnumerator;
-        while ( count -- ) {
-            BbOutlet *outlet = [outletEnumerator nextObject];
-            NSString *arg = [argEnumerator nextObject];
+        NSUInteger count = myArguments.count;
+        for (NSInteger i = (count-1); i >= 0; --i) {
+            BbOutlet *outlet = weakself.outlets[i];
+            NSString *arg = myArguments[i];
             if ( [arg isEqualToString:@"b"] ) {
-                outlet.inputElement = [BbBang bang];
+                outputValue = [BbBang bang];
+                outlet.inputElement = outputValue;
             }else{
-                outlet.inputElement = hotValue;
+                outputValue = hotValue;
+                outlet.inputElement = outputValue;
             }
         }
     }];
