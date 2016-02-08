@@ -554,6 +554,11 @@
 {
     id <BbObject> object = objectView.entity;
     if (object) {
+        NSSet *connections = [object childConnections];
+        for (id<BbConnection> aConnection in connections.allObjects) {
+            [sender removeConnectionPath:aConnection.path];
+            [self patchView:sender didRemoveChildConnection:aConnection];
+        }
         BOOL ok = [self removeChildEntity:object];
         NSAssert(ok,@"ERROR REMOVING CHILD ENTITY");
     }
