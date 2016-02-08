@@ -115,7 +115,8 @@ static NSString     *kSelectorToken     =       @"S";
 + (NSString *)objectArgumentsFromString:(NSString *)string
 {
     //NSString *pattern = @"(?<=\\d\\s)Bb(\\w*\\s?)*[^;]";
-    NSString *pattern = @"(?<=\\d\\s)Bb([\\w|\\d|$|:]*\\s?)*[^;]";
+    //NSString *pattern = @"(?<=\\d\\s)Bb([\\w|\\d|$|:]*\\s?)*[^;]";
+    NSString *pattern = @"(?<=\\d\\s)Bb([\\S^;]*\\s?)*(?=;)";
     return [BbParseText matchPattern:pattern inString:string];
 }
 
@@ -193,7 +194,13 @@ static NSString     *kSelectorToken     =       @"S";
     NSString *myTrimmedText = [[myText componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]componentsJoinedByString:@" "];
     myText = myTrimmedText;
     NSString *myViewArgs = [BbParseText parentViewArgumentsFromString:myText];
+    if (!myViewArgs) {
+        //myViewArgs = @"BbPatchView 2.0 2.0 0.0 0.0 0.5";
+    }
     NSString *myObjectArgs = [BbParseText objectArgumentsFromString:myText];
+    if (!myObjectArgs) {
+        //myObjectArgs = @"BbPatch";
+    }
     BbPatchDescription *patchDescription = [BbPatchDescription patchDescriptionWithArgs:myObjectArgs viewArgs:myViewArgs];
     patchDescription.depth = self.myDepth;
     //NSUInteger lineNumber

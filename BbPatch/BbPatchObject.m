@@ -99,8 +99,10 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
         __block BbOutlet *myOutlet = [[BbOutlet alloc]init];
         [self addChildEntity:myOutlet];
         BbPatchOutlet *patchOutlet = outletAttrs[kPortAttributeKeyPort];
+        __block id outputValue;
         [patchOutlet.outlets.firstObject setOutputBlock:^(id value){
-            myOutlet.inputElement = value;
+            outputValue = value;
+            myOutlet.inputElement = outputValue;
         }];
     }
 }

@@ -18,9 +18,10 @@
     
     __block BbOutlet *outlet = [[BbOutlet alloc]init];
     [self addChildEntity:outlet];
-    
+    __block id inputValue;
     [inlet setOutputBlock:^(id value){
-        outlet.inputElement = value;
+        inputValue = value;
+        outlet.inputElement = inputValue;
     }];
     
 }

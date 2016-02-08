@@ -28,15 +28,21 @@
     
     __weak BbMessage *weakself = self;
     [hotInlet setInputBlock:[BbPort allowTypesInputBlock:@[[NSArray class],[BbBang class]]]];
-    
+    __block NSArray *outputArray = [weakself defaultOutput];
+
     [hotInlet setOutputBlock:^(id value){
         if ( ![value isKindOfClass:[NSArray class]]) {
             [weakself.view setHighlighted:YES];
-            id defaultOutput = [weakself defaultOutput];
-            mainOutlet.inputElement = defaultOutput;
+            outputArray = [weakself defaultOutput];
         }else{
-            id output = [weakself outputForInput:value];
-            mainOutlet.inputElement = output;
+            outputArray = [weakself outputForInput:value];
+        }
+        
+        if (outputArray) {
+            for (NSUInteger i = 0; i < outputArray.count; i ++ ) {
+                id outputValue = [outputArray objectAtIndex:i];
+                mainOutlet.inputElement = outputValue;
+            }
         }
     }];
 }
@@ -67,9 +73,42 @@
             return nil;
         }
     }else if ( nil != self.placeholderMappings ){
+        
         NSEnumerator *keys = [self.placeholderMappings keyEnumerator];
+        NSMutableArray *arrayOfArrays = self.myDefaultOutput.mutableCopy;
+        NSMutableArray *myOutput = [NSMutableArray arrayWithCapacity:arrayOfArrays.count];
+        
+        for (NSArray *anArray in arrayOfArrays) {
+            
+            NSMutableArray *substitutedArray = anArray.mutableCopy;
+            BOOL isValid = YES;
+            
+            for (NSNumber *aKey in keys ) {
+                NSUInteger myIdx = aKey.integerValue;
+                NSUInteger theirIdx = [[self.placeholderMappings objectForKey:aKey]integerValue];
+                
+                if ( myIdx < anArray.count && theirIdx < value.count ) {
+                    [substitutedArray replaceObjectAtIndex:myIdx withObject:value[theirIdx]];
+                }else{
+                    isValid = NO;
+                    break;
+                }
+            }
+            
+            if ( isValid ) {
+                [myOutput addObject:[NSArray arrayWithArray:substitutedArray]];
+            }else{
+                [myOutput addObject:anArray];
+            }
+        }
+        
+        return myOutput;
+        
+        /*
+        
         NSMutableArray *substitutedArray = self.myDefaultOutput.mutableCopy;
         BOOL sendOnDone = NO;
+        
         for (NSNumber *aKey in keys ) {
             NSUInteger myIndex = aKey.integerValue;
             NSUInteger theirIndex = [[self.placeholderMappings objectForKey:aKey]integerValue];
@@ -82,6 +121,8 @@
         if ( sendOnDone ) {
             return [NSArray arrayWithArray:substitutedArray];
         }
+         */
+        
     }else{
         return [self defaultOutput];
     }
@@ -89,6 +130,19 @@
     return nil;
 }
 
+- (NSArray *)getCommaSeparatedArrays:(NSString *)text
+{
+    NSArray *components = [text componentsSeparatedByString:@","];
+    NSMutableArray *arrayOfArrays = [NSMutableArray arrayWithCapacity:components.count];
+    for (NSString *aComponent in components) {
+        NSArray *anArray = [[aComponent trimWhitespace]getArguments];
+        if (anArray) {
+            [arrayOfArrays addObject:anArray];
+        }
+    }
+    
+    return [NSArray arrayWithArray:arrayOfArrays];
+}
 
 - (void)updateDefaultOutputAndPlaceholderMapWithText:(NSString *)text
 {
@@ -98,7 +152,8 @@
     
     self.placeholderMappings = nil;
     self.creationArguments = [text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    self.myDefaultOutput = [text getArguments];
+    self.myDefaultOutput = [self getCommaSeparatedArrays:text];
+    //self.myDefaultOutput = [text getArguments];
     
     if ( ![text containsString:@"$"] ) {
         return;
@@ -109,6 +164,7 @@
     NSCharacterSet *integerCharSet = [NSCharacterSet characterSetWithCharactersInString:@"0123456789"];
     NSCharacterSet *nonIntegerCharSet = [integerCharSet invertedSet];
     NSUInteger myIndex = 0;
+    
     for (NSString *aComponent in textComponents.mutableCopy ) {
         NSString *trimmedComponent = [aComponent stringByTrimmingCharactersInSet:whiteSpaceCharSet];
         if ( [trimmedComponent hasPrefix:@"$"] && trimmedComponent.length > 1 ) {
@@ -140,8 +196,12 @@
 
 - (void)sendActionsForView:(id<BbObjectView>)sender
 {
-    [self.inlets[0] setInputElement:[self.displayText getArguments]];
+    //[self.inlets[0] setInputElement:[self.displayText getArguments]];
+    NSArray *myOutput = self.myDefaultOutput;
     [self.view setHighlighted:YES];
+    for (NSArray *anArray in myOutput) {
+        [self.outlets.firstObject setInputElement:anArray];
+    }
 }
 
 - (NSString *)titleTextForObjectView:(id<BbObjectView>)objectView
