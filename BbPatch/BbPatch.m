@@ -207,7 +207,9 @@
                 }
             }
         }
-        
+        if ([entity respondsToSelector:@selector(cleanup)]) {
+            [NSInvocation doInstanceMethod:entity selector:@"cleanup" arguments:nil];
+        }
         [self.objects removeObjectAtIndex:index];
         entity.parent = nil;
         return YES;

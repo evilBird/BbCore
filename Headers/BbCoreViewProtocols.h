@@ -188,7 +188,7 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 
 - (void)patchView:(id<BbPatchView>)sender didEdit:(id)editObject;
 
-- (void)patchView:(id<BbPatchView>)sender didOpenPatchView:(id<BbPatchView>)patchView;
+- (void)patchView:(id<BbPatchView>)sender didOpenAbstraction:(id<BbObject>)abstraction;
 
 - (BOOL)patchViewCanUndo:(id<BbPatchView>)sender;
 

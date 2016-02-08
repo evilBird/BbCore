@@ -290,9 +290,8 @@ static CGFloat              kMaxMovement          = 5.0;
                 BOOL canOpen = ([gesture.currentView canOpen]);
                 if (repeat && movementOK && canOpen) {
                     id <BbObject>  object = (id<BbObject>)[gesture.currentView entity];
-                    id <BbPatchView> patchView = [NSInvocation doInstanceMethod:object selector:@"open" arguments:nil];
-                    if (patchView) {
-                        [self.editingDelegate patchView:self didOpenPatchView:patchView];
+                    if (object) {
+                        [self.editingDelegate patchView:self didOpenAbstraction:object];
                     }
                 }
             }
