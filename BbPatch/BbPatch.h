@@ -15,6 +15,7 @@
 
 @class BbPatchDescription;
 @class BbSymbolTable;
+@class BbAbstraction;
 
 @interface BbPatch : BbObject
 
@@ -90,6 +91,10 @@
 - (void)pasteCopiedWithText:(NSString *)text;
 
 - (void)abstractCopiedWithText:(NSString *)text;
+
+- (void)insertAbstraction:(BbAbstraction *)abstraction atPosition:(NSValue *)position;
+
+- (void)insertAbstractionWithText:(NSString *)text atPosition:(NSValue *)position;
 
 - (void)patchView:(id<BbPatchView>)sender didConnectOutletView:(id<BbEntityView>)outletView toInletView:(id<BbEntityView>)inletView;
 

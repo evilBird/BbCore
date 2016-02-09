@@ -210,7 +210,8 @@
         if ([entity respondsToSelector:@selector(cleanup)]) {
             [NSInvocation doInstanceMethod:entity selector:@"cleanup" arguments:nil];
         }
-        [self.objects removeObjectAtIndex:index];
+        [self.objects removeObjectIdenticalTo:entity];
+        //[self.objects removeObjectAtIndex:index];
         entity.parent = nil;
         return YES;
     }
@@ -442,6 +443,27 @@
     }
 }
 
+- (void)insertAbstraction:(BbAbstraction *)abstraction
+{
+    [self addChildEntity:abstraction];
+    id <BbObjectView> view = [abstraction loadView];
+    [self.view addChildEntityView:view];
+    
+}
+
+- (void)insertAbstraction:(BbAbstraction *)abstraction atPosition:(NSValue *)position
+{
+    [self addChildEntity:abstraction];
+    id <BbObjectView> view = [abstraction loadView];
+    view.position = position;
+    [self.view addChildEntityView:view];
+}
+
+- (void)insertAbstractionWithText:(NSString *)text atPosition:(NSValue *)position
+{
+    BbAbstraction *abstraction = [[BbAbstraction alloc]initWithArguments:text];
+    [self insertAbstraction:abstraction atPosition:position];
+}
 
 - (void)abstractCopiedWithText:(NSString *)text
 {

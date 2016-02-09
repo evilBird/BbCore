@@ -65,17 +65,30 @@
 - (BbConnection *)connectionWithDescription:(BbConnectionDescription *)description
 {
     NSUInteger childCount = self.objects.count;
-    NSAssert(description.senderParentIndex < childCount, @"ERROR: Sending object index: %@",@(description.senderParentIndex));
+    NSUInteger senderParentIndex = description.senderParentIndex;
+    
+    NSAssert(senderParentIndex < childCount, @"ERROR: Sending object index: %@",@(description.senderParentIndex));
+    
     BbObject *sendingObject = [self.objects objectAtIndex:description.senderParentIndex];
+    
     NSUInteger sendingObjectOutletCount = sendingObject.outlets.count;
-    NSAssert(description.senderPortIndex<sendingObjectOutletCount, @"ERROR: Sending port index: %@",@(description.senderPortIndex));
+    NSUInteger senderPortIndex = description.senderPortIndex;
+    
+    NSAssert(senderPortIndex<sendingObjectOutletCount, @"ERROR: Sending port index: %@",@(description.senderPortIndex));
+    
     BbOutlet *sender = [sendingObject.outlets objectAtIndex:description.senderPortIndex];
-    NSAssert(description.receiverParentIndex < childCount, @"ERROR: Receiving Object index: %@",@(description.receiverParentIndex));
+    NSUInteger receiverParentIndex = description.receiverParentIndex;
+    
+    NSAssert(receiverParentIndex < childCount, @"ERROR: Receiving Object index: %@",@(description.receiverParentIndex));
     BbObject *receivingObject = [self.objects objectAtIndex:description.receiverParentIndex];
+    
     NSUInteger receivingObjectInletCount = receivingObject.inlets.count;
-    NSAssert(description.receiverPortIndex<receivingObjectInletCount, @"ERROR: Receiving port index: %@",@(description.receiverPortIndex));
+    NSUInteger receiverPortIndex = description.receiverPortIndex;
+    
+    NSAssert(receiverPortIndex<receivingObjectInletCount, @"ERROR: Receiving port index: %@",@(description.receiverPortIndex));
     BbInlet *receiver = [receivingObject.inlets objectAtIndex:description.receiverPortIndex];
     BbConnection *connection = [BbConnection connectionWithSender:sender receiver:receiver];
+    
     return connection;
 }
 

@@ -59,7 +59,7 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
 
 + (NSString *)emptyAbstractionDescription
 {
-    return [NSString stringWithFormat:@"#N BbView 0.0 0.0 BbAbstraction abstract;\n"];
+    return [NSString stringWithFormat:@"#N BbView 0.0 0.0 BbAbstraction abstraction;\n"];
 }
 
 - (void)setupPorts {}
@@ -98,7 +98,8 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
             [outletAttributes addObject:[BbAbstraction attributesForPatchPort:child]];
         }
     }
-    
+    //[self setupPortsForPatch:patch withInletAttributes:inletAttributes outletAttributes:outletAttributes];
+
     NSMutableArray *connectionsDescriptions = descriptions[kCopiedConnectionDescriptionsKey];
     for (BbConnectionDescription *connectionDescription in connectionsDescriptions ) {
         BbConnection *connection = [patch connectionWithDescription:connectionDescription];

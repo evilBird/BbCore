@@ -234,7 +234,7 @@ static NSString     *kSelectorToken     =       @"S";
 
                 for (NSUInteger i = 0; i < remainingComponents.count; i++) {
                     NSString *component = remainingComponents[i];
-                    NSUInteger componentLength = component.length+spacerLength;
+                    NSUInteger componentLength = component.length;
                     NSUInteger componentDepth = [BbParseText countOccurencesOfSubstring:@"\t" beforeSubstring:@"#" inString:component];
                     myRange.length+=componentLength;
                     numCharsToAdvance+=componentLength;
@@ -242,9 +242,14 @@ static NSString     *kSelectorToken     =       @"S";
                     if (i == 0) {
                         myComponent = component;
                         myDepth = componentDepth;
+                        myRange.length+=spacerLength;
+                        numCharsToAdvance+=spacerLength;
                     }else{
                         if (componentDepth == myDepth) {
                             break;
+                        }else{
+                            myRange.length+=spacerLength;
+                            numCharsToAdvance+=spacerLength;
                         }
                     }
                 }
