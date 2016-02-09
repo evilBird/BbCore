@@ -85,9 +85,11 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
     NSMutableArray *objectDescriptions = descriptions[kCopiedObjectDescriptionsKey];
     double sumOfPosX = 0.0;
     double sumOfPosY = 0.0;
-    
+    id dataSource = self.dataSource;
     for (BbObjectDescription *childDescription in objectDescriptions ) {
-        BbObject *child = [NSInvocation doClassMethod:childDescription.objectClass selector:@"objectWithDescription:" arguments:childDescription];
+        
+        NSArray *argArray = [NSArray arrayWithObjects:childDescription,dataSource, nil];
+        BbObject *child = [NSInvocation doClassMethod:childDescription.objectClass selector:@"objectWithDescription:dataSource:" arguments:argArray];
         [patch addChildEntity:child];
         NSArray *pos = [child.viewArguments getArguments];
         sumOfPosX += ([(NSNumber *)pos.firstObject doubleValue]);
@@ -107,6 +109,7 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
     }
     
     [self setupPortsForPatch:patch withInletAttributes:inletAttributes outletAttributes:outletAttributes];
+    
     self.patch = patch;
     self.patch.selectors = descriptions[kCopiedSelectorDescriptionsKey];
     

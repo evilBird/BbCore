@@ -60,14 +60,15 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
             [outletAttributes addObject:[BbPatchObject attributesForPatchPort:child]];
         }
     }
-    [self setupPortsForPatch:patch withInletAttributes:inletAttributes outletAttributes:outletAttributes];
+    //[self setupPortsForPatch:patch withInletAttributes:inletAttributes outletAttributes:outletAttributes];
 
     for (BbConnectionDescription *connectionDescription in patchDescription.childConnectionDescriptions) {
         BbConnection *connection = [patch connectionWithDescription:connectionDescription];
         [connection.sender addChildEntity:connection];
     }
     
-    //[self setupPortsForPatch:patch withInletAttributes:inletAttributes outletAttributes:outletAttributes];
+    [self setupPortsForPatch:patch withInletAttributes:inletAttributes outletAttributes:outletAttributes];
+    
     self.patchDescription = patchDescription;
     self.patch = patch;
 }

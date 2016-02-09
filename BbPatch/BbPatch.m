@@ -461,7 +461,13 @@
 
 - (void)insertAbstractionWithText:(NSString *)text atPosition:(NSValue *)position restoreConnections:(NSString *)connectionsText cutSelected:(BOOL)cutSelected
 {
-    BbAbstraction *abstraction = [[BbAbstraction alloc]initWithArguments:text];
+
+    NSString *abstractionComponent = [text componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]].firstObject;
+    NSString *viewArgs = [BbParseText childViewArgumentsFromString:abstractionComponent];
+    
+    BbAbstractionDescription *desc = [BbAbstractionDescription abstractionDescriptionWithArgs:text viewArgs:viewArgs];
+    BbAbstraction *abstraction = (BbAbstraction *)[BbAbstraction objectWithDescription:desc dataSource:self.dataSource];
+    
     [self insertAbstraction:abstraction atPosition:position];
     
     if (connectionsText) {
