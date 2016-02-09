@@ -459,10 +459,28 @@
     [self.view addChildEntityView:view];
 }
 
-- (void)insertAbstractionWithText:(NSString *)text atPosition:(NSValue *)position
+- (void)insertAbstractionWithText:(NSString *)text atPosition:(NSValue *)position restoreConnections:(NSString *)connectionsText cutSelected:(BOOL)cutSelected
 {
     BbAbstraction *abstraction = [[BbAbstraction alloc]initWithArguments:text];
     [self insertAbstraction:abstraction atPosition:position];
+    
+    if (connectionsText) {
+        NSArray *components = [connectionsText componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"length > 1"];
+        NSArray *filteredComponents = [components filteredArrayUsingPredicate:predicate];
+        for (NSString *aComponent in filteredComponents) {
+            NSString *connectionArgs = [BbParseText connectionArgumentsFromString:aComponent];
+            BbConnectionDescription *connectionDesc = [BbConnectionDescription connectionDescriptionWithArgs:connectionArgs];
+            BbConnection *connection = [self connectionWithDescription:connectionDesc];
+            [connection.sender addChildEntity:connection];
+            id<BbConnectionPath> path = [connection loadPath];
+            [self.view addConnectionPath:path];
+        }
+    }
+    
+    if (cutSelected) {
+        [self.view cutSelected];
+    }
 }
 
 - (void)abstractCopiedWithText:(NSString *)text

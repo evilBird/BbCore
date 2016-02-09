@@ -94,7 +94,7 @@
 
 - (void)insertAbstraction:(BbAbstraction *)abstraction atPosition:(NSValue *)position;
 
-- (void)insertAbstractionWithText:(NSString *)text atPosition:(NSValue *)position;
+- (void)insertAbstractionWithText:(NSString *)text atPosition:(NSValue *)position restoreConnections:(NSString *)connectionsText cutSelected:(BOOL)cutSelected;
 
 - (void)patchView:(id<BbPatchView>)sender didConnectOutletView:(id<BbEntityView>)outletView toInletView:(id<BbEntityView>)inletView;
 
