@@ -17,6 +17,7 @@
 - (void)setupWithArguments:(id)arguments
 {
     self.name = @"prepend";
+    
     if ( arguments ) {
         self.displayText = [NSString stringWithFormat:@"%@ %@",self.name,arguments];
     }else{

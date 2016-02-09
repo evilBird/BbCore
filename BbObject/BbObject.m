@@ -540,7 +540,7 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 
 - (BOOL)canEdit
 {
-    return NO;
+    return YES;
 }
 
 - (BOOL)canOpen
@@ -550,7 +550,10 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 
 - (id<BbObjectViewEditingDelegate>)editingDelegateForObjectView:(id<BbObjectView>)sender
 {
-    if ( [self.parent conformsToProtocol:NSProtocolFromString(@"BbObjectViewEditingDelegate")]) {
+    
+    if ([self canEdit]) {
+        return self;
+    }else if ( [self.parent conformsToProtocol:NSProtocolFromString(@"BbObjectViewEditingDelegate")]) {
         return (id<BbObjectViewEditingDelegate>)self.parent;
     }
     
@@ -563,9 +566,28 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 
 @implementation BbObject (BbObjectEditingDelegate)
 
+- (NSString *)objectView:(id<BbObjectView>)sender suggestCompletionForUserText:(NSString *)userText
+{
+    return @"";
+}
+
+- (BOOL)objectView:(id<BbObjectView>)sender shouldEndEditingWithUserText:(NSString *)userText
+{
+    return YES;
+}
+
 - (void)objectView:(id<BbObjectView>)sender didEndEditingWithUserText:(NSString *)userText
 {
     self.userText = userText;
+    NSRange nameRange = [self.userText rangeOfString:self.name];
+    
+    if (nameRange.length) {
+        NSString *nameRemoved = [userText stringByReplacingCharactersInRange:nameRange withString:@""];
+        NSString *newArgs = [nameRemoved trimWhitespace];
+        NSLog(@"new args: %@",newArgs);
+    }
+    
+    [sender updateAppearance];
 }
 
 @end

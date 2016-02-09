@@ -438,7 +438,6 @@
         BbConnection *connection = [BbPatch connectionWithDecription:connectionDescription amongstCopiedObjects:copiedObjects];
         [connection.sender addChildEntity:connection];
         id<BbConnectionPath> path = [connection loadPath];
-        path.selected = YES;
         [self.view addConnectionPath:path];
     }
 }

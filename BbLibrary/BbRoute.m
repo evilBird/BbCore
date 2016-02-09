@@ -25,11 +25,15 @@
 
 - (void)setupWithArguments:(id)arguments
 {
+    self.name = @"route";
+    
     if ( nil == arguments ) {
-        self.displayText = @"route";
+        self.displayText = self.name;
         return;
+    }else{
+        self.displayText = [NSString stringWithFormat:@"%@ %@",self.name,arguments];
     }
-    self.displayText = [NSString stringWithFormat:@"route %@",arguments];
+    
     NSString *argString = arguments;
     NSArray *routeArgs = [argString getArguments];
     BbInlet *hotInlet = [[BbInlet alloc]init];
