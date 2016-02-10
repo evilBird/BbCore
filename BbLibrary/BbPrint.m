@@ -59,11 +59,13 @@
      if ([value isKindOfClass:[NSArray class]] || [value isKindOfClass:[NSDictionary class]]) {
          id toPrint = [value mutableCopy];
          NSString *text = [NSString stringWithFormat:@"bB %@: %@",myText,toPrint];
-         [[NSNotificationCenter defaultCenter]postNotificationName:kPrintNotificationChannel object:text];
+         NSDictionary *myObject = @{@"text":text};
+         [[NSNotificationCenter defaultCenter]postNotificationName:kPrintNotificationChannel object:myObject];
          NSLog(@"%@",text);
      }else{
          NSString *text = [NSString stringWithFormat:@"bB %@: %@",myText,value];
-         [[NSNotificationCenter defaultCenter]postNotificationName:kPrintNotificationChannel object:text];
+         NSDictionary *myObject = @{@"text":text};
+         [[NSNotificationCenter defaultCenter]postNotificationName:kPrintNotificationChannel object:myObject];
          NSLog(@"%@",text);
      }
 }
