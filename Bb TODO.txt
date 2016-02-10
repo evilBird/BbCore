@@ -1,0 +1,11 @@
+Undo/redo
+Patch navigation
+Do something with dependencies
+Log view size & text attributes
+Canvas and log view transitions
+Object view editing
+Object view text display
+Autocorrect
+Save as -- load saved copy
+Attributed text in print object
+Creation argument placeholders
