@@ -34,6 +34,9 @@
 @property (nonatomic,weak)                              id<BbObjectView>                        editingObjectView;
 
 
+@property (nonatomic)                                   BOOL                                    needsOrientationUpdate;
+
+
 + (id<BbPatchView>)viewWithEntity:(id<BbEntity,BbObject,BbPatch>)entity;
 
 - (void)addChildEntityView:(id<BbEntityView>)entityView;
@@ -43,6 +46,8 @@
 - (void)addConnectionPath:(id<BbConnectionPath>)path;
 
 - (void)removeConnectionPath:(id<BbConnectionPath>)connection;
+
+- (void)updateLayoutForChildView:(id<BbObjectView>)childView;
 
 - (void)cutSelected;
 

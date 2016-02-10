@@ -551,6 +551,16 @@ static CGFloat              kMaxMovement          = 5.0;
     [self updateAppearance];
 }
 
+- (void)updateLayoutForChildView:(id<BbObjectView>)childView
+{
+    BbAbstractView *view = (BbAbstractView *)childView;
+    CGPoint pos = view.position.CGPointValue;
+    CGPoint pt = [self myPosition2Point:pos];
+    CGPoint offsets = [self point2ConstraintOffsets:pt];
+    view.centerXConstraint.constant = offsets.x;
+    view.centerYConstraint.constant = offsets.y;
+    [self layoutIfNeeded];
+}
 
 - (void)addChildEntityView:(id<BbEntityView>)entityView
 {
@@ -641,6 +651,14 @@ static CGFloat              kMaxMovement          = 5.0;
     if ( [self childViewsNeedAppearanceUpdate] ) {
         [self updateChildViewAppearance];
         [self resizeIfNeeded];
+    }else if ( self.needsOrientationUpdate ){
+        for (id<BbObjectView> childView in self.childObjectViews.allObjects.mutableCopy) {
+            [self updateLayoutForChildView:childView];
+            [childView updateAppearance];
+        }
+        
+        [self setNeedsLayout];
+        _needsOrientationUpdate = NO;
     }
     
     [self setNeedsDisplay];
