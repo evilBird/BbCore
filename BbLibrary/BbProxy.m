@@ -65,7 +65,7 @@
 
 - (void)setClient:(id)client property:(NSString *)property
 {
-    if ( nil == property ) {
+    if ( nil == property || nil == client || [client isKindOfClass:[NSNull class]]) {
         return;
     }
     

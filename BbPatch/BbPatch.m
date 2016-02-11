@@ -256,6 +256,8 @@
     if ( !self.selectors.count ) {
         [selectorText appendFormat:@"%@#S loadBang;\n",depthString];
     }else{
+        NSSet *selectorSet = [NSSet setWithArray:self.selectors];
+        self.selectors = selectorSet.allObjects.mutableCopy;
         for (NSString *aSelectorDescription in self.selectors ) {
             [selectorText appendFormat:@"%@#S %@;\n",depthString,aSelectorDescription];
         }

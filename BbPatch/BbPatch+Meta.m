@@ -36,8 +36,13 @@
     if ( nil != description.childConnectionDescriptions ) {
         for (BbConnectionDescription *aDescription in description.childConnectionDescriptions ) {
             BbConnection *connection = [patch connectionWithDescription:aDescription];
-            BOOL success = [connection.sender addChildEntity:connection];
-            NSAssert(success, @"ERROR LOADING CONNECTION: %@",aDescription);
+            if (connection) {
+                BOOL success = [connection.sender addChildEntity:connection];
+                NSAssert(success, @"ERROR LOADING CONNECTION: %@",aDescription);
+            }else{
+                NSLog(@"Missing connection: %@",[aDescription humanReadableText]);
+            }
+
         }
     }
     
@@ -66,26 +71,37 @@
 {
     NSUInteger childCount = self.objects.count;
     NSUInteger senderParentIndex = description.senderParentIndex;
-    
-    NSAssert(senderParentIndex < childCount, @"ERROR: Sending object index: %@",@(description.senderParentIndex));
+    if (senderParentIndex >= childCount) {
+        return nil;
+    }
+    //NSAssert(senderParentIndex < childCount, @"ERROR: Sending object index: %@",@(description.senderParentIndex));
     
     BbObject *sendingObject = [self.objects objectAtIndex:description.senderParentIndex];
     
     NSUInteger sendingObjectOutletCount = sendingObject.outlets.count;
     NSUInteger senderPortIndex = description.senderPortIndex;
     
-    NSAssert(senderPortIndex<sendingObjectOutletCount, @"ERROR: Sending port index: %@",@(description.senderPortIndex));
+    if (senderPortIndex >= sendingObjectOutletCount) {
+        return nil;
+    }
+    
+    //NSAssert(senderPortIndex<sendingObjectOutletCount, @"ERROR: Sending port index: %@",@(description.senderPortIndex));
     
     BbOutlet *sender = [sendingObject.outlets objectAtIndex:description.senderPortIndex];
     NSUInteger receiverParentIndex = description.receiverParentIndex;
-    
-    NSAssert(receiverParentIndex < childCount, @"ERROR: Receiving Object index: %@",@(description.receiverParentIndex));
+    if (receiverParentIndex>=childCount) {
+        return nil;
+    }
+    //NSAssert(receiverParentIndex < childCount, @"ERROR: Receiving Object index: %@",@(description.receiverParentIndex));
     BbObject *receivingObject = [self.objects objectAtIndex:description.receiverParentIndex];
     
     NSUInteger receivingObjectInletCount = receivingObject.inlets.count;
     NSUInteger receiverPortIndex = description.receiverPortIndex;
+    if (receiverPortIndex >= receivingObjectInletCount) {
+        return nil;
+    }
     
-    NSAssert(receiverPortIndex<receivingObjectInletCount, @"ERROR: Receiving port index: %@",@(description.receiverPortIndex));
+    //NSAssert(receiverPortIndex<receivingObjectInletCount, @"ERROR: Receiving port index: %@",@(description.receiverPortIndex));
     BbInlet *receiver = [receivingObject.inlets objectAtIndex:description.receiverPortIndex];
     BbConnection *connection = [BbConnection connectionWithSender:sender receiver:receiver];
     
