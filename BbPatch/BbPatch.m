@@ -211,7 +211,6 @@
             [NSInvocation doInstanceMethod:entity selector:@"cleanup" arguments:nil];
         }
         [self.objects removeObjectIdenticalTo:entity];
-        //[self.objects removeObjectAtIndex:index];
         entity.parent = nil;
         return YES;
     }

@@ -1,11 +1,14 @@
-Undo/redo
-Patch navigation
-Do something with dependencies
-Log view size & text attributes
-Canvas and log view transitions
-Object view editing
-Object view text display
-Autocorrect
-Save as -- load saved copy
-Attributed text in print object
-Creation argument placeholders
+-Undo/redo
+-Patch navigation
+-Do something with dependencies
+-Canvas and log view transitions
+-Object view editing
+-Object view text display
+-Save as -- load saved copy
+-Creation argument placeholders
+-Deal with iphone 
+-File wrapper for patches
+-NumberView
+-Generalized controls view
+-Implement supplementary views
+-AutoCorrect!!!!

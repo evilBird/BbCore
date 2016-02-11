@@ -33,7 +33,9 @@
 - (void)setParent:(id<BbEntity,BbObject>)parent
 {
     parent_ = parent;
-    [self subscribeToNotificationsWithParentID:[parent uniqueID]];
+    if (parent) {
+        [self subscribeToNotificationsWithParentID:[parent uniqueID]];
+    }
 }
 
 - (void)subscribeToNotificationsWithParentID:(NSString *)parentID
@@ -54,6 +56,7 @@
 {
     if (self.myNotificationName) {
         [[NSNotificationCenter defaultCenter]removeObserver:self name:self.myNotificationName object:nil];
+        self.myNotificationName = nil;
     }
 }
 
