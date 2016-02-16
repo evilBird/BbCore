@@ -54,6 +54,12 @@
         self.displayText = @"value";
     }else{
         self.displayText = [NSString stringWithFormat:@"value %@",arguments];
+        NSArray *args = [arguments getArguments];
+        if (args.count == 1) {
+            self.myValue = args.firstObject;
+        }else{
+            self.myValue = args;
+        }
     }
 }
 

@@ -30,6 +30,7 @@
 - (void)doSelectors;
 - (void)loadBang;
 - (void)closeBang;
+- (NSString *)makeSubstitutionsInChildArgs:(NSString *)childArgs;
 
 @end
 

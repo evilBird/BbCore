@@ -59,7 +59,7 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
     NSString *patchArgs = [arguments stringByReplacingCharactersInRange:[arguments rangeOfString:patchName] withString:@""];
     self.childArguments = [patchArgs getArguments];
     NSString *text = [self.dataSource object:self textForPatchName:patchName];
-    [self setupWithText:text];
+    [self setupWithText:text patchArgs:[patchArgs getArguments]];
 }
 
 - (void)creationArgumentsDidChange:(NSString *)creationArguments
@@ -68,7 +68,7 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
     [self setupWithArguments:creationArguments];
 }
 
-- (void)setupWithText:(NSString *)text
+- (void)setupWithText:(NSString *)text patchArgs:(NSArray *)patchArgs
 {
     if ( nil == text) {
         return;
@@ -76,10 +76,15 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
     
     BbPatchDescription *patchDescription = [BbParseText parseText:text];
     BbPatch *patch = [[BbPatch alloc]initWithArguments:nil];
+    patch.childArguments = patchArgs;
+    patch.selectors = patchDescription.selectorDescriptions;
     NSMutableArray *inletAttributes = [NSMutableArray array];
     NSMutableArray *outletAttributes = [NSMutableArray array];
     id dataSource = self.dataSource;
     for (BbObjectDescription *childDescription in patchDescription.childObjectDescriptions) {
+        NSString *descArgs = childDescription.objectArguments;
+        NSString *subsArgs = [patch makeSubstitutionsInChildArgs:descArgs];
+        childDescription.objectArguments = subsArgs;
         NSArray *argArray = [NSArray arrayWithObjects:childDescription,dataSource, nil];
         BbObject *child = [NSInvocation doClassMethod:childDescription.objectClass selector:@"objectWithDescription:dataSource:" arguments:argArray];
         [patch addChildEntity:child];

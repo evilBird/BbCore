@@ -73,6 +73,75 @@
     return @"BbPatchView";
 }
 
+- (NSString *)makeSubstitutionsInChildArgs:(NSString *)childArgs
+{
+    if (!self.childArguments || ![childArgs containsString:@"$"]) {
+        return childArgs;
+    }
+    NSMutableArray *myArgs = [childArgs getArguments].mutableCopy;
+    NSMutableArray *parentArgs = self.childArguments.mutableCopy;
+    NSCharacterSet *whiteSpaceCharSet = [NSCharacterSet whitespaceCharacterSet];
+    NSArray *textComponents = [childArgs componentsSeparatedByCharactersInSet:whiteSpaceCharSet];
+    NSCharacterSet *integerCharSet = [NSCharacterSet characterSetWithCharactersInString:@"0123456789"];
+    NSCharacterSet *nonIntegerCharSet = [integerCharSet invertedSet];
+    NSUInteger myIndex = 0;
+    
+    for (NSString *aComponent in textComponents.mutableCopy ) {
+        NSString *trimmedComponent = [aComponent stringByTrimmingCharactersInSet:whiteSpaceCharSet];
+        if ( [trimmedComponent hasPrefix:@"$"] && trimmedComponent.length > 1 ) {
+            NSString *digits = [trimmedComponent substringFromIndex:1];
+            if ( [digits rangeOfCharacterFromSet:nonIntegerCharSet].length == 0) {
+                NSUInteger theirIndex = [digits integerValue];
+                if ( theirIndex > 0 ) {
+                    theirIndex--;
+                    if ( theirIndex < parentArgs.count && myIndex < myArgs.count ) {
+                        [myArgs replaceObjectAtIndex:myIndex withObject:parentArgs[theirIndex]];
+                    }
+                }
+            }
+        }
+        myIndex++;
+    }
+    
+    return [myArgs componentsJoinedByString:@" "];
+}
+
+- (NSArray *)getArgumentsFromText:(NSString *)text
+{
+    NSString *parentArgText = [self.parent creationArguments];
+    NSMutableArray *myArgs = [text getArguments].mutableCopy;
+    
+    if ( !myArgs || ![text containsString:@"$"] || !parentArgText ) {
+        return myArgs;
+    }
+    
+    NSMutableArray *parentArgs = [self.parent getArgumentsFromText:parentArgText].mutableCopy;
+    NSCharacterSet *whiteSpaceCharSet = [NSCharacterSet whitespaceCharacterSet];
+    NSArray *textComponents = [text componentsSeparatedByCharactersInSet:whiteSpaceCharSet];
+    NSCharacterSet *integerCharSet = [NSCharacterSet characterSetWithCharactersInString:@"0123456789"];
+    NSCharacterSet *nonIntegerCharSet = [integerCharSet invertedSet];
+    NSUInteger myIndex = 0;
+    
+    for (NSString *aComponent in textComponents.mutableCopy ) {
+        NSString *trimmedComponent = [aComponent stringByTrimmingCharactersInSet:whiteSpaceCharSet];
+        if ( [trimmedComponent hasPrefix:@"$"] && trimmedComponent.length > 1 ) {
+            NSString *digits = [trimmedComponent substringFromIndex:1];
+            if ( [digits rangeOfCharacterFromSet:nonIntegerCharSet].length == 0) {
+                NSUInteger theirIndex = [digits integerValue];
+                if ( theirIndex > 0 ) {
+                    theirIndex--;
+                    if ( theirIndex < parentArgs.count && myIndex < myArgs.count ) {
+                        [myArgs replaceObjectAtIndex:myIndex withObject:parentArgs[theirIndex]];
+                    }
+                }
+            }
+        }
+        myIndex++;
+    }
+    
+    return [NSArray arrayWithArray:myArgs];
+}
+
 - (void)dealloc
 {
     [self closeBang];
