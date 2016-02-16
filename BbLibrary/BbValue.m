@@ -8,6 +8,11 @@
 
 #import "BbValue.h"
 
+@interface BbValue ()
+
+@property (nonatomic,strong)    id  myValue;
+
+@end
 
 @implementation BbValue
 
@@ -17,19 +22,25 @@
     
     BbInlet *rightInlet = self.inlets[1];
     rightInlet.hot = YES;
-    __block id aValue = nil;
-    
+    __weak BbValue *weakself = self;
     [rightInlet setOutputBlock:^( id value ){
-        aValue = value;
+        weakself.myValue = value;
     }];
     
     BbInlet *leftInlet = self.inlets[0];
     __block BbOutlet *mainOutlet = self.outlets[0];
     [leftInlet setOutputBlock:^(id value){
         if ( [value isKindOfClass:[BbBang class]] ) {
-            mainOutlet.inputElement = aValue;
+            mainOutlet.inputElement = weakself.myValue;
         }
     }];
+}
+
+- (void)creationArgumentsDidChange:(NSString *)creationArguments
+{
+    [super creationArgumentsDidChange:creationArguments];
+    NSArray *args = [creationArguments getArguments];
+    [self.inlets[1] setInputElement:args.lastObject];
 }
 
 + (NSString *)symbolAlias

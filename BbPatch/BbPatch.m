@@ -19,6 +19,7 @@
     [super commonInit];
     self.objects = [NSMutableArray array];
     self.selectors = [NSMutableArray array];
+    self.undoManager = [NSUndoManager new];
 }
 
 - (void)setupPorts {}
@@ -616,21 +617,21 @@
 
 @implementation BbPatch (BbObjectViewEditingDelegate)
 
-- (NSString *)objectView:(id<BbObjectView>)sender suggestCompletionForUserText:(NSString *)userText
+- (NSArray *)objectView:(id<BbObjectView>)sender suggestCompletionForUserText:(NSString *)userText
 {
     if ( nil == self.symbolTable ) {
-        self.symbolTable = [BbSymbolTable new];
+        self.symbolTable = [[BbSymbolTable alloc]initWithDataSource:self.dataSource];
     }
     
     NSArray *textComponents = [userText componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    NSArray *searchResults = [self.symbolTable BbText:self searchKeywordsForText:textComponents.firstObject];
-    
-    if ( nil != searchResults && searchResults.count > 0 ) {
-        NSString *keyword = searchResults.firstObject;
-        return [self.symbolTable BbText:self symbolForKeyword:keyword];
+    NSArray *filteredComponents = [textComponents filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"length > 0"]];
+    NSArray *searchResults = nil;
+    if (filteredComponents.count == 1) {
+        searchResults = [self.symbolTable BbText:self searchObjectsForText:filteredComponents.lastObject];
+    }else if (filteredComponents.count == 2 && [filteredComponents.firstObject isEqualToString:@"BbPatchObject"]){
+        searchResults = [self.symbolTable BbText:self searchPatchesForText:filteredComponents.lastObject];
     }
-    
-    return nil;
+    return searchResults;
 }
 
 - (BOOL)objectView:(id<BbObjectView>)sender shouldEndEditingWithUserText:(NSString *)userText

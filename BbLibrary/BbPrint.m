@@ -26,11 +26,16 @@
     [self addChildEntity:coldInlet];
     __weak BbPrint *weakself = self;
     [hotInlet setOutputBlock:^( id value ){
-        if ( [value isKindOfClass:[BbBang class]] ) {
-            [weakself printBang];
-        }else{
-            [weakself printValue:value];
-        }
+        [[NSOperationQueue mainQueue]addOperationWithBlock:^{
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if ( [value isKindOfClass:[BbBang class]] ) {
+                    [weakself printBang];
+                }else{
+                    [weakself printValue:value];
+                }
+            });
+        }];
+
     }];
 }
 
@@ -96,6 +101,12 @@
     
 }
 
+- (void)creationArgumentsDidChange:(NSString *)creationArguments
+{
+    [super creationArgumentsDidChange:creationArguments];
+    [self setupWithArguments:creationArguments];
+}
+
 - (void)setupWithArguments:(id)arguments
 {
     self.name = @"print";
@@ -107,11 +118,14 @@
 {
 	NSString *text = _text;
 	NSString *value = [NSString stringWithFormat:@"\n%@: bang\n",text];
+
     [self printValue:value];
+
 }
 
 - (void)printValue:(id)value
 {
+    
 	NSString *myText = _text;
     NSDictionary *myAttributes = @{NSForegroundColorAttributeName:self.textColorAttribute};
     

@@ -9,6 +9,8 @@
 #import "BbProtocol.h"
 #import "BbRuntime.h"
 
+@protocol NSURLSessionDownloadDelegate;
+
 static NSString *kSELF = @"self";
 static NSString *kSET = @"set";
 

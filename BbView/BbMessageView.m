@@ -60,5 +60,6 @@
     self.highlightedBorderColor = self.defaultBorderColor;
 }
 
+- (void)setupQuickType {}
 
 @end

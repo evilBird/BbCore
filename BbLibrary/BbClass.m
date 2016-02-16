@@ -56,12 +56,10 @@
     [classNameInlet setOutputBlock:^ (id value ){
         if ( [value isKindOfClass:[NSString class]] ) {
             weakself.className = value;
-            [weakself setCreationArguments:value];
         }else if ([value isKindOfClass:[NSArray class]] ){
             id first = [(NSArray *)value firstObject];
             if ( [first isKindOfClass:[NSString class]] ) {
                 weakself.className = first;
-                [weakself setCreationArguments:first];
             }
         }
     }];

@@ -38,6 +38,13 @@
     }
 }
 
+- (void)creationArgumentsDidChange:(NSString *)creationArguments
+{
+    [super creationArgumentsDidChange:creationArguments];
+    [self cleanup];
+    self.parent = self.parent;
+}
+
 - (void)subscribeToNotificationsWithParentID:(NSString *)parentID
 {
     NSString *parentIdProxy = @"$0";

@@ -23,6 +23,20 @@
     return @"r";
 }
 
+- (void)creationArgumentsDidChange:(NSString *)creationArguments
+{
+    [super creationArgumentsDidChange:creationArguments];
+    for (id<BbEntity> anInlet in self.inlets.mutableCopy) {
+        [self removeChildEntity:anInlet];
+    }
+    for (id<BbEntity> anOutlet in self.outlets.mutableCopy) {
+        [self removeChildEntity:anOutlet];
+    }
+    [self setupWithArguments:creationArguments];
+    [self.view updateAppearance];
+}
+
+
 - (void)setupWithArguments:(id)arguments
 {
     self.name = @"route";
@@ -40,6 +54,7 @@
     hotInlet.hot = YES;
     [self addChildEntity:hotInlet];
     self.routingTable = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsCopyIn valueOptions:NSPointerFunctionsWeakMemory];
+    
     for (id anArg in routeArgs ) {
         BbOutlet *anOutlet = [[BbOutlet alloc]init];
         [self addChildEntity:anOutlet];
@@ -51,6 +66,7 @@
     NSDictionary *routeTableDictionary = [self.routingTable dictionaryRepresentation];
     NSSet *routeKeysSet = [NSSet setWithArray:routeTableDictionary.allKeys];
     __weak BbRoute *weakself = self;
+    
     [hotInlet setOutputBlock:^( id value ){
         if ( [value isKindOfClass:[NSArray class]] ) {
             NSArray *arr = value;
@@ -71,9 +87,29 @@
                 
                 [[weakself.routingTable objectForKey:key]setInputElement:output];
             }
+        }else if ( [value isKindOfClass:[NSDictionary class]]){
+            NSDictionary *dict = value;
+            NSMutableSet *dictKeysSet = [NSMutableSet setWithArray:dict.allKeys];
+            [dictKeysSet intersectSet:routeKeysSet];
+            if (!dictKeysSet.allObjects.count) {
+                [weakself.outlets.lastObject setInputElement:value];
+            }else{
+                NSMutableDictionary *dictCopy = dict.mutableCopy;
+                for (NSString *aKey in dictKeysSet) {
+                    id objectForKey = [dictCopy valueForKey:aKey];
+                    [[weakself.routingTable objectForKey:aKey]setInputElement:objectForKey];
+                }
+                [dictCopy removeObjectsForKeys:dictKeysSet.allObjects];
+                
+                if (dictCopy.allKeys.count) {
+                    [[weakself.outlets lastObject]setInputElement:[NSDictionary dictionaryWithDictionary:dictCopy]];
+                }
+            }
         }
     }];
     
 }
+
+
 
 @end

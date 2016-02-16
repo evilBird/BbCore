@@ -23,6 +23,7 @@
 @property (nonatomic,strong)                NSMutableArray                                      *objects;
 @property (nonatomic,strong)                NSHashTable                                         *loadBangObjects;
 @property (nonatomic,strong)                NSHashTable                                         *closeBangObjects;
+@property (nonatomic,strong)                NSUndoManager                                       *undoManager;
 @property (nonatomic,strong)                BbSymbolTable<BbTextCompletionDataSource>           *symbolTable;
 
 - (void)doSelectors;

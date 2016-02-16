@@ -20,6 +20,7 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
 
 @property (nonatomic,strong)        BbPatch                         *patch;
 @property (nonatomic, strong)       BbPatchDescription              *patchDescription;
+@property (nonatomic, strong)       NSMutableSet                    *myConnections;
 
 @end
 
@@ -36,8 +37,14 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
     NSArray *args = [arguments getArguments];
     NSString *patchName = [BbHelpers getSelectorFromArray:args];
     NSArray *patchArgs = [BbHelpers getArgumentsFromArray:args];
-    NSString *text = [self.dataSource object:self textForPatchName:patchName];
+    NSString *text = [self.dataSource object:self textForPatchName:arguments];
     [self setupWithText:text];
+}
+
+- (void)creationArgumentsDidChange:(NSString *)creationArguments
+{
+    [super creationArgumentsDidChange:creationArguments];
+    [self setupWithArguments:creationArguments];
 }
 
 - (void)setupWithText:(NSString *)text
@@ -50,9 +57,10 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
     BbPatch *patch = [[BbPatch alloc]initWithArguments:nil];
     NSMutableArray *inletAttributes = [NSMutableArray array];
     NSMutableArray *outletAttributes = [NSMutableArray array];
-    
+    id dataSource = self.dataSource;
     for (BbObjectDescription *childDescription in patchDescription.childObjectDescriptions) {
-        BbObject *child = [NSInvocation doClassMethod:childDescription.objectClass selector:@"objectWithDescription:" arguments:childDescription];
+        NSArray *argArray = [NSArray arrayWithObjects:childDescription,dataSource, nil];
+        BbObject *child = [NSInvocation doClassMethod:childDescription.objectClass selector:@"objectWithDescription:dataSource:" arguments:argArray];
         [patch addChildEntity:child];
         if ([child isKindOfClass:[BbPatchInlet class]]) {
             [inletAttributes addObject:[BbPatchObject attributesForPatchPort:child]];
@@ -71,6 +79,9 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
     
     self.patchDescription = patchDescription;
     self.patch = patch;
+    if (self.patch.selectors) {
+        [self.patch doSelectors];
+    }
 }
 
 + (NSDictionary *)attributesForPatchPort:(BbObject *)port
@@ -86,12 +97,13 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
 {
     NSSortDescriptor *sortByXPositionDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"x" ascending:YES];
     NSArray *sortedInlets = [inletAttributes sortedArrayUsingDescriptors:@[sortByXPositionDescriptor]];
+    self.myConnections = [NSMutableSet set];
     for ( NSDictionary *inletAttrs in sortedInlets ) {
         __block BbPatchInlet *patchInlet = inletAttrs[kPortAttributeKeyPort];
         BbInlet *myInlet = [[BbInlet alloc]init];
         myInlet.hot = YES;
         [self addChildEntity:myInlet];
-        [myInlet setOutputBlock:^(id value){
+        [myInlet setOutputBlock:^( id value ){
             [patchInlet.inlets.firstObject setInputElement:value];
         }];
     }
@@ -107,6 +119,11 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
             myOutlet.inputElement = outputValue;
         }];
     }
+}
+
+- (void)cleanup
+{
+    
 }
 
 + (NSString *)symbolAlias

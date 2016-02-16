@@ -579,15 +579,21 @@ static void     *BbObjectContextXX      =       &BbObjectContextXX;
 - (void)objectView:(id<BbObjectView>)sender didEndEditingWithUserText:(NSString *)userText
 {
     self.userText = userText;
-    NSRange nameRange = [self.userText rangeOfString:self.name];
-    
-    if (nameRange.length) {
+    NSString *newArgs = userText;
+    if (self.name) {
+        NSRange nameRange = [self.userText rangeOfString:self.name];
         NSString *nameRemoved = [userText stringByReplacingCharactersInRange:nameRange withString:@""];
-        NSString *newArgs = [nameRemoved trimWhitespace];
-        NSLog(@"new args: %@",newArgs);
+        newArgs = [nameRemoved trimWhitespace];
     }
     
-    [sender updateAppearance];
+    [self creationArgumentsDidChange:newArgs];
+
+}
+
+- (void)creationArgumentsDidChange:(NSString *)creationArguments
+{
+    self.creationArguments = creationArguments;
+    self.displayText = [NSString stringWithFormat:@"%@ %@",self.name,self.creationArguments];
 }
 
 @end

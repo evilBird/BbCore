@@ -141,7 +141,7 @@ static NSUInteger kViewArgumentIndexZoomScale       =   4;
 
 @optional
 
-- (NSString *)objectView:(id<BbObjectView>)sender suggestCompletionForUserText:(NSString *)userText;
+- (NSArray *)objectView:(id<BbObjectView>)sender suggestCompletionForUserText:(NSString *)userText;
 
 - (BOOL)objectView:(id<BbObjectView>)sender shouldEndEditingWithUserText:(NSString *)userText;
 

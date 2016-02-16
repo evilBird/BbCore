@@ -32,6 +32,13 @@
     return @"/";
 }
 
+- (void)creationArgumentsDidChange:(NSString *)creationArguments
+{
+    [super creationArgumentsDidChange:creationArguments];
+    NSArray *args = [creationArguments getArguments];
+    [self.inlets[1] setInputElement:args.lastObject];
+}
+
 - (void)setupWithArguments:(id)arguments
 {
     self.name = [[self class]symbolAlias];

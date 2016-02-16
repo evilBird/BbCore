@@ -112,6 +112,7 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
     
     self.patch = patch;
     self.patch.selectors = descriptions[kCopiedSelectorDescriptionsKey];
+    [self.patch doSelectors];
     
     double posX = sumOfPosX/(double)objectDescriptions.count;
     double posY = sumOfPosY/(double)objectDescriptions.count;

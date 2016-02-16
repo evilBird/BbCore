@@ -16,6 +16,19 @@
 
 - (void)setupPorts {}
 
+- (void)creationArgumentsDidChange:(NSString *)creationArguments
+{
+    [super creationArgumentsDidChange:creationArguments];
+    for (id<BbEntity> anInlet in self.inlets.mutableCopy) {
+        [self removeChildEntity:anInlet];
+    }
+    for (id<BbEntity> anOutlet in self.outlets.mutableCopy) {
+        [self removeChildEntity:anOutlet];
+    }
+    [self setupWithArguments:creationArguments];
+}
+
+
 - (void)setupPortsWithArguments:(NSArray *)arguments
 {
     BbInlet *hotInlet = [[BbInlet alloc]init];

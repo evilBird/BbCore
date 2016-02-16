@@ -4,7 +4,6 @@
 -Canvas and log view transitions
 -Object view editing
 -Object view text display
--Save as -- load saved copy
 -Creation argument placeholders
 -Deal with iphone 
 -File wrapper for patches

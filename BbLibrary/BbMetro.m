@@ -83,6 +83,13 @@
     }
 }
 
+- (void)creationArgumentsDidChange:(NSString *)creationArguments
+{
+    [super creationArgumentsDidChange:creationArguments];
+    NSArray *args = [creationArguments getArguments];
+    [self.inlets[1] setInputElement:args.lastObject];
+}
+
 - (void)metroSendBang
 {
     

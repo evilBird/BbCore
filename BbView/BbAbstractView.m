@@ -7,6 +7,7 @@
 //
 
 #import "BbAbstractView.h"
+#import "BbSymbolTable.h"
 
 NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
 {
@@ -19,8 +20,9 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
 
 
 
-@interface BbAbstractView ()
+@interface BbAbstractView () 
 
+@property (nonatomic,strong)    BSWQuickType        *quickType;
 
 @end
 
@@ -230,6 +232,8 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
     self.layer.borderColor = self.myBorderColor.CGColor;
     [(UITextField *)self.textField setTextColor:self.myTextColor];
     [(UITextField *)self.textField setText:self.titleText];
+    UITextField *textField = self.textField;
+    
     [self setNeedsDisplay];
     [self updateContentSize];
 }
@@ -383,6 +387,14 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
 {
     [textField addTarget:self action:@selector(textFieldTextDidChange:) forControlEvents:UIControlEventAllEditingEvents];
     [self.entity objectView:self didBeginEditingWithDelegate:self.editingDelegate];
+    if (!self.quickType && !self.entity) {
+        [self setupQuickType];
+    }else if (self.entity){
+        self.quickType = nil;
+    }else{
+        self.quickType.frame = CGRectMake(0, 0, self.superview.superview.bounds.size.width, 30);
+        [self.quickType showQuickType];
+    }
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField
@@ -391,14 +403,49 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
     self.titleText = textField.text;
     [self updateAppearance];
     self.editing = NO;
+    if (self.quickType) {
+        [self.quickType hideQuickType];
+    }
 }
 
 - (void)textFieldTextDidChange:(id)sender
 {
     UITextField *textField = sender;
     self.titleText = textField.text;
-    NSString *suggestedCompletion = [self.editingDelegate objectView:self suggestCompletionForUserText:textField.text];
     [self updateAppearance];
+}
+
+#pragma mark - BSWQuickType
+
+- (NSArray *)quickType:(id)sender suggestedTextForUserText:(NSString *)userText
+{
+    NSArray *suggestions = [self.editingDelegate objectView:self suggestCompletionForUserText:userText];
+    return suggestions;
+}
+
+- (void)setupQuickType
+{
+    CGRect frame = CGRectMake(0, 0, self.superview.superview.bounds.size.width, 30);
+    self.quickType = [[BSWQuickType alloc]initWithFrame:frame suggestionArray:nil filterSuggestions:YES onTextField:(UITextField *)self.textField];
+    self.quickType.quickTypeShouldScroll = YES;
+    self.quickType.delegate = self;
+    self.quickType.dataSource = self;
+    UITextField *textField = self.textField;
+    textField.inputAccessoryView = self.quickType;
+}
+
+- (void)quickType:(BSWQuickType *)quickType selectedButtonAtIndex:(NSInteger)buttonIndex withArray:(NSArray *)resultsArray
+{
+    NSString *result = [resultsArray objectAtIndex:buttonIndex];
+    NSString *text = [(UITextField *)self.textField text];
+    NSArray *components = [text componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    NSString *lastComponent = components.lastObject;
+    NSRange range = [text rangeOfString:lastComponent];
+    NSString *newText = [text stringByReplacingCharactersInRange:range withString:result];
+    [(UITextField *)self.textField setText:newText];
+    self.titleText = newText;
+    [self updateAppearance];
+
 }
 
 @end

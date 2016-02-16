@@ -13,7 +13,7 @@
 #import "BbPlaceholderView.h"
 #import "BbRuntime.h"
 static NSTimeInterval       kLongPressMinDuration = 0.5;
-static CGFloat              kMaxMovement          = 5.0;
+static CGFloat              kMaxMovement          = 20.0;
 
 @interface BbPatchView () <UIGestureRecognizerDelegate,UIScrollViewDelegate>
 
@@ -46,11 +46,6 @@ static CGFloat              kMaxMovement          = 5.0;
     return self;
 }
 
-- (void)dealloc
-{
-    [[NSNotificationCenter defaultCenter]removeObserver:self name:UIKeyboardWillShowNotification object:nil];
-    [[NSNotificationCenter defaultCenter]removeObserver:self name:UIKeyboardWillHideNotification object:nil];
-}
 
 - (void)commonInit
 {
@@ -67,9 +62,7 @@ static CGFloat              kMaxMovement          = 5.0;
     self.childEntityViewQueue = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
     self.childConnectionQueue = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
     self.entityViewType = BbEntityViewType_Patch;
-    
-    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(keyboardDidShow:) name:UIKeyboardWillShowNotification object:nil];
-    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(keyboardDidHide:) name:UIKeyboardWillHideNotification object:nil];
+
 }
 
 - (void)keyboardDidShow:(NSNotification *)notification
@@ -128,6 +121,11 @@ static CGFloat              kMaxMovement          = 5.0;
     }
 }
 
+- (CGFloat)scaledMaxMovement
+{
+    return (kMaxMovement / self.scrollView.zoomScale);
+}
+
 - (void)handleGesture:(BbPatchGestureRecognizer *)gesture
 {
     
@@ -166,11 +164,11 @@ static CGFloat              kMaxMovement          = 5.0;
 
 - (void)longPressDetected:(id)sender
 {
-    if ( self.gesture.isTracking && self.gesture.movement < kMaxMovement ) {
+    if ( self.gesture.isTracking ) {
         
-        if ( self.gesture.firstViewType == BbEntityViewType_Patch && self.gesture.currentViewType == BbEntityViewType_Patch ) {
+        if ( self.gesture.firstViewType == BbEntityViewType_Patch && self.gesture.currentViewType == BbEntityViewType_Patch && self.gesture.movement < (kMaxMovement)) {
             [self addPlaceholderObjectView];
-        }else if ( self.gesture.currentViewType == BbEntityViewType_Object || self.gesture.currentViewType == BbEntityViewType_Control ){
+        }else if ( (self.gesture.firstViewType == BbEntityViewType_Object || self.gesture.firstViewType == BbEntityViewType_Control ) && (self.gesture.currentViewType == BbEntityViewType_Object || self.gesture.currentViewType == BbEntityViewType_Control) && (self.gesture.movement < kMaxMovement) ){
             if ( self.editState == BbPatchViewEditState_Default ) {
                 if ( self.gesture.currentView.isEditing ) {
                     self.gesture.currentView.editing = NO;

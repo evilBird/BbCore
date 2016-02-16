@@ -119,6 +119,8 @@ static   NSString    *kBbReceiveObjectNotification   =       @"com.birdSound.bb.
 
 - (void)objectView:(id<BbObjectView>)sender didBeginEditingWithDelegate:(id<BbObjectViewEditingDelegate>)editingDelegate;
 
+- (void)creationArgumentsDidChange:(NSString *)creationArguments;
+
 @end
 
 @interface BbObject (BbObjectEditingDelegate) <BbObjectViewEditingDelegate>

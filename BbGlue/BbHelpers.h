@@ -11,6 +11,9 @@
 @interface BbHelpers : NSObject
 
 
++ (NSString *)stringWithFormat:(NSString *)formatString arguments:(NSArray *)arguments;
++ (NSString *)stringWithFormatAndArgs:(NSArray *)formatAndArgs;
+
 + (NSString *)getSelectorFromArray:(NSArray *)array;
 + (NSArray *)getArgumentsFromArray:(NSArray *)array;
 

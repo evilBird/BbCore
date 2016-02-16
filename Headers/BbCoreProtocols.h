@@ -142,6 +142,7 @@
 
 - (void)objectView:(id<BbObjectView>)sender didBeginEditingWithDelegate:(id<BbObjectViewEditingDelegate>)editingDelegate;
 
+- (void)creationArgumentsDidChange:(NSString *)creationArguments;
 
 @end
 
@@ -179,6 +180,8 @@
 @protocol BbObjectDataSource <NSObject>
 
 - (NSString *)object:(id<BbObject>)object textForPatchName:(NSString *)patchName;
+
+- (NSArray *)allPatchNames;
 
 - (id)canvasForObject:(id<BbObject>)object;
 

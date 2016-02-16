@@ -61,4 +61,6 @@
     }
 }
 
+- (void)setupQuickType {}
+
 @end

@@ -21,4 +21,6 @@
     return NO;
 }
 
+- (void)setupQuickType {}
+
 @end

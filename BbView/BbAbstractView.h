@@ -11,11 +11,12 @@
 #import "BbCoreProtocols.h"
 #import "UIView+Layout.h"
 #import "UIView+BbPatch.h"
+#import "BSWQuickType.h"
 
 NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2);
 
 
-@interface BbAbstractView : UIView <BbEntityView,BbObjectView,UITextFieldDelegate>
+@interface BbAbstractView : UIView <BbEntityView,BbObjectView,UITextFieldDelegate,BSWQuickTypeDelegate,BSWQuickTypeDataSource>
 
 @property (nonatomic,weak)                      id<BbEntity,BbObject>           entity;
 @property (nonatomic,weak)                      id<BbObjectViewEditingDelegate> editingDelegate;

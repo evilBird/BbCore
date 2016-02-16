@@ -12,6 +12,53 @@
 
 @implementation BbHelpers
 
++ (NSString *)nextObjectFormatSpecifierInString:(NSMutableString **)string
+{
+    NSMutableString *myString = *string;
+    NSRange range = [myString rangeOfString:@"%@"];
+    NSString *result = nil;
+    if (range.length) {
+        NSUInteger index = range.location+range.length;
+        NSRange rangeToTrim;
+        rangeToTrim.location = 0;
+        rangeToTrim.length = index;
+        result = [myString substringWithRange:rangeToTrim];
+        [myString deleteCharactersInRange:rangeToTrim];
+    }
+    
+    return result;
+}
+
++ (NSString *)buildStringWithFormat:(NSString *)formatString arguments:(NSArray *)arguments {
+    
+    NSMutableString *myMutableFormatString = [NSMutableString stringWithString:formatString];
+    NSMutableString *myResult = [NSMutableString new];
+    for (id anArg in arguments) {
+        NSString *aFormatString = [BbHelpers nextObjectFormatSpecifierInString:&myMutableFormatString];
+        [myResult appendFormat:aFormatString,anArg];
+    }
+    
+    if (myMutableFormatString.length) {
+        [myResult appendString:myMutableFormatString];
+    }
+    
+    NSString *result = [NSString stringWithString:myResult];
+    return result;
+}
+
++ (NSString *)stringWithFormat:(NSString *)formatString arguments:(NSArray *)arguments
+{
+    return [BbHelpers buildStringWithFormat:formatString arguments:arguments];
+}
+
++ (NSString *)stringWithFormatAndArgs:(NSArray *)formatAndArgs
+{
+    NSString *formatString = formatAndArgs.firstObject;
+    NSMutableArray *temp = formatAndArgs.mutableCopy;
+    [temp removeObjectAtIndex:0];
+    return [BbHelpers stringWithFormat:formatString arguments:temp];
+}
+
 + (NSString *)getSelectorFromArray:(NSArray *)array
 {
     if ( nil == array ) {

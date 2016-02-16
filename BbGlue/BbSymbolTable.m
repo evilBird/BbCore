@@ -15,16 +15,18 @@
 @property (nonatomic,strong)            NSArray             *registeredClassNames;
 @property (nonatomic,strong)            NSDictionary        *objectSymbolDictionary;
 @property (nonatomic,strong)            NSSet               *objectSearchKeywords;
+@property (nonatomic,strong)            NSDictionary        *patchSymbolDictionary;
 @property (nonatomic,strong)            NSPredicate         *searchPredicate;
 
 @end
 
 @implementation BbSymbolTable
 
-- (instancetype)init
+- (instancetype)initWithDataSource:(id<BbObjectDataSource>)dataSource
 {
     self = [super init];
     if ( self ) {
+        _dataSource = dataSource;
         [self defaultInit];
     }
     
@@ -78,8 +80,24 @@
         }
     }
     
+
     return symbolDictionary;
 }
+
+- (NSDictionary *)patchSymbolDictionary
+{
+    NSMutableDictionary *symbolDictionary = [NSMutableDictionary dictionary];
+    NSArray *savedPatchNames = [self.dataSource allPatchNames];
+    NSArray *patchNames = [savedPatchNames valueForKey:@"name"];
+    
+    for (NSString *aPatchName in patchNames) {
+        NSString *mainKey = [aPatchName lowercaseString];
+        symbolDictionary[mainKey] = aPatchName;
+    }
+    
+    return symbolDictionary;
+}
+
 
 - (NSArray *)searchForText:(NSString *)text inKeywordArray:(NSArray *)keywords sortAscending:(BOOL)ascending onKey:(NSString *)sortKey maxResults:(NSUInteger)maxResults
 {
@@ -103,6 +121,43 @@
                                    sortAscending:YES onKey:@"length"
                                       maxResults:3];
     return searchResults;
+}
+
+
+- (NSArray *)BbText:(id)sender searchObjectsForText:(NSString *)text
+{
+    NSString *searchTerm = [NSString stringWithFormat:@"%@*",[text lowercaseString]];
+    NSArray *keywords = [self searchForText:searchTerm
+                                  inKeywordArray:self.objectSearchKeywords.allObjects
+                                   sortAscending:YES onKey:@"length"
+                                      maxResults:6];
+    
+    NSMutableArray *symbols = [NSMutableArray array];
+    for (NSString *aKeyword in keywords) {
+        [symbols addObject:self.objectSymbolDictionary[aKeyword]];
+    }
+    return symbols;
+}
+
+- (NSArray *)BbText:(id)sender searchPatchesForText:(NSString *)text
+{
+    NSString *searchTerm = [NSString stringWithFormat:@"%@*",[text lowercaseString]];
+    NSArray *keywords = [self searchForText:searchTerm
+                             inKeywordArray:self.patchSymbolDictionary.allKeys
+                              sortAscending:YES
+                                      onKey:@"length"
+                                 maxResults:6];
+    
+    NSMutableArray *symbols = [NSMutableArray array];
+    for (NSString *aKeyword in keywords) {
+        [symbols addObject:self.patchSymbolDictionary[aKeyword]];
+    }
+    return symbols;
+}
+
+- (NSArray *)BbText:(id)sender searchMethodsForText:(NSString *)text
+{
+    return nil;
 }
 
 - (BOOL)BbText:(id)sender symbolExistsForKeyword:(NSString *)keyword
