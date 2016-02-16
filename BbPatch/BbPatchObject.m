@@ -11,6 +11,7 @@
 #import "BbTextDescription.h"
 #import "BbParseText.h"
 #import "BbRuntime.h"
+#import "BbSymbolTable.h"
 
 
 static NSString *kPortAttributeKeyPort      =       @"port";
@@ -21,6 +22,7 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
 @property (nonatomic,strong)        BbPatch                         *patch;
 @property (nonatomic, strong)       BbPatchDescription              *patchDescription;
 @property (nonatomic, strong)       NSMutableSet                    *myConnections;
+@property (nonatomic,strong)        NSArray                         *childArguments;
 
 @end
 
@@ -28,16 +30,35 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
 
 - (void)setupPorts {}
 
+- (NSString *)patchNameFromText:(NSString *)text
+{
+    NSArray *allPatchNames = [[self.dataSource allPatchNames]valueForKey:@"name"];
+    NSSet *patchNameSet = [NSSet setWithArray:allPatchNames];
+    NSMutableArray *components = [text componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].mutableCopy;
+    __block NSMutableString *patchName = [[NSMutableString alloc]initWithString:components.firstObject];
+    [components removeObjectAtIndex:0];
+    [components enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSString *proposedPatchName = [[NSString stringWithString:patchName]stringByAppendingFormat:@" %@",obj];
+        if ([patchNameSet containsObject:proposedPatchName]) {
+            [patchName appendFormat:@" %@",obj];
+        }else{
+            *stop = YES;
+        }
+    }];
+    
+    return [NSString stringWithString:patchName];
+}
+
 - (void)setupWithArguments:(id)arguments
 {
     if ( nil == arguments ) {
         return;
     }
     self.displayText = arguments;
-    NSArray *args = [arguments getArguments];
-    NSString *patchName = [BbHelpers getSelectorFromArray:args];
-    NSArray *patchArgs = [BbHelpers getArgumentsFromArray:args];
-    NSString *text = [self.dataSource object:self textForPatchName:arguments];
+    NSString *patchName = [self patchNameFromText:arguments];
+    NSString *patchArgs = [arguments stringByReplacingCharactersInRange:[arguments rangeOfString:patchName] withString:@""];
+    self.childArguments = [patchArgs getArguments];
+    NSString *text = [self.dataSource object:self textForPatchName:patchName];
     [self setupWithText:text];
 }
 

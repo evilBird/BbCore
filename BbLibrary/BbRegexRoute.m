@@ -19,6 +19,9 @@
 
 + (BOOL)string:(NSString *)aString matchesPattern:(NSString *)pattern
 {
+    if (![aString isKindOfClass:[NSString class]]) {
+        return NO;
+    }
     NSError *err = nil;
     NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:&err];
     NSArray *matches = [regex matchesInString:aString options:0 range:NSMakeRange(0, aString.length)];

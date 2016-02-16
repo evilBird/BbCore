@@ -39,6 +39,8 @@
 @optional
 
 @property (nonatomic,strong)        id<BbEntityView>            view;
+@property (nonatomic,strong)        NSArray                    *childArguments;
+
 
 + (NSString *)viewClass;
 

@@ -441,6 +441,11 @@ NSUInteger ReturnGreatest (NSUInteger value1, NSUInteger value2)
     NSArray *components = [text componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     NSString *lastComponent = components.lastObject;
     NSRange range = [text rangeOfString:lastComponent];
+    if (!range.length) {
+        range.location = 0;
+        range.length = text.length;
+    }
+    
     NSString *newText = [text stringByReplacingCharactersInRange:range withString:result];
     [(UITextField *)self.textField setText:newText];
     self.titleText = newText;

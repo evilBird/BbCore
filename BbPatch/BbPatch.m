@@ -427,6 +427,14 @@
     NSArray *objectDescriptions = descriptions[kCopiedObjectDescriptionsKey];
     NSMutableArray *copiedObjects = [NSMutableArray array];
     for (BbObjectDescription *objectDescription in objectDescriptions ) {
+        NSString *viewArgs = objectDescription.viewArguments;
+        NSNumber *positionXArg = [viewArgs getArgumentAtIndex:0];
+        NSNumber *positionYArg = [viewArgs getArgumentAtIndex:1];
+        double newXPos = [positionXArg doubleValue]+0.01;
+        double newYPos = [positionYArg doubleValue]+0.01;
+        viewArgs = [viewArgs setArgument:@(newXPos) atIndex:0];
+        viewArgs = [viewArgs setArgument:@(newYPos) atIndex:1];
+        objectDescription.viewArguments = viewArgs;
         BbObject *object = [BbObject objectWithDescription:objectDescription dataSource:self.dataSource];
         [copiedObjects addObject:object];
         NSAssert(nil!=object, @"ERROR CREATING OBJECT FROM DESCRIPTION");

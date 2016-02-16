@@ -25,6 +25,7 @@
 @property (nonatomic,strong)                NSHashTable                                         *closeBangObjects;
 @property (nonatomic,strong)                NSUndoManager                                       *undoManager;
 @property (nonatomic,strong)                BbSymbolTable<BbTextCompletionDataSource>           *symbolTable;
+@property (nonatomic,strong)                NSArray                                             *childArguments;
 
 - (void)doSelectors;
 - (void)loadBang;
