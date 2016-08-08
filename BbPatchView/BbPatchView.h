@@ -33,6 +33,7 @@
 @property (nonatomic,weak)                              id<BbObjectView>                        activeObject;
 @property (nonatomic,weak)                              id<BbObjectView>                        editingObjectView;
 
+@property (nonatomic,strong)                            NSUndoManager                           *patchUndoManager;
 
 @property (nonatomic)                                   BOOL                                    needsOrientationUpdate;
 

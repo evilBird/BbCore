@@ -73,6 +73,13 @@
     return @"BbPatchView";
 }
 
+- (void)updateUndoManagerState
+{
+    self.canUndo = self.undoManager.canUndo;
+    self.canRedo = self.undoManager.canRedo;
+
+}
+
 - (NSString *)makeSubstitutionsInChildArgs:(NSString *)childArgs
 {
     if (!self.childArguments || ![childArgs containsString:@"$"]) {
@@ -647,6 +654,12 @@
         if ( nil != newPath && newPath.isValid ) {
             [sender addConnectionPath:newPath];
         }
+        [self.undoManager registerUndoWithTarget:self handler:^(id  _Nonnull target) {
+            BbPatch *patchTarget = target;
+            [patchTarget.view removeConnectionPath:newPath];
+            [patchTarget removeChildEntity:newConnection];
+        }];
+        [self updateUndoManagerState];
     }else{
         NSAssert(newConnection.isConnected, @"ERROR MAKING CONNECTION");
     }

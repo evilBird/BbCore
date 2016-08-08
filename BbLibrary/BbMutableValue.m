@@ -45,7 +45,7 @@
             return;
         }
         if ( [value isKindOfClass:[BbBang class]] ) {
-            [mainOutlet setInputElement:coldValue];
+            [mainOutlet setInputElement:[coldValue valueArray]];
             return;
         }
         
@@ -86,7 +86,7 @@
 
 - (void)setupWithArguments:(id)arguments
 {
-    self.name = @"m val";
+    self.name = @"mutable val";
     if (arguments) {
         self.displayText = [NSString stringWithFormat:@"%@ %@",self.name,arguments];
     }else{

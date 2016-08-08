@@ -29,11 +29,13 @@
     
     [argsInlet setInputBlock:[BbPort allowTypeInputBlock:[NSArray class]]];
     __block BbOutlet *mainOutlet = self.outlets[0];
+    __block id outputValue;
     [argsInlet setOutputBlock:^(id value){
         NSArray *args = value;
         NSString *selector = [BbHelpers getSelectorFromArray:args];
         NSArray *selectorArgs = [BbHelpers getArgumentsFromArray:args];
-        mainOutlet.outputElement = [NSInvocation doInstanceMethod:myTarget selector:selector arguments:selectorArgs];
+        outputValue = [NSInvocation doInstanceMethod:myTarget selector:selector arguments:selectorArgs];
+        [mainOutlet setInputElement:outputValue];
     }];
 }
 

@@ -54,21 +54,23 @@
     [self updateDefaultOutputAndPlaceholderMapWithText:self.displayText];
 }
 
-- (NSArray *)outputForInput:(NSArray *)value
+- (NSArray *)outputForInput:(id)value
 {
-    if ( [value.firstObject isKindOfClass:[NSString class]] && [value.firstObject isEqualToString:@"set"]) {
-        if ( value.count == 1 ) {
-            self.creationArguments = nil;
+    if ( [value isKindOfClass:[NSArray class]] && [[value firstObject] isKindOfClass:[NSString class]] && [[value firstObject] isEqualToString:@"set"]) {
+        if ( [value count] == 1 ) {
+            self.creationArguments = @"";
             self.displayText = @"";
             [self.view setTitleText:self.displayText];
+            [self.view updateAppearance];
             [self updateDefaultOutputAndPlaceholderMapWithText:self.displayText];
             return nil;
         }else{
-            NSMutableArray *toSet = value.mutableCopy;
+            NSMutableArray *toSet = [value mutableCopy];
             [toSet removeObjectAtIndex:0];
             self.creationArguments = [toSet componentsJoinedByString:@" "];
             self.displayText = self.creationArguments;
             [self.view setTitleText:self.displayText];
+            [self.view updateAppearance];
             [self updateDefaultOutputAndPlaceholderMapWithText:self.displayText];
             return nil;
         }
@@ -86,12 +88,20 @@
             for (NSNumber *aKey in keys ) {
                 NSUInteger myIdx = aKey.integerValue;
                 NSUInteger theirIdx = [[self.placeholderMappings objectForKey:aKey]integerValue];
-                
-                if ( myIdx < anArray.count && theirIdx < value.count ) {
-                    [substitutedArray replaceObjectAtIndex:myIdx withObject:value[theirIdx]];
+                if ([value isKindOfClass:[NSArray class]]){
+                    if ( myIdx < anArray.count && theirIdx < [value count] ) {
+                        [substitutedArray replaceObjectAtIndex:myIdx withObject:value[theirIdx]];
+                    }else{
+                        isValid = NO;
+                        break;
+                    }
                 }else{
-                    isValid = NO;
-                    break;
+                    if ( myIdx < anArray.count && theirIdx == 0 ) {
+                        [substitutedArray replaceObjectAtIndex:myIdx withObject:value];
+                    }else{
+                        isValid = NO;
+                        break;
+                    }
                 }
             }
             
@@ -103,25 +113,6 @@
         }
         
         return myOutput;
-        
-        /*
-        
-        NSMutableArray *substitutedArray = self.myDefaultOutput.mutableCopy;
-        BOOL sendOnDone = NO;
-        
-        for (NSNumber *aKey in keys ) {
-            NSUInteger myIndex = aKey.integerValue;
-            NSUInteger theirIndex = [[self.placeholderMappings objectForKey:aKey]integerValue];
-            if ( myIndex < self.myDefaultOutput.count && theirIndex < value.count ) {
-                sendOnDone = YES;
-                [substitutedArray replaceObjectAtIndex:myIndex withObject:value[theirIndex]];
-            }
-        }
-        
-        if ( sendOnDone ) {
-            return [NSArray arrayWithArray:substitutedArray];
-        }
-         */
         
     }else{
         return [self defaultOutput];
@@ -153,7 +144,6 @@
     self.placeholderMappings = nil;
     self.creationArguments = [text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     self.myDefaultOutput = [self getCommaSeparatedArrays:text];
-    //self.myDefaultOutput = [text getArguments];
     
     if ( ![text containsString:@"$"] ) {
         return;

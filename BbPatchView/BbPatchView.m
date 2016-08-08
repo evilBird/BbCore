@@ -12,7 +12,7 @@
 #import "UIView+BbPatch.h"
 #import "BbPlaceholderView.h"
 #import "BbRuntime.h"
-static NSTimeInterval       kLongPressMinDuration = 0.5;
+static NSTimeInterval       kLongPressMinDuration = 0.4;
 static CGFloat              kMaxMovement          = 20.0;
 
 @interface BbPatchView () <UIGestureRecognizerDelegate,UIScrollViewDelegate>
@@ -62,6 +62,7 @@ static CGFloat              kMaxMovement          = 20.0;
     self.childEntityViewQueue = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
     self.childConnectionQueue = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory];
     self.entityViewType = BbEntityViewType_Patch;
+    self.patchUndoManager = [[NSUndoManager alloc]init];
 
 }
 

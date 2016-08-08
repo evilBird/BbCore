@@ -80,6 +80,7 @@ static NSString *kPortAttributeKeyXPosition =       @"x";
 - (void)setupWithChildDescriptions:(NSDictionary *)descriptions
 {
     BbPatch *patch = [[BbPatch alloc]initWithArguments:nil];
+    
     NSMutableArray *inletAttributes = [NSMutableArray array];
     NSMutableArray *outletAttributes = [NSMutableArray array];
     NSMutableArray *objectDescriptions = descriptions[kCopiedObjectDescriptionsKey];

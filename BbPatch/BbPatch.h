@@ -26,10 +26,13 @@
 @property (nonatomic,strong)                NSUndoManager                                       *undoManager;
 @property (nonatomic,strong)                BbSymbolTable<BbTextCompletionDataSource>           *symbolTable;
 @property (nonatomic,strong)                NSArray                                             *childArguments;
+@property (nonatomic)                       BOOL                                                canUndo;
+@property (nonatomic)                       BOOL                                                canRedo;
 
 - (void)doSelectors;
 - (void)loadBang;
 - (void)closeBang;
+- (void)updateUndoManagerState;
 - (NSString *)makeSubstitutionsInChildArgs:(NSString *)childArgs;
 
 @end
