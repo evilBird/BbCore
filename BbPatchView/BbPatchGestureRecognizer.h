@@ -26,7 +26,7 @@
 @property (nonatomic)                           CGPoint             previousPosition;
 @property (nonatomic)                           CGPoint             deltaPosition;
 
-@property (nonatomic)                           NSUInteger          numberOfTouches;
+@property (nonatomic)                           NSUInteger          touchCount;
 @property (nonatomic)                           NSUInteger          repeatCount;
 @property (nonatomic)                           NSTimeInterval      duration;
 @property (nonatomic)                           CGFloat             movement;
